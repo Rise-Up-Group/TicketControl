@@ -1,0 +1,75 @@
+
+{%  extends "main.html" %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Dashboard</h1>
+<hr>
+<h5 class="text-center"> TicketControl by RiseUp-Group</h5>
+
+    <br>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Meine Profil</h5>
+                </div>
+                <div class="card-body bg-light">
+                    <table class="table table-sm">
+                        <tbody class="text-left">
+                        <tr>
+                            <th scope="row">1</th>
+                            <td calss="text-left">Offene Tickets</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>Teilnahme Tickets</td>
+                            <td class="">7</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td>Zugewiesene Tickets</td>
+                            <td class="">7</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">4</th>
+                            <td>Registriert seit</td>
+                            <td class="">18.02.2022</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Meine Tickets</h5>
+                </div>
+
+                <div class="card-body bg-light">
+                    <table class="table table-sm">
+                        <tr>
+                            <th scope="row">Id</th>
+                            <th>Kategorie</th>
+                            <th>Titel</th>
+                            <th>Modarator</th>
+
+                        </tr>
+                        {% for index, ticket in tickets %}
+                        <tr>
+                            <th scope="row">#{{ticket.id}}</th>
+                            <td>{{ticket.category}}</td>
+                            <td>{{ticket.title}}</td>
+                            <td>{{ticket.moderator}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
