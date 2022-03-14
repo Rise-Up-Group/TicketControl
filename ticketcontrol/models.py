@@ -13,10 +13,6 @@ class User(BaseUser):
 
     role = models.CharField(max_length=3, choices=RoleChoices.choices, default=RoleChoices.USER)
 
-    #class Meta:
-        #proxy = True
-        #ordering = ["fist_name"]
-
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
@@ -50,8 +46,8 @@ class Ticket(models.Model):
     description = models.TextField()
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="owner")
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
-    participating = models.ManyToManyField("User", blank=True) # does NOT contain owner
-    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)
+    participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
+    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)#TODO: 'moderatorS'
 
     def __str__(self):
         return self.title + " (" + self.owner.username + ")"
@@ -67,4 +63,3 @@ class Attachment(models.Model):
 
     def __str__(self):
         return self.ticket.title + " File: " + self.filename + "(" + self.size + ")"
-

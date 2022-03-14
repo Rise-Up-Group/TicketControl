@@ -1,0 +1,24 @@
+{%  extends "main.html" %}
+
+{% block content %}
+    <br>
+    <br>
+ <div class="row">
+    <div class="card">
+        <div class="card-header">
+            <div class="col-md">
+                <h5>#{{ ticket.id }} {{ ticket.title }}</h5>
+                <h5>Category: {{ ticket.category.name }}</h5>
+                <h5> {% for foo in moderator %}
+                {{ foo.username }},
+                {% endfor %}
+                </h5>
+            </div>
+            <div class="col-md">
+
+            </div>
+        </div>
+    </div>
+ </div>
+
+{% endblock %}
