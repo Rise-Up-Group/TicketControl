@@ -24,11 +24,13 @@ urlpatterns = [
     path('ticket/my', mytickets_view),
     path('ticket/<int:id>', ticket_view),
     # path('ticket/new', new_ticket_view),
-    path('login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
+    path('user/profile', profile_view, name='profile'),
     path('djangoadmin/', admin.site.urls),
     path('', dashboard_view, name='dashboard'),
+    path('home/', home_view, name='home'),
 ]
 
 handler404 = "ticketcontrol.views.handler404"

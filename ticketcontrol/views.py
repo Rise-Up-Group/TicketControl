@@ -1,7 +1,10 @@
 from django.http import HttpResponse
 
-from django.contrib.auth import login
-from django.shortcuts import render
+from django.contrib.auth import login, logout, authenticate
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
 from .models import User, Ticket
 from django.shortcuts import get_object_or_404
 import logging
@@ -18,6 +21,9 @@ def render_error(request, title, message):
 def dashboard_view(request):
     return render(request, "dashboard.html")
 
+
+def home_view(request):
+    return render(request, "home.html")
 
 ##TODO: fix
 def mytickets_view(request):
@@ -46,13 +52,36 @@ def handler404(request, exception, template_name="error.html"):
 def new_ticket_view(request):
     pass #TODO
 
+def logout_view(request):
+    logout(request)
+    return redirect("home")
+
+def login_view(request):
+    context = {}
+    if request.method == 'POST':
+        username = str(request.POST['username'])
+        password = request.POST['password']
+        try:
+            validate_email(username)
+            user = User.objects.get(email=username)
+        except ValidationError:
+            try:
+                user = User.objects.get(username=username)
+            except ObjectDoesNotExist:
+                user = None
+
+        if user is not None and user.check_password(password):
+            login(request, user)
+            return redirect("dashboard")
+        context = {'wrong_username_or_password': True}
+    return render(request, "user/login.html", context)
 
 def register_view(request):
     if request.method == 'POST':
         email = request.POST['email']
-        firstname = str(request.POST['firstname']) #TODO: remove conversion if possible
-        lastname = str(request.POST['lastname'])
-        username = str(request.POST['username'])
+        firstname = request.POST['firstname']
+        lastname = request.POST['lastname']
+        username = request.POST['username']
         # TODO: preview in javascrip and show to user
         # TODO: nickname has to be unique (possibly with db)
         if username == "":
@@ -66,9 +95,12 @@ def register_view(request):
             user.last_name = lastname
             user.save()
             login(request, user)
-            return render(request, "dashboard.html")
+            return redirect("profile")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
     else:
-        return render(request, "registration/register.html")
+        return render(request, "user/register.html")
+
+def profile_view(request):
+    return render(request, "user/profile.html")
