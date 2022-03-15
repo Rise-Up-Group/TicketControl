@@ -63,7 +63,10 @@ def login_view(request):
         password = request.POST['password']
         try:
             validate_email(username)
-            user = User.objects.get(email=username)
+            try:
+                user = User.objects.get(email=username)
+            except ObjectDoesNotExist:
+                user = None
         except ValidationError:
             try:
                 user = User.objects.get(username=username)
