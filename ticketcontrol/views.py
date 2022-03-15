@@ -2,8 +2,8 @@ from django.http import HttpResponse
 
 from django.contrib.auth import login
 from django.shortcuts import render
-from .models import User, Ticket
-from django.shortcuts import get_object_or_404
+from .models import User, Ticket, Comment, Category
+from django.shortcuts import get_object_or_404, get_list_or_404
 import logging
 from django.http import Http404
 
@@ -31,8 +31,17 @@ def ticket_view(request, id):
     context = {}
     try:
         ticket = get_object_or_404(Ticket, pk=id)
-        context = {"ticket": ticket, "moderator": ticket.moderator.all()}
-        return render(request, "ticket/detail.html", context)
+        try:
+            comments = get_list_or_404(Comment, ticket_id=ticket.id)
+            try:
+                category = get_list_or_404(Category)
+                context = {"ticket": ticket, "moderator": ticket.moderator.all(), "participants": ticket.participating.all(), "comments": comments, "category": category}
+                return render(request, "ticket/detail.html", context)
+            except Http404:
+                return render_error(request, "404 - Not Found", "Unable to load Category")
+        except Http404:
+            return render_error(request, "404 - Not Found", "Comments in Ticket " + id + " Not Found")
+
     except Http404:
         return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
 
@@ -53,7 +62,7 @@ def register_view(request):
         firstname = str(request.POST['firstname']) #TODO: remove conversion if possible
         lastname = str(request.POST['lastname'])
         username = str(request.POST['username'])
-        # TODO: preview in javascrip and show to user
+        # TODO: preview in javascript and show to user
         # TODO: nickname has to be unique (possibly with db)
         if username == "":
             username = firstname[0:1] + ". " + lastname
