@@ -4,43 +4,40 @@
 <head>
     <title>{% block title %}TicketControl | Default Page{% endblock %}</title>
     <link rel="stylesheet" href="{% static '/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static '/css/custom.css' %}">
 
-<style>
+    <style>
 
-		#logo{
-		}
+        #logo {
+        }
 
-		body{
-			background-color: #ebeff5;
-		}
-
-
-		#total-orders{
-			background-color: #4cb4c7;
-		}
+        body {
+            background-color: #ebeff5;
+        }
 
 
-		#orders-delivered{
-			background-color: #7abecc;
-		}
-
-		#orders-pending{
-			background-color: #7CD1C0;
-		}
+        #total-orders {
+            background-color: #4cb4c7;
+        }
 
 
+        #orders-delivered {
+            background-color: #7abecc;
+        }
+
+        #orders-pending {
+            background-color: #7CD1C0;
+        }
 
 
-	</style>
+    </style>
 </head>
 
 <body class="bg-white">
 {% include "navbar.html" %}
-<div class="container-fluid">
-    {% block content %}
+{% block content %}
 
-    {% endblock %}
-</div>
+{% endblock %}
 <hr>
 <h5>Our footer</h5>
 
@@ -49,5 +46,6 @@
 <script src="{% static '/js/jquery-3.3.1.slim.min.js' %}"></script>
 <script src="{% static '/js/popper.min.js' %}"></script>
 <script src="{% static '/js/bootstrap.min.js' %}"></script>
+<script src="{% static '/js/searchuser.js' %}"></script>
 
 </html>
