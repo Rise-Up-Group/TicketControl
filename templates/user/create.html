@@ -18,7 +18,7 @@
     <input type="password" name="password" id="password" placeholder="Password"><br><br>
     <input type="password" name="password_retype" id="password_retype" placeholder="Retype password"><br><br>
     <label for="groups">Groups:</label><br>
-    <select multiple="" name="groups" id="groups">
+    <select multiple="" name="groups" id="groups"{% if not change_permission %} disabled{% endif %}>
         {% for group in groups %}
             <option class="checkbox" value="{{ group.id }}">{{ group.name }}</option>
         {% endfor %}

@@ -11,6 +11,11 @@ class User(BaseUser):
         MOD = 'mod'
         ADMIN = 'adm'
 
+    class Meta:
+        permissions = (
+            ("change_user_permission", "Change the permissions of other users"),
+        )
+
 
 class Category(models.Model):
     name = models.CharField(max_length=256)

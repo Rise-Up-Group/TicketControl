@@ -2,6 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.shortcuts import render, redirect
@@ -58,7 +59,10 @@ def logout_view(request):
     return redirect("home")
 
 def login_view(request):
-    context = {}
+    error = ""
+    next = request.GET.get("next", False)
+    if next == False:
+        next = request.POST.get("next", False)
     if request.method == 'POST':
         username = str(request.POST['username'])
         password = request.POST['password']
@@ -77,18 +81,15 @@ def login_view(request):
         if user is not None and user.check_password(password):
             if user.is_active:
                 login(request, user)
+                if next != False:
+                    return HttpResponseRedirect(next)
                 return redirect("dashboard")
             else:
-                context = {"error": "User is not activated"}
+               error = "User is not activated"
         else:
-            context = {"error": "Wrong username or password"}
-    return render(request, "user/login.html", context)
+            error = "Wrong username or password"
 
-def has_permission(request, permission):
-    for group in request.user.groups.all():
-        if group.permissions.all().contains(permission):
-            return True
-    return False
+    return render(request, "user/login.html", {"error": error, "next": next})
 
 
 def add_user(email, firstname, lastname, username, password, groups, isActive):
@@ -100,8 +101,11 @@ def add_user(email, firstname, lastname, username, password, groups, isActive):
     user = User.objects.create_user(username=username, password=password, email=email)
     user.first_name = firstname
     user.last_name = lastname
-    for group in groups:
-        Group.objects.get(id=group).user_set.add(user)
+    if groups is not None:
+        for group in groups:
+            Group.objects.get(id=group).user_set.add(user)
+    else:
+        Group.objects.get(name="usr").user_set.add(user)
     user.is_active = isActive
     user.save()
     return user
@@ -116,15 +120,16 @@ def update_user(id, email, firstname, lastname, username, password, groups, isAc
         if password != "" and password is not None:
             user.set_password(password)
 
-        userGroups = user.groups.all()
-        userGroupsId = []
-        for group in userGroups:
-            userGroupsId.append(group.id)
-            if not group.id in groups:
-                Group.objects.get(id=group.id).user_set.remove(user)
-        for group in groups:
-            if not group in userGroupsId:
-                Group.objects.get(id=group).user_set.add(user)
+        if groups is not None:
+            userGroups = user.groups.all()
+            userGroupsId = []
+            for group in userGroups:
+                userGroupsId.append(group.id)
+                if not group.id in groups:
+                    Group.objects.get(id=group.id).user_set.remove(user)
+            for group in groups:
+                if not group in userGroupsId:
+                    Group.objects.get(id=group).user_set.add(user)
 
         if isActive is not None:
             user.is_active = isActive
@@ -140,7 +145,7 @@ def register_view(request):
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
         if password == passwordRetype:
-            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, [Group.objects.get(name="usr").id], 1)
+            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, None, 1)
             login(request, user)
             return redirect("profile")
         else:
@@ -148,18 +153,23 @@ def register_view(request):
             return render_error(request, "Passwords do not match", "")
     return render(request, "user/register.html")
 
+
+@permission_required("add_user")
 def create_user_view(request):
     if (request.method == 'POST'):
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
         if password == passwordRetype:
-            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST.getlist('groups'), request.POST.get("is_active", False) == "on")
+            groups = None
+            if request.user.has_perm("ticketcontrol.change_user_permission"):
+                request.POST.getlist("groups")
+            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
             login(request, user)
             return redirect("profile")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
-    return render(request, "user/create.html", {"groups": Group.objects.all()})
+    return render(request, "user/create.html", {"groups": Group.objects.all(), "change_permission": request.user.has_perm("ticketcontrol.change_user_permission")})
 
 
 def manage_users_view(request):
@@ -169,12 +179,16 @@ def user_details_view(request, id):
     return render(request, "user/details.html")
 
 
+@permission_required("auth.change_user")
 def edit_user_view(request, id):
     if request.method == 'POST':
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
         if password == "" or password == passwordRetype:
-            update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST.getlist("groups"), request.POST.get("is_active", False) == "on")
+            groups = None
+            if request.user.has_perm("ticketcontrol.change_user_permission"):
+                request.POST.getlist("groups")
+            update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
             return redirect("user_details", id=id)
         else:
             # Should not happen anyway
@@ -183,9 +197,10 @@ def edit_user_view(request, id):
     groups = []
     for group in user.groups.all():
         groups.append(group.id)
-    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all()})
+    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(), "change_permission": request.user.has_perm("ticketcontrol.change_user_permission")})
 
 
+@permission_required("delete_user")
 def delete_user_view(request, id):
     if request.method == 'POST':
         delete_user(id)

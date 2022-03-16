@@ -12,6 +12,7 @@
 {% endif %}
 <form method="POST" action="{% url 'login' %}" >
     {% csrf_token %}
+    <input type="hidden" name="next" id="next" value="{{ next }}">
     <input type="text" name="username" id="username" placeholder="Username" autofocus><br><br>
     <input type="password" name="password" id="password" placeholder="Password"><br><br>
     <input type="submit" value="Submit">
