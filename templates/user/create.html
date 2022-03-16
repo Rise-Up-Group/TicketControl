@@ -1,0 +1,30 @@
+{% extends "main.html" %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Create User</h1>
+<hr>
+<h5 class="text-center">TicketControl by RiseUp-Group</h5>
+
+<br>
+
+<form method="POST" action="{% url 'create_user' %}" >
+    {% csrf_token %}
+    <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
+    <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
+    <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>
+    <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
+    <input type="password" name="password" id="password" placeholder="Password"><br><br>
+    <input type="password" name="password_retype" id="password_retype" placeholder="Retype password"><br><br>
+    <label for="role">Role:</label>
+    <select name="role" id="role">
+        {% for role in RoleChoices.choices %}
+            <option value="{{ role|first }}">{{ role|last }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input type="checkbox" name="is_active" id="is_active">
+    <label for="is_active">Active</label><br><br>
+    <input type="submit" value="Submit">
+</form>
+
+{% endblock %}

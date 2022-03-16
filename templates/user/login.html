@@ -7,8 +7,8 @@
 <h5 class="text-center">TicketControl by RiseUp-Group</h5>
 
 <br>
-{% if wrong_username_or_password %}
-    wrong username or password
+{% if error %}
+{{ error }}
 {% endif %}
 <form method="POST" action="{% url 'login' %}" >
     {% csrf_token %}

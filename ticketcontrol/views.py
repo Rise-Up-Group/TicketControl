@@ -74,36 +74,102 @@ def login_view(request):
                 user = None
 
         if user is not None and user.check_password(password):
-            login(request, user)
-            return redirect("dashboard")
-        context = {'wrong_username_or_password': True}
+            if user.is_active:
+                login(request, user)
+                return redirect("dashboard")
+            else:
+                context = {"error": "User is not activated"}
+        else:
+            context = {"error": "Wrong username or password"}
     return render(request, "user/login.html", context)
+
+def add_user(email, firstname, lastname, username, password, role, isActive):
+    # TODO: preview in javascrip and show to user
+    # TODO: nickname has to be unique (possibly with db)
+    if username == "":
+        username = firstname[0:1] + ". " + lastname
+    # Creates ticketcontrol.user; never create a BaseUser
+    user = User.objects.create_user(username=username, password=password, email=email)
+    user.first_name = firstname
+    user.last_name = lastname
+    user.role = role
+    user.is_active = isActive
+    user.save()
+    return user
+
+def update_user(id, email, firstname, lastname, username, password, role, isActive):
+    user = User.objects.get(id=id)
+    if user is not None:
+        user.email = email
+        user.first_name = firstname
+        user.last_name = lastname
+        user.username = username
+        if password != "" and password is not None:
+            user.set_password(password)
+        if role is not None:
+            user.role = role
+        if isActive is not None:
+            user.is_active = isActive
+        user.save()
+        return user
+    return None
+
+def delete_user(id):
+    User.objects.get(id=id).delete(keep_parents=False)
 
 def register_view(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        firstname = request.POST['firstname']
-        lastname = request.POST['lastname']
-        username = request.POST['username']
-        # TODO: preview in javascrip and show to user
-        # TODO: nickname has to be unique (possibly with db)
-        if username == "":
-            username = firstname[0:1] + ". " + lastname
         password = request.POST['password']
-        password_retype = request.POST['password_retype']
-        if password == password_retype:
-            # Creates ticketcontrol.user; never create a BaseUser
-            user = User.objects.create_user(username=username, password=password, email=email)
-            user.first_name = firstname
-            user.last_name = lastname
-            user.save()
+        passwordRetype = request.POST['password_retype']
+        if password == passwordRetype:
+            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, User.RoleChoices.USER, 1)
             login(request, user)
             return redirect("profile")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
-    else:
-        return render(request, "user/register.html")
+    return render(request, "user/register.html")
+
+def create_user_view(request):
+    if (request.method == 'POST'):
+        password = request.POST['password']
+        passwordRetype = request.POST['password_retype']
+        if password == passwordRetype:
+            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST['role'], request.POST.get("is_active", False) == "on")
+            login(request, user)
+            return redirect("profile")
+        else:
+            # Should not happen anyway
+            return render_error(request, "Passwords do not match", "")
+    return render(request, "user/create.html", {"RoleChoices": User.RoleChoices})
+
+
+def manage_users_view(request):
+    return render(request, "user/manage.html")
+
+def user_details_view(request, id):
+    return render(request, "user/details.html")
+
+
+def edit_user_view(request, id):
+    if request.method == 'POST':
+        password = request.POST['password']
+        passwordRetype = request.POST['password_retype']
+        if password == "" or password == passwordRetype:
+            update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST['role'], request.POST.get("is_active", False) == "on")
+            return redirect("user_details", id=id)
+        else:
+            # Should not happen anyway
+            return render_error(request, "Passwords do not match", "")
+    return render(request, "user/edit.html", {"user": get_object_or_404(User, pk=id), "RoleChoices": User.RoleChoices})
+
+
+def delete_user_view(request, id):
+    if request.method == 'POST':
+        delete_user(id)
+        return redirect("manage_users")
+    return render(request, "user/delete.html", {"user": get_object_or_404(User, pk=id)})
+
 
 def profile_view(request):
     return render(request, "user/profile.html")
