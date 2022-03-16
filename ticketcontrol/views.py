@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import Group, Permission
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.shortcuts import render, redirect
@@ -81,7 +81,7 @@ def login_view(request):
         if user is not None and user.check_password(password):
             if user.is_active:
                 login(request, user)
-                if next != False:
+                if next is not False:
                     return HttpResponseRedirect(next)
                 return redirect("dashboard")
             else:
@@ -92,60 +92,12 @@ def login_view(request):
     return render(request, "user/login.html", {"error": error, "next": next})
 
 
-def add_user(email, firstname, lastname, username, password, groups, isActive):
-    # TODO: preview in javascrip and show to user
-    # TODO: nickname has to be unique (possibly with db)
-    if username == "":
-        username = firstname[0:1] + ". " + lastname
-    # Creates ticketcontrol.user; never create a BaseUser
-    user = User.objects.create_user(username=username, password=password, email=email)
-    user.first_name = firstname
-    user.last_name = lastname
-    if groups is not None:
-        for group in groups:
-            Group.objects.get(id=group).user_set.add(user)
-    else:
-        Group.objects.get(name="usr").user_set.add(user)
-    user.is_active = isActive
-    user.save()
-    return user
-
-def update_user(id, email, firstname, lastname, username, password, groups, isActive):
-    user = User.objects.get(id=id)
-    if user is not None:
-        user.email = email
-        user.first_name = firstname
-        user.last_name = lastname
-        user.username = username
-        if password != "" and password is not None:
-            user.set_password(password)
-
-        if groups is not None:
-            userGroups = user.groups.all()
-            userGroupsId = []
-            for group in userGroups:
-                userGroupsId.append(group.id)
-                if not group.id in groups:
-                    Group.objects.get(id=group.id).user_set.remove(user)
-            for group in groups:
-                if not group in userGroupsId:
-                    Group.objects.get(id=group).user_set.add(user)
-
-        if isActive is not None:
-            user.is_active = isActive
-        user.save()
-        return user
-    return None
-
-def delete_user(id):
-    User.objects.get(id=id).delete()
-
 def register_view(request):
     if request.method == 'POST':
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
         if password == passwordRetype:
-            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, None, 1)
+            user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, None, 1)
             login(request, user)
             return redirect("profile")
         else:
@@ -162,8 +114,8 @@ def create_user_view(request):
         if password == passwordRetype:
             groups = None
             if request.user.has_perm("ticketcontrol.change_user_permission"):
-                request.POST.getlist("groups")
-            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
+                groups = request.POST.getlist("groups")
+            user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
             login(request, user)
             return redirect("profile")
         else:
@@ -174,12 +126,12 @@ def create_user_view(request):
 
 @permission_required("auth.view_user")
 def manage_users_view(request):
-    return render(request, "user/manage.html", {"users": User.objects.all()})
+    return render(request, "user/manage.html", {"users": User.objects.all(), "create_permission": request.user.has_perm("ticketcontrol.create_user"), "edit_permission": request.user.has_perm("ticketcontrol.edit_user"), "delete_permission": request.user.has_perm("ticketcontrol.delete_user")})
 
 
 @permission_required("auth.view_user")
 def user_details_view(request, id):
-    return render(request, "user/details.html", {"user": User.objects.get(id=id), "edit": request.user.has_perm("ticketcontrol.update_user")})
+    return render(request, "user/details.html", {"user": User.objects.get(id=id), "edit_permission": request.user.has_perm("ticketcontrol.update_user")})
 
 
 @permission_required("auth.change_user")
@@ -191,7 +143,7 @@ def edit_user_view(request, id):
             groups = None
             if request.user.has_perm("ticketcontrol.change_user_permission"):
                 groups = request.POST.getlist("groups")
-            update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
+            User.update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
             return redirect("user_details", id=id)
         else:
             # Should not happen anyway
@@ -206,15 +158,14 @@ def edit_user_view(request, id):
 @permission_required("delete_user")
 def delete_user_view(request, id):
     if request.method == 'POST':
-        delete_user(id)
+        User.delete_user(id)
         return redirect("manage_users")
     return render(request, "user/delete.html", {"user": get_object_or_404(User, pk=id)})
 
 
 @permission_required("auth.view_group")
 def manage_groups_view(request):
-    return render(request, "user/group/manage.html", {"groups": Group.objects.all()})
-
+    return render(request, "user/group/manage.html", {"groups": Group.objects.all(), "create_permission": request.user.has_perm("ticketcontrol.create_user")})
 
 
 @permission_required("auth.create_group")
@@ -225,6 +176,7 @@ def create_group_view(request):
         permissions = request.POST.getlist("permissions")
         for permission in permissions:
             group.permissions.add(permission)
+        group.save()
         return redirect("manage_groups")
     return render(request, "user/group/create.html", {"permissions": Permission.objects.all()})
 
@@ -247,7 +199,7 @@ def edit_group_view(request, id):
                 group.permissions.add(permission)
         group.save()
         return redirect("manage_groups")
-    return render(request, "user/group/edit.html", {"group": group, "permissions": Permission.objects.all(), "change_permission": edit})
+    return render(request, "user/group/edit.html", {"group": group, "permissions": Permission.objects.all(), "change_permission": edit, "delete_permission": request.user.has_perm("ticketcontrol.delete_user")})
 
 
 @permission_required("delete_group")

@@ -1,20 +1,62 @@
 from django.db import models
+from django.contrib.auth.models import Group
 
-import datetime
-from django.utils import timezone
 from django.contrib.auth.models import User as BaseUser
 
 
 class User(BaseUser):
-    class RoleChoices(models.TextChoices):
-        USER = 'usr'
-        MOD = 'mod'
-        ADMIN = 'adm'
-
     class Meta:
         permissions = (
             ("change_user_permission", "Change the permissions of other users"),
         )
+
+    def add_user(email, firstname, lastname, username, password, groups, isActive):
+        # TODO: preview in javascrip and show to user
+        # TODO: nickname has to be unique (possibly with db)
+        if username == "":
+            username = firstname[0:1] + ". " + lastname
+        # Creates ticketcontrol.user; never create a BaseUser
+        user = User.objects.create_user(username=username, password=password, email=email)
+        user.first_name = firstname
+        user.last_name = lastname
+        if groups is not None:
+            for group in groups:
+                Group.objects.get(id=group).user_set.add(user)
+        else:
+            Group.objects.get(name="usr").user_set.add(user)
+        user.is_active = isActive
+        user.save()
+        return user
+
+    def update_user(id, email, firstname, lastname, username, password, groups, isActive):
+        user = User.objects.get(id=id)
+        if user is not None:
+            user.email = email
+            user.first_name = firstname
+            user.last_name = lastname
+            user.username = username
+            if password != "" and password is not None:
+                user.set_password(password)
+
+            if groups is not None:
+                userGroups = user.groups.all()
+                userGroupsId = []
+                for group in userGroups:
+                    userGroupsId.append(group.id)
+                    if not group.id in groups:
+                        Group.objects.get(id=group.id).user_set.remove(user)
+                for group in groups:
+                    if not group in userGroupsId:
+                        Group.objects.get(id=group).user_set.add(user)
+
+            if isActive is not None:
+                user.is_active = isActive
+            user.save()
+            return user
+        return None
+
+    def delete_user(id):
+        User.objects.get(id=id).delete()
 
 
 class Category(models.Model):

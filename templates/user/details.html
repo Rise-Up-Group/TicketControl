@@ -4,12 +4,12 @@
 <br>
 <h1 class="text-center display-4">{{ user.username }}</h1>
 <hr>
-<h5 class="text-center">{{ user.email }}</h5>
 
 <br>
 
 <table>
 <tbody>
+<tr><td>E-Mail:</td><td>{{ user.email }}</td></tr>
 <tr><td>First name:</td><td>{{ user.first_name }}</td></tr>
 <tr><td>Last name:</td><td>{{ user.last_name }}</td></tr>
 <tr><td>Groups:</td><td><ul>{% for group in user.groups.all %}
@@ -18,7 +18,7 @@
 </tbody>
 </table>
 <br>
-{% if edit %}
+{% if edit_permission %}
     <a class="btn btn-primary" href="{% url 'edit_user' id=user.id %}">Edit</a>
 {% endif %}
 
