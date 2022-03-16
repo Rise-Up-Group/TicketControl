@@ -172,11 +172,14 @@ def create_user_view(request):
     return render(request, "user/create.html", {"groups": Group.objects.all(), "change_permission": request.user.has_perm("ticketcontrol.change_user_permission")})
 
 
+@permission_required("auth.view_user")
 def manage_users_view(request):
-    return render(request, "user/manage.html")
+    return render(request, "user/manage.html", {"users": User.objects.all()})
 
+
+@permission_required("auth.view_user")
 def user_details_view(request, id):
-    return render(request, "user/details.html")
+    return render(request, "user/details.html", {"user": User.objects.get(id=id), "edit": request.user.has_perm("ticketcontrol.update_user")})
 
 
 @permission_required("auth.change_user")
@@ -187,7 +190,7 @@ def edit_user_view(request, id):
         if password == "" or password == passwordRetype:
             groups = None
             if request.user.has_perm("ticketcontrol.change_user_permission"):
-                request.POST.getlist("groups")
+                groups = request.POST.getlist("groups")
             update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
             return redirect("user_details", id=id)
         else:

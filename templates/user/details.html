@@ -1,0 +1,25 @@
+{% extends "main.html" %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">{{ user.username }}</h1>
+<hr>
+<h5 class="text-center">{{ user.email }}</h5>
+
+<br>
+
+<table>
+<tbody>
+<tr><td>First name:</td><td>{{ user.first_name }}</td></tr>
+<tr><td>Last name:</td><td>{{ user.last_name }}</td></tr>
+<tr><td>Groups:</td><td><ul>{% for group in user.groups.all %}
+    <li>{{ group.name }}</li>
+{% endfor %}</ul></td></tr>
+</tbody>
+</table>
+<br>
+{% if edit %}
+    <a class="btn btn-primary" href="{% url 'edit_user' id=user.id %}">Edit</a>
+{% endif %}
+
+{% endblock %}
