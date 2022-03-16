@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Delete Group</h1>
+<hr>
+<h5 class="text-center">TicketControl by RiseUp-Group</h5>
+
+<br>
+
+Really delete group {{ group.name }}?
+<form method="POST" action="{% url 'delete_group' id=group.id %}" >
+    {% csrf_token %}
+    <input class="btn btn-danger" type="submit" value="Delete">
+</form>
+
+{% endblock %}

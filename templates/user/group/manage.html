@@ -1,0 +1,22 @@
+{% extends "main.html" %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Manage groups</h1>
+<hr>
+<h5 class="text-center">TicketControl by RiseUp-Group</h5>
+
+<br>
+
+<table>
+<thead>
+<tr><td><strong>id</strong></td><td><strong>name</strong></td></tr>
+</thead>
+<tbody>
+{% for group in groups %}
+    <tr onclick="window.location='{% url 'edit_group' id=group.id %}'"><td>{{ group.id }}</td><td>{{ group.name }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

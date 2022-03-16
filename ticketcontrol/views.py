@@ -138,7 +138,7 @@ def update_user(id, email, firstname, lastname, username, password, groups, isAc
     return None
 
 def delete_user(id):
-    User.objects.get(id=id).delete(keep_parents=False)
+    User.objects.get(id=id).delete()
 
 def register_view(request):
     if request.method == 'POST':
@@ -206,6 +206,54 @@ def delete_user_view(request, id):
         delete_user(id)
         return redirect("manage_users")
     return render(request, "user/delete.html", {"user": get_object_or_404(User, pk=id)})
+
+
+@permission_required("auth.view_group")
+def manage_groups_view(request):
+    return render(request, "user/group/manage.html", {"groups": Group.objects.all()})
+
+
+
+@permission_required("auth.create_group")
+def create_group_view(request):
+    edit = request.user.has_perm("auth.change_group")
+    if request.method == 'POST' and edit:
+        group = Group.objects.create(name=request.POST['name'])
+        permissions = request.POST.getlist("permissions")
+        for permission in permissions:
+            group.permissions.add(permission)
+        return redirect("manage_groups")
+    return render(request, "user/group/create.html", {"permissions": Permission.objects.all()})
+
+
+@permission_required("auth.view_group")
+def edit_group_view(request, id):
+    edit = request.user.has_perm("auth.change_group")
+    group = get_object_or_404(Group, id=id)
+    if request.method == 'POST' and edit:
+        group.name = request.POST['name']
+        groupPermissions = group.permissions.all()
+        groupPermissionsId = []
+        permissions = request.POST.getlist("permissions")
+        for permission in groupPermissions:
+            groupPermissionsId.append(permission.id)
+            if not permission.id in permissions:
+                group.permissions.remove(permission)
+        for permission in permissions:
+            if not permission in groupPermissionsId:
+                group.permissions.add(permission)
+        group.save()
+        return redirect("manage_groups")
+    return render(request, "user/group/edit.html", {"group": group, "permissions": Permission.objects.all(), "change_permission": edit})
+
+
+@permission_required("delete_group")
+def delete_group_view(request, id):
+    group = Group.objects.get(id=id)
+    if request.method == 'POST':
+        group.delete()
+        return redirect("manage_groups")
+    return render(request, "user/group/delete.html", {"group": group})
 
 
 def profile_view(request):

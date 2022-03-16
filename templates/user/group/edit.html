@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Edit group</h1>
+<hr>
+<h5 class="text-center">TicketControl by RiseUp-Group</h5>
+
+<br>
+
+<form method="POST" action="{% url 'edit_group' id=group.id %}" >
+    {% csrf_token %}
+    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if not change_permission %} disabled{% endif %}><br><br>
+    <label for="permissions">Permissions:</label><br>
+    <select style="height: 50vh;" multiple="" name="permissions" id="permissions"{% if not change_permission %} disabled{% endif %}>
+        {% for permission in permissions %}
+            <option class="checkbox" value="{{ permission.id }}"{% if permission in group.permissions.all %} selected{% endif %}>{{ permission.content_type.app_label }}.{{ permission.content_type.model }}.{{ permission.name }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>
+    <a class="btn btn-danger" href="{% url 'delete_group' id=group.id %}">Delete</a>
+</form>
+<style>
+option.checkbox:before { content: "☐ " }
+option.checkbox:checked:before { content: "☑ " }
+</style>
+
+{% endblock %}
