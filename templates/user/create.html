@@ -1,4 +1,5 @@
 {% extends "main.html" %}
+{% load static %}
 
 {% block content %}
 <br>
@@ -8,7 +9,7 @@
 
 <br>
 
-<form method="POST" action="{% url 'create_user' %}" >
+<form method="POST" action="{% url 'create_user' %}">
     {% csrf_token %}
     <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
     <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
@@ -16,15 +17,20 @@
     <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
     <input type="password" name="password" id="password" placeholder="Password"><br><br>
     <input type="password" name="password_retype" id="password_retype" placeholder="Retype password"><br><br>
-    <label for="role">Role:</label>
-    <select name="role" id="role">
-        {% for role in RoleChoices.choices %}
-            <option value="{{ role|first }}">{{ role|last }}</option>
+    <label for="groups">Groups:</label><br>
+    <select multiple="" name="groups" id="groups">
+        {% for group in groups %}
+            <option class="checkbox" value="{{ group.id }}">{{ group.name }}</option>
         {% endfor %}
     </select><br><br>
-    <input type="checkbox" name="is_active" id="is_active">
+    <input type="checkbox" name="is_active" id="is_active" checked>
     <label for="is_active">Active</label><br><br>
     <input type="submit" value="Submit">
 </form>
+
+<style>
+option.checkbox:before { content: "☐ " }
+option.checkbox:checked:before { content: "☑ " }
+</style>
 
 {% endblock %}

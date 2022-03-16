@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout
+from django.contrib.auth.models import Group, Permission
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.shortcuts import render, redirect
@@ -83,7 +84,14 @@ def login_view(request):
             context = {"error": "Wrong username or password"}
     return render(request, "user/login.html", context)
 
-def add_user(email, firstname, lastname, username, password, role, isActive):
+def has_permission(request, permission):
+    for group in request.user.groups.all():
+        if group.permissions.all().contains(permission):
+            return True
+    return False
+
+
+def add_user(email, firstname, lastname, username, password, groups, isActive):
     # TODO: preview in javascrip and show to user
     # TODO: nickname has to be unique (possibly with db)
     if username == "":
@@ -92,12 +100,13 @@ def add_user(email, firstname, lastname, username, password, role, isActive):
     user = User.objects.create_user(username=username, password=password, email=email)
     user.first_name = firstname
     user.last_name = lastname
-    user.role = role
+    for group in groups:
+        Group.objects.get(id=group).user_set.add(user)
     user.is_active = isActive
     user.save()
     return user
 
-def update_user(id, email, firstname, lastname, username, password, role, isActive):
+def update_user(id, email, firstname, lastname, username, password, groups, isActive):
     user = User.objects.get(id=id)
     if user is not None:
         user.email = email
@@ -106,8 +115,17 @@ def update_user(id, email, firstname, lastname, username, password, role, isActi
         user.username = username
         if password != "" and password is not None:
             user.set_password(password)
-        if role is not None:
-            user.role = role
+
+        userGroups = user.groups.all()
+        userGroupsId = []
+        for group in userGroups:
+            userGroupsId.append(group.id)
+            if not group.id in groups:
+                Group.objects.get(id=group.id).user_set.remove(user)
+        for group in groups:
+            if not group in userGroupsId:
+                Group.objects.get(id=group).user_set.add(user)
+
         if isActive is not None:
             user.is_active = isActive
         user.save()
@@ -122,7 +140,7 @@ def register_view(request):
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
         if password == passwordRetype:
-            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, User.RoleChoices.USER, 1)
+            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, [Group.objects.get(name="usr").id], 1)
             login(request, user)
             return redirect("profile")
         else:
@@ -135,13 +153,13 @@ def create_user_view(request):
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
         if password == passwordRetype:
-            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST['role'], request.POST.get("is_active", False) == "on")
+            user = add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST.getlist('groups'), request.POST.get("is_active", False) == "on")
             login(request, user)
             return redirect("profile")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
-    return render(request, "user/create.html", {"RoleChoices": User.RoleChoices})
+    return render(request, "user/create.html", {"groups": Group.objects.all()})
 
 
 def manage_users_view(request):
@@ -156,12 +174,16 @@ def edit_user_view(request, id):
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
         if password == "" or password == passwordRetype:
-            update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST['role'], request.POST.get("is_active", False) == "on")
+            update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, request.POST.getlist("groups"), request.POST.get("is_active", False) == "on")
             return redirect("user_details", id=id)
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
-    return render(request, "user/edit.html", {"user": get_object_or_404(User, pk=id), "RoleChoices": User.RoleChoices})
+    user = get_object_or_404(User, pk=id)
+    groups = []
+    for group in user.groups.all():
+        groups.append(group.id)
+    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all()})
 
 
 def delete_user_view(request, id):

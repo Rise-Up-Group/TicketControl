@@ -11,8 +11,6 @@ class User(BaseUser):
         MOD = 'mod'
         ADMIN = 'adm'
 
-    role = models.CharField(max_length=3, choices=RoleChoices.choices, default=RoleChoices.USER)
-
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
