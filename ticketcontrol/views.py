@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import Group, Permission
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.shortcuts import render, redirect
@@ -134,8 +134,7 @@ def user_details_view(request, id):
     return render(request, "user/details.html", {"user": User.objects.get(id=id), "edit_permission": request.user.has_perm("ticketcontrol.update_user")})
 
 
-@permission_required("auth.change_user")
-def edit_user_view(request, id):
+def unrestricted_edit_user_view(request, id, deletePermission):
     if request.method == 'POST':
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
@@ -152,15 +151,36 @@ def edit_user_view(request, id):
     groups = []
     for group in user.groups.all():
         groups.append(group.id)
-    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(), "change_permission": request.user.has_perm("ticketcontrol.change_user_permission")})
+    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(), "change_permission": request.user.has_perm("ticketcontrol.change_user_permission"), "delete_permission": deletePermission})
 
 
-@permission_required("delete_user")
-def delete_user_view(request, id):
+@permission_required("auth.change_user")
+def edit_user_view(request, id):
+    return unrestricted_edit_user_view(request, id, request.user.has_perm("ticketcontrol.delete_user"))
+
+
+@login_required()
+def profile_view(request):
+    return unrestricted_edit_user_view(request, request.user.id, True)
+
+
+def unrestricted_delete_user_view(request, id):
     if request.method == 'POST':
         User.delete_user(id)
         return redirect("manage_users")
     return render(request, "user/delete.html", {"user": get_object_or_404(User, pk=id)})
+
+
+@permission_required("delete_user")
+def restricted_delete_user_view(request, id):
+    return unrestricted_delete_user_view(request, id)
+
+
+@login_required()
+def delete_user_view(request, id):
+    if (request.user.id == id):
+        return unrestricted_delete_user_view(request, id)
+    return restricted_delete_user_view(request, id)
 
 
 @permission_required("auth.view_group")
@@ -209,7 +229,3 @@ def delete_group_view(request, id):
         group.delete()
         return redirect("manage_groups")
     return render(request, "user/group/delete.html", {"group": group})
-
-
-def profile_view(request):
-    return render(request, "user/profile.html")

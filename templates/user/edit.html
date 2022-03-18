@@ -23,8 +23,8 @@
     </select><br><br>
     <input type="checkbox" name="is_active" id="is_active"{% if user.is_active %} checked{% endif %}>
     <label for="is_active">Active</label><br><br>
-    {% if edit_permission %}input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>{% endif %}
-    {% if delete_psermission %}<a class="btn btn-danger" href="{% url 'delete_user' id=user.id %}">Delete</a>{% endif %}
+    <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>
+    {% if delete_permission %}<a class="btn btn-danger" href="{% url 'delete_user' id=user.id %}">Delete</a>{% endif %}
 </form>
 <style>
 option.checkbox:before { content: "☐ " }
