@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  app:
+    build: 
+      context: .
+    restart: always # this is a temporary fix. see below why it's needed
+    command: >  # we might need to add a wait for database creation script
+      sh -c "python manage.py migrate && 
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000
+    volumes:
+      - ./app:/app # auto refresh server files
+      - ./data/web:/vol/web
+    environment:
+      - SECRET_KEY=localdevelopment
+      - DEBUG=1
+      - DB_HOST=db # can be container name, service name, or real dns / ip
+      - DB_NAME=ticketcontrol_dev
+      - DB_USER=root
+      - DB_PASS=changeme
+    depends_on: # make serve name as dns work & connect containers
+      - db
+    
+
+  db:
+    image: mariadb:10.6
+    environment:
+      - MARIADB_DATABASE=ticketcontrol_dev
+      - MARIADB_ROOT_PASSWORD=changeme
+    ports:
+      - 3306:3306
