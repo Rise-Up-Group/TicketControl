@@ -4,6 +4,7 @@ services:
   app:
     build: 
       context: .
+    restart: always # this is a temporary fix. see below why it's needed
     command: >  # we might need to add a wait for database creation script
       sh -c "python manage.py migrate && 
              python manage.py runserver 0.0.0.0:8000"
@@ -21,6 +22,7 @@ services:
       - DB_PASS=changeme
     depends_on: # make serve name as dns work & connect containers
       - db
+    
 
   db:
     image: mariadb:10.6
