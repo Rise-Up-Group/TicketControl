@@ -1,13 +1,13 @@
 from django.http import HttpResponse
 
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
-from .models import User, Ticket
+from .models import *
 from django.shortcuts import get_object_or_404
 import logging
 from django.http import Http404
@@ -95,8 +95,8 @@ def login_view(request):
 def register_view(request):
     if request.method == 'POST':
         password = request.POST['password']
-        passwordRetype = request.POST['password_retype']
-        if password == passwordRetype:
+        confirmPassword = request.POST['confirm_password']
+        if password == confirmPassword:
             user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, None, 1)
             login(request, user)
             return redirect("profile")
@@ -106,35 +106,31 @@ def register_view(request):
     return render(request, "user/register.html")
 
 
-@permission_required("add_user")
+@permission_required("ticketcontrol.add_user")
 def create_user_view(request):
     if (request.method == 'POST'):
         password = request.POST['password']
-        passwordRetype = request.POST['password_retype']
-        if password == passwordRetype:
-            groups = None
-            if request.user.has_perm("ticketcontrol.change_user_permission"):
-                groups = request.POST.getlist("groups")
-            user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
-            login(request, user)
-            return redirect("profile")
-        else:
-            # Should not happen anyway
-            return render_error(request, "Passwords do not match", "")
-    return render(request, "user/create.html", {"groups": Group.objects.all(), "change_permission": request.user.has_perm("ticketcontrol.change_user_permission")})
+        groups = None
+        if request.user.has_perm("ticketcontrol.change_user_permission"):
+            groups = request.POST.getlist("groups")
+        User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
+        return redirect("manage_users")
+    return render(request, "user/create.html", {"groups": Group.objects.all(), "can_change_permission": request.user.has_perm("ticketcontrol.change_user_permission")})
 
 
-@permission_required("auth.view_user")
+@permission_required("ticketcontrol.view_user")
 def manage_users_view(request):
-    return render(request, "user/manage.html", {"users": User.objects.all(), "create_permission": request.user.has_perm("ticketcontrol.create_user"), "edit_permission": request.user.has_perm("ticketcontrol.edit_user"), "delete_permission": request.user.has_perm("ticketcontrol.delete_user")})
+    return render(request, "user/manage.html", {"users": User.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_user"), "can_edit": request.user.has_perm("ticketcontrol.edit_user"), "can_delete": request.user.has_perm("ticketcontrol.delete_user")})
 
 
-@permission_required("auth.view_user")
+@login_required()
 def user_details_view(request, id):
-    return render(request, "user/details.html", {"user": User.objects.get(id=id), "edit_permission": request.user.has_perm("ticketcontrol.update_user")})
+    if request.user.has_perm("ticketcontrol.view_user") or request.user.id == id:
+        return render(request, "user/details.html", {"user": User.objects.get(id=id), "can_edit": request.user.has_perm("ticketcontrol.update_user") or request.user.id == id})
+    return redirect("login")
 
 
-def unrestricted_edit_user_view(request, id, deletePermission):
+def unrestricted_edit_user_view(request, id, updatePermission, deletePermission):
     if request.method == 'POST':
         password = request.POST['password']
         passwordRetype = request.POST['password_retype']
@@ -151,17 +147,19 @@ def unrestricted_edit_user_view(request, id, deletePermission):
     groups = []
     for group in user.groups.all():
         groups.append(group.id)
-    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(), "change_permission": request.user.has_perm("ticketcontrol.change_user_permission"), "delete_permission": deletePermission})
+    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(), "can_change_permission": request.user.has_perm("ticketcontrol.change_user_permission"), "can_update": updatePermission, "can_delete": deletePermission})
 
 
-@permission_required("auth.change_user")
+@login_required()
 def edit_user_view(request, id):
-    return unrestricted_edit_user_view(request, id, request.user.has_perm("ticketcontrol.delete_user"))
+    if request.user.has_perm("auth.change_user") or request.user.id == id:
+        return unrestricted_edit_user_view(request, id, request.user.has_perm("ticketcontrol.update_user") or request.user.id == id, request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id)
+    return redirect("login")
 
 
 @login_required()
 def profile_view(request):
-    return unrestricted_edit_user_view(request, request.user.id, True)
+    return edit_user_view(request, request.user.id)
 
 
 def unrestricted_delete_user_view(request, id):
@@ -171,7 +169,7 @@ def unrestricted_delete_user_view(request, id):
     return render(request, "user/delete.html", {"user": get_object_or_404(User, pk=id)})
 
 
-@permission_required("delete_user")
+@permission_required("ticketcontrol.delete_user")
 def restricted_delete_user_view(request, id):
     return unrestricted_delete_user_view(request, id)
 
@@ -185,7 +183,7 @@ def delete_user_view(request, id):
 
 @permission_required("auth.view_group")
 def manage_groups_view(request):
-    return render(request, "user/group/manage.html", {"groups": Group.objects.all(), "create_permission": request.user.has_perm("ticketcontrol.create_user")})
+    return render(request, "user/group/manage.html", {"groups": Group.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_user")})
 
 
 @permission_required("auth.create_group")
@@ -194,8 +192,13 @@ def create_group_view(request):
     if request.method == 'POST' and edit:
         group = Group.objects.create(name=request.POST['name'])
         permissions = request.POST.getlist("permissions")
+        allPermissions = Permission.objects.all().values_list("id", flat=True)
+        allPermissionsId = []
+        for permission in allPermissions:
+            allPermissionsId.append(int(permission))
         for permission in permissions:
-            group.permissions.add(permission)
+            if int(permission) in allPermissionsId:
+                group.permissions.add(permission)
         group.save()
         return redirect("manage_groups")
     return render(request, "user/group/create.html", {"permissions": Permission.objects.all()})
@@ -203,28 +206,40 @@ def create_group_view(request):
 
 @permission_required("auth.view_group")
 def edit_group_view(request, id):
-    edit = request.user.has_perm("auth.change_group")
+    canEdit = request.user.has_perm("auth.change_group")
     group = get_object_or_404(Group, id=id)
-    if request.method == 'POST' and edit:
-        group.name = request.POST['name']
-        groupPermissions = group.permissions.all()
-        groupPermissionsId = []
-        permissions = request.POST.getlist("permissions")
-        for permission in groupPermissions:
-            groupPermissionsId.append(permission.id)
-            if not permission.id in permissions:
-                group.permissions.remove(permission)
-        for permission in permissions:
-            if not permission in groupPermissionsId:
-                group.permissions.add(permission)
-        group.save()
-        return redirect("manage_groups")
-    return render(request, "user/group/edit.html", {"group": group, "permissions": Permission.objects.all(), "change_permission": edit, "delete_permission": request.user.has_perm("ticketcontrol.delete_user")})
+    if request.method == 'POST' and canEdit:
+        if group.name != "User" and group.name != "Admin":
+            group.name = request.POST['name']
+        if group.name != "Admin":
+            groupPermissions = group.permissions.all()
+            groupPermissionsId = []  # list of ids of group permissions for simpler comparing
+            permissions = request.POST.getlist("permissions")
+            allPermissions = Permission.objects.all().values_list("id", flat=True)
+            allPermissionsId = []
+            for permission in allPermissions:
+                allPermissionsId.append(int(permission))
+            for permission in groupPermissions:
+                groupPermissionsId.append(permission.id)
+                if not permission.id in permissions:
+                    group.permissions.remove(permission.id)
+            for permission in permissions:
+                if not permission in groupPermissionsId and int(permission) in allPermissionsId:
+                    group.permissions.add(permission)
+            group.save()
+            return redirect("manage_groups")
+        return render_error(request, "Unable to edit group", "You are not allowed to edit group \""+group.name+"\"")
+    groupPermissions = []
+    for permissionId in group.permissions.all().values_list("id", flat=True):
+        groupPermissions.append(permissionId)
+    return render(request, "user/group/edit.html", {"group": group, "group_permissions": groupPermissions, "permissions": Permission.objects.all(), "can_change": canEdit, "can_delete": request.user.has_perm("ticketcontrol.delete_group")})
 
 
-@permission_required("delete_group")
+@permission_required("auth.delete_group")
 def delete_group_view(request, id):
     group = Group.objects.get(id=id)
+    if group.name == "User" or group.name == "Admin":
+        return render_error(request, "Unable to delete group", "You are not allowed to delete group \"" + group.name + "\"")
     if request.method == 'POST':
         group.delete()
         return redirect("manage_groups")

@@ -18,7 +18,7 @@
 </tbody>
 </table>
 <br>
-{% if edit_permission %}
+{% if can_edit %}
     <a class="btn btn-primary" href="{% url 'edit_user' id=user.id %}">Edit</a>
 {% endif %}
 

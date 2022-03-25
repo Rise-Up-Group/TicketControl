@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import Group
 
 from django.contrib.auth.models import User as BaseUser
-
+from django.contrib.auth.models import Permission as BasePermission
 
 class User(BaseUser):
     class Meta:
@@ -22,8 +22,15 @@ class User(BaseUser):
         if groups is not None:
             for group in groups:
                 Group.objects.get(id=group).user_set.add(user)
+            user.is_superuser = False
+            user.is_staff = False
+            adminId = Group.objects.get(name="Admin").id
+            for groupId in groups:
+                if int(groupId) == adminId:
+                    user.is_superuser = True
+                    user.is_staff = True
         else:
-            Group.objects.get(name="usr").user_set.add(user)
+            Group.objects.get(name="User").user_set.add(user)
         user.is_active = isActive
         user.save()
         return user
@@ -49,6 +56,14 @@ class User(BaseUser):
                     if not group in userGroupsId:
                         Group.objects.get(id=group).user_set.add(user)
 
+                user.is_superuser = False
+                user.is_staff = False
+                adminId = Group.objects.get(name="Admin").id
+                for groupId in groups:
+                    if int(groupId) == adminId:
+                        user.is_superuser = True
+                        user.is_staff = True
+
             if isActive is not None:
                 user.is_active = isActive
             user.save()
@@ -57,6 +72,11 @@ class User(BaseUser):
 
     def delete_user(id):
         User.objects.get(id=id).delete()
+
+
+class Permission(BasePermission):
+    def __str__(self):
+        return self.name
 
 
 class Category(models.Model):
