@@ -8,11 +8,11 @@ services:
       - ticketcontrol-static-data:/vol/web
     environment:
       - DB_HOST=db
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER} # user has to be root with this default config
-      - DB_PASS=${DB_PASS}
-      - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=* # main difference
+      - DB_NAME=ticketcontrol
+      - DB_USER=root # user has to be root with this default config
+      - DB_PASS=changeme
+      - SECRET_KEY=changeme
+      - ALLOWED_HOSTS=*
     depends_on:
       - db
   db:
@@ -21,8 +21,8 @@ services:
     volumes:
       - ticketcontrol-mariadb-data:/var/lib/mysql
     environment:
-      - MARIADB_DATABASE=${DB_NAME}
-      - MARIADB_ROOT_PASSWORD=${DB_PASS}
+      - MARIADB_DATABASE=ticketcontrol
+      - MARIADB_ROOT_PASSWORD=changeme
   proxy:
     image: pgnhd/riseupgroup-ticketcontrol-proxy:latest
     restart: always
@@ -33,7 +33,7 @@ services:
     volumes:
       - ticketcontrol-static-data:/vol/static
     environment:
-      - MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE}
+      - MAX_REQUEST_SIZE=20M
 
 volumes:
   ticketcontrol-static-data:
