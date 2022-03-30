@@ -95,6 +95,7 @@ class Comment(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
     num = models.IntegerField()
     ticket = models.ForeignKey("Ticket", on_delete=models.DO_NOTHING)
+    user = models.ForeignKey("User", on_delete=models.DO_NOTHING)
 
     def __str__(self):
         return self.ticket.title + " Comment " + self.num
