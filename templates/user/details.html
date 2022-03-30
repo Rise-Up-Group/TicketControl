@@ -1,5 +1,7 @@
 {% extends "main.html" %}
 
+{% block title %}View User: {{ user.username }}{% endblock %}
+
 {% block content %}
 <br>
 <h1 class="text-center display-4">{{ user.username }}</h1>
@@ -18,7 +20,7 @@
 </tbody>
 </table>
 <br>
-{% if can_edit %}
+{% if can_change %}
     <a class="btn btn-primary" href="{% url 'edit_user' id=user.id %}">Edit</a>
 {% endif %}
 

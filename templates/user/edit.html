@@ -1,5 +1,7 @@
 {% extends "main.html" %}
 
+{% block title %}Edit User: {{ user.username }}{% endblock %}
+
 {% block content %}
 <br>
 <h1 class="text-center display-4">Edit User</h1>
@@ -23,7 +25,7 @@
     </select><br><br>
     <input type="checkbox" name="is_active" id="is_active"{% if user.is_active %} checked{% endif %}>
     <label for="is_active">Active</label><br><br>
-    {% if can_update %}<input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>{% endif %}
+    {% if can_change %}<input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>{% endif %}
     {% if can_delete %}<a class="btn btn-danger" href="{% url 'delete_user' id=user.id %}">Delete</a>{% endif %}
 </form>
 <style>

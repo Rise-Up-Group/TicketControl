@@ -3,7 +3,7 @@
     "model": "auth.group",
     "pk": 1,
     "fields": {
-      "name": "User",
+      "name": "user",
       "permissions": [
         45,
         28,
@@ -19,7 +19,7 @@
     "model": "auth.group",
     "pk": 2,
     "fields": {
-      "name": "Admin",
+      "name": "admin",
       "permissions": []
     }
   }

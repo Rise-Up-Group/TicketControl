@@ -1,5 +1,7 @@
 {% extends "main.html" %}
 
+{% block title %}Manage Users{% endblock %}
+
 {% block content %}
 <br>
 <h1 class="text-center display-4">Manage users</h1>
@@ -13,7 +15,7 @@
 </thead>
 <tbody>
 {% for user in users %}
-    <tr onclick="window.location='{% url 'user_details' id=user.id %}'"><td>{{ user.id }}</td><td>{{ user.username }}</td><td>{{ user.email }}</td><td>{{ user.first_name }}</td><td>{{ user.last_name }}</td>{% if can_edit or can_delete %}<td><a href="{% url 'edit_user' id=user.id %}">Edit</a></td>{% endif %}</tr>
+    <tr onclick="window.location='{% url 'user_details' id=user.id %}'"><td>{{ user.id }}</td><td>{{ user.username }}</td><td>{{ user.email }}</td><td>{{ user.first_name }}</td><td>{{ user.last_name }}</td>{% if can_change or can_delete %}<td><a href="{% url 'edit_user' id=user.id %}">Edit</a></td>{% endif %}</tr>
 {% endfor %}
 </tbody>
 </table>

@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.models import User as BaseUser
 from django.contrib.auth.models import Permission as BasePermission
 
+
 class User(BaseUser):
     class Meta:
         permissions = (
@@ -47,13 +48,15 @@ class User(BaseUser):
 
             if groups is not None:
                 userGroups = user.groups.all()
-                userGroupsId = []
                 for group in userGroups:
-                    userGroupsId.append(group.id)
                     if not group.id in groups:
                         Group.objects.get(id=group.id).user_set.remove(user)
                 for group in groups:
-                    if not group in userGroupsId:
+                    found = False
+                    for userGroup in userGroups:
+                        if userGroup.id == group:
+                            found = True
+                    if not found:
                         Group.objects.get(id=group).user_set.add(user)
 
                 user.is_superuser = False
@@ -112,7 +115,7 @@ class Ticket(models.Model):
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="owner")
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
     participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
-    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)#TODO: 'moderatorS'
+    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
 
     def __str__(self):
         return self.title + " (" + self.owner.username + ")"

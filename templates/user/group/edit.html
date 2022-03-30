@@ -1,17 +1,19 @@
 {% extends "main.html" %}
 
+{% block title %}Edit Group: {{ group.name }}{% endblock %}
+
 {% block content %}
 <br>
-<h1 class="text-center display-4">Edit group</h1>
+<h1 class="text-center display-4">Edit Group</h1>
 <hr>
 
 <br>
 
 <form method="POST" action="{% url 'edit_group' id=group.id %}" >
     {% csrf_token %}
-    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if group.name == "User" or group.name == "Admin" %} disabled{% endif %}><br><br>
+    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if group.name == "user" or group.name == "admin" %} disabled{% endif %}><br><br>
     <label for="permissions">Permissions:</label><br>
-    <select style="height: 50vh;" multiple="" name="permissions" id="permissions"{% if group.name == "Admin" or not can_change %} disabled{% endif %}>
+    <select style="height: 50vh;" multiple="" name="permissions" id="permissions"{% if group.name == "admin" or not can_change %} disabled{% endif %}>
         {% for permission in permissions %}
             <option class="checkbox" value="{{ permission.id }}"{% if permission.id in group_permissions %} selected{% endif %}>{{ permission.content_type.app_label }}.{{ permission.content_type.model }}.{{ permission.name }}</option>
         {% endfor %}
