@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ticketcontrol', '0003_alter_ticket_moderator_alter_ticket_participating'),
+        ('ticketcontrol', '0006_permission'),
     ]
 
     operations = [
