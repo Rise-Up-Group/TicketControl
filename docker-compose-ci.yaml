@@ -2,7 +2,8 @@ version: "3.9"
 
 services:
   app:
-    image: pgnhd/riseupgroup-ticketcontrol-app:latest
+    build:
+      context: .
     restart: always
     volumes:
       - ticketcontrol-static-data:/vol/web
@@ -13,10 +14,6 @@ services:
       - DB_PASS=${DB_PASS}
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
-      - STATIC_URL=/static/static/
-      - MEDIA_URL=/static/media/
-      - STATIC_ROOT=/vol/web/static/
-      - MEDIA_ROOT=/vol/web/media/
     depends_on:
       - db
   db:
@@ -28,7 +25,8 @@ services:
       - MARIADB_DATABASE=${DB_NAME}
       - MARIADB_ROOT_PASSWORD=${DB_PASS}
   proxy:
-    image: pgnhd/riseupgroup-ticketcontrol-proxy:latest
+    build:
+      context: ./proxy
     restart: always
     depends_on:
       - app
