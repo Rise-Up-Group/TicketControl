@@ -242,7 +242,7 @@ def edit_group_view(request, id):
                     group.permissions.add(permission)
             group.save()
             return redirect("manage_groups")
-        return render_error(request, "Unable to edit group", "You are not allowed to edit group \""+group.name+"\"")
+        return render_error(request, "Unable to edit group", "Editing default group \""+group.name+"\" is not allowed.")
     groupPermissions = []
     for permissionId in group.permissions.all().values_list("id", flat=True):
         groupPermissions.append(permissionId)
@@ -253,7 +253,7 @@ def edit_group_view(request, id):
 def delete_group_view(request, id):
     group = Group.objects.get(id=id)
     if group.name == "admin" or group.name == "moderator" or group.name == "user":
-        return render_error(request, "Unable to delete group", "You are not allowed to delete group \"" + group.name + "\"")
+        return render_error(request, "Unable to delete group", "Deleting default group \"" + group.name + "\" is not allowed.")
     if request.method == 'POST':
         group.delete()
         return redirect("manage_groups")
