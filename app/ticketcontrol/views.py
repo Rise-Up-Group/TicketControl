@@ -198,8 +198,7 @@ def manage_groups_view(request):
 
 @permission_required("auth.create_group")
 def create_group_view(request):
-    edit = request.user.has_perm("auth.change_group")
-    if request.method == 'POST' and edit:
+    if request.method == 'POST':
         group = Group.objects.create(name=request.POST['name'])
         permissions = request.POST.getlist("permissions")
         allPermissions = Permission.objects.all().values_list("id", flat=True)
