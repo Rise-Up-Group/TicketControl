@@ -3,29 +3,37 @@ version: "3" # 3.9 is too new for playwithdocker
 services:
   app:
     image: pgnhd/riseupgroup-ticketcontrol-app:latest
-    restart: always
+    restart: unless-stopped
     volumes:
       - ticketcontrol-static-data:/vol/web
     environment:
-      - DB_HOST=db
+      - DB_HOST=db # can be container name, service name, or real dns / ip
       - DB_NAME=ticketcontrol
       - DB_USER=root # user has to be root with this default config
       - DB_PASS=changeme
       - SECRET_KEY=changeme
       - ALLOWED_HOSTS=*
+      - STATIC_URL=/static/static/
+      - MEDIA_URL=/static/media/
+      - STATIC_ROOT=/vol/web/static/
+      - MEDIA_ROOT=/vol/web/media/
     depends_on:
       - db
+
+
   db:
     image: mariadb:10.6
-    restart: always
-    volumes:
-      - ticketcontrol-mariadb-data:/var/lib/mysql
+    restart: unless-stopped
     environment:
       - MARIADB_DATABASE=ticketcontrol
       - MARIADB_ROOT_PASSWORD=changeme
+    volumes:
+      - ticketcontrol-mariadb-data:/var/lib/mysql
+
+
   proxy:
     image: pgnhd/riseupgroup-ticketcontrol-proxy:latest
-    restart: always
+    restart: unless-stopped
     depends_on:
       - app
     ports:
