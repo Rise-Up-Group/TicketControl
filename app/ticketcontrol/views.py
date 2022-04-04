@@ -75,10 +75,6 @@ def login_view(request):
         next = request.POST.get("next", False)
     if request.method == 'POST':
         username = str(request.POST['username'])
-        # TODO: preview in javascript and show to user
-        # TODO: nickname has to be unique (possibly with db)
-        if username == "":
-            username = firstname[0:1] + ". " + lastname
         password = request.POST['password']
         try:
             validate_email(username)
