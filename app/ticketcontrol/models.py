@@ -63,7 +63,7 @@ class User(BaseUser):
 
                 user.is_superuser = False
                 user.is_staff = False
-                adminId = Group.objects.get(name="Admin").id
+                adminId = Group.objects.get(name="admin").id
                 for groupId in groups:
                     if int(groupId) == adminId:
                         user.is_superuser = True
