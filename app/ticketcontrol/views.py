@@ -26,6 +26,7 @@ def dashboard_view(request):
 def home_view(request):
     return render(request, "home.html")
 
+
 ##TODO: fix
 def mytickets_view(request):
     context = {"dataset": Ticket.objects.all().filter()}
@@ -62,6 +63,7 @@ def handler404(request, exception, template_name="error.html"):
 def new_ticket_view(request):
     pass #TODO
 
+  
 def logout_view(request):
     logout(request)
     return redirect("home")
