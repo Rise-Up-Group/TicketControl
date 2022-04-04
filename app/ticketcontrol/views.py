@@ -107,7 +107,7 @@ def register_view(request):
         password = request.POST['password']
         confirmPassword = request.POST['confirm_password']
         if password == confirmPassword:
-            user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, None, 1)
+            user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'], request.POST['username'], password, None, 1) # None: groups, 1: is_active
             login(request, user)
             return redirect("profile")
         else:
