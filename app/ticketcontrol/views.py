@@ -221,7 +221,7 @@ def edit_group_view(request, id):
     if request.method == 'POST' and canEdit:
         if group.name != "admin" and group.name != "modertor" and group.name != "user":
             group.name = request.POST['name']
-        if group.name != "admin":
+        if group.name != "admin": # admin is superuser anyway
             groupPermissions = group.permissions.all()
             permissions = request.POST.getlist("permissions")
             allPermissions = Permission.objects.all().values_list("id", flat=True)
