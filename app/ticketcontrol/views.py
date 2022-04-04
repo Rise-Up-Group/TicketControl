@@ -222,7 +222,7 @@ def edit_group_view(request, id):
     canEdit = request.user.has_perm("auth.change_group")
     group = get_object_or_404(Group, id=id)
     if request.method == 'POST' and canEdit:
-        if group.name != "user" and group.name != "admin":
+        if group.name != "admin" and group.name != "modertor" and group.name != "user":
             group.name = request.POST['name']
         if group.name != "admin":
             groupPermissions = group.permissions.all()
@@ -249,13 +249,13 @@ def edit_group_view(request, id):
     groupPermissions = []
     for permissionId in group.permissions.all().values_list("id", flat=True):
         groupPermissions.append(permissionId)
-    return render(request, "user/group/edit.html", {"group": group, "group_permissions": groupPermissions, "permissions": Permission.objects.all(), "can_change": canEdit, "can_delete": request.user.has_perm("ticketcontrol.delete_group")})
+    return render(request, "user/group/edit.html", {"group": group, "group_permissions": groupPermissions, "permissions": Permission.objects.all(), "can_change": canEdit, "can_delete": request.user.has_perm("ticketcontrol.delete_group") and group.name != "admin" and group.name != "moderator" and group.name != "user"})
 
 
 @permission_required("auth.delete_group")
 def delete_group_view(request, id):
     group = Group.objects.get(id=id)
-    if group.name == "user" or group.name == "admin":
+    if group.name == "admin" or group.name == "moderator" or group.name == "user":
         return render_error(request, "Unable to delete group", "You are not allowed to delete group \"" + group.name + "\"")
     if request.method == 'POST':
         group.delete()

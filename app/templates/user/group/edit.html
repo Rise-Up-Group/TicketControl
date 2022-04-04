@@ -11,7 +11,7 @@
 
 <form method="POST" action="{% url 'edit_group' id=group.id %}" >
     {% csrf_token %}
-    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if group.name == "user" or group.name == "admin" %} disabled{% endif %}><br><br>
+    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if group.name == "admin" or group.name == "moderator" or group.name == "user" %} disabled{% endif %}><br><br>
     <label for="permissions">Permissions:</label><br>
     <select style="height: 50vh;" multiple="" name="permissions" id="permissions"{% if group.name == "admin" or not can_change %} disabled{% endif %}>
         {% for permission in permissions %}

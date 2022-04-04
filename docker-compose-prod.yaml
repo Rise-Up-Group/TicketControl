@@ -16,6 +16,8 @@ services:
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - STATIC_URL=/static/static/
       - MEDIA_URL=/static/media/
+      - STATIC_ROOT=/vol/web/static/
+      - MEDIA_ROOT=/vol/web/media/
     depends_on:
       - db
   db:

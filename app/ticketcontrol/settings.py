@@ -130,8 +130,8 @@ USE_TZ = True
 STATIC_URL = os.environ.get("STATIC_URL")
 MEDIA_URL = os.environ.get("MEDIA_URL")
 
-MEDIA_ROOT = "media/"
-STATIC_ROOT = "static/"
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT")
+STATIC_ROOT = os.environ.get("STATIC_ROOT")
 
 LOGIN_URL = '/login'
 
