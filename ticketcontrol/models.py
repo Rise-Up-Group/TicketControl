@@ -35,13 +35,13 @@ class Comment(models.Model):
 
 class Ticket(models.Model):
     class StatusChoices(models.TextChoices):
-        UNASSIGNED = 'uas'
-        ASSIGNED = 'ass'
-        CLOSED = 'clo'
-        OPEN = 'opn'
-        WAITING = 'wat'
+        UNASSIGNED = 'Unassigned'
+        ASSIGNED = 'Assigned'
+        CLOSED = 'Closed'
+        OPEN = 'Open'
+        WAITING = 'Waiting'
 
-    status = models.CharField(max_length=3, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
+    status = models.CharField(max_length=15, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
     creationDate = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
     description = models.TextField()

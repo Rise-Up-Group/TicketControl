@@ -26,7 +26,7 @@ def mytickets_view(request):
 
 
 def ticket_view(request, id):
-    id = str(id) #TODO: no conversion
+    id = str(id)  # TODO: no conversion
 
     context = {}
     try:
@@ -35,7 +35,8 @@ def ticket_view(request, id):
             comments = get_list_or_404(Comment, ticket_id=ticket.id)
             try:
                 category = get_list_or_404(Category)
-                context = {"ticket": ticket, "moderator": ticket.moderator.all(), "participants": ticket.participating.all(), "comments": comments, "category": category}
+                context = {"ticket": ticket, "moderator": ticket.moderator.all(),
+                           "participants": ticket.participating.all(), "comments": comments, "category": category}
                 return render(request, "ticket/detail.html", context)
             except Http404:
                 return render_error(request, "404 - Not Found", "Unable to load Category")
@@ -47,19 +48,19 @@ def ticket_view(request, id):
 
 
 def handler404(request, exception, template_name="error.html"):
-    response = HttpResponse("404 page")#TODO: render template
+    response = HttpResponse("404 page")  # TODO: render template
     response.status_code = 404
     return response
 
 
 def new_ticket_view(request):
-    pass #TODO
+    pass  # TODO
 
 
 def register_view(request):
     if request.method == 'POST':
         email = request.POST['email']
-        firstname = str(request.POST['firstname']) #TODO: remove conversion if possible
+        firstname = str(request.POST['firstname'])  # TODO: remove conversion if possible
         lastname = str(request.POST['lastname'])
         username = str(request.POST['username'])
         # TODO: preview in javascript and show to user
