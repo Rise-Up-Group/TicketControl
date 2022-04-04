@@ -1,0 +1,25 @@
+{%  extends "main.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Register</h1>
+<hr>
+<h5 class="text-center">TicketControl by RiseUp-Group</h5>
+
+<br>
+
+<form method="POST" action="{% url 'register' %}" >
+    {% csrf_token %}
+    <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
+    <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
+    <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>
+    <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
+    <input type="password" name="password" id="password" placeholder="Password"><br><br>
+    <input type="password" name="confirm_password" id="password_retype" placeholder="Retype password"><br><br>
+    <input type="submit" value="Submit"><br>
+    Have a login? <a href="{% url 'login' %}">Login</a>
+</form>
+
+{% endblock %}

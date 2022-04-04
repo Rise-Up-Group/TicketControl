@@ -1,0 +1,23 @@
+{% extends "main.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Manage users</h1>
+<hr>
+
+<br>{% if can_create %}<a class="btn btn-primary" href="{% url 'create_user' %}">Create</a><br><br>{% endif %}
+
+<table>
+<thead>
+<tr><td>id</td><td>name</td><td>E-Mail</td><td>firstname</td><td>lastname</td></tr>
+</thead>
+<tbody>
+{% for user in users %}
+    <tr onclick="window.location='{% url 'user_details' id=user.id %}'"><td>{{ user.id }}</td><td>{{ user.username }}</td><td>{{ user.email }}</td><td>{{ user.first_name }}</td><td>{{ user.last_name }}</td>{% if can_change or can_delete %}<td><a href="{% url 'edit_user' id=user.id %}">Edit</a></td>{% endif %}</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

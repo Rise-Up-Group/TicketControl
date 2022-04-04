@@ -1,0 +1,23 @@
+{% extends "main.html" %}
+
+{% block title %}Manage Groups{% endblock %}
+
+{% block content %}
+<br>
+<h1 class="text-center display-4">Manage Groups</h1>
+<hr>
+
+<br>{% if can_create %}<a class="btn btn-primary" href="{% url 'create_group' %}">Create</a><br><br>{% endif %}
+
+<table>
+<thead>
+<tr><td><strong>id</strong></td><td><strong>name</strong></td></tr>
+</thead>
+<tbody>
+{% for group in groups %}
+    <tr onclick="window.location='{% url 'edit_group' id=group.id %}'"><td>{{ group.id }}</td><td>{{ group.name }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

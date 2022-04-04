@@ -1,17 +1,87 @@
 from django.db import models
 
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import User as BaseUser
+from django.contrib.auth.models import Permission as BasePermission
 import datetime
 from django.utils import timezone
-from django.contrib.auth.models import User as BaseUser
 
 
 class User(BaseUser):
-    class RoleChoices(models.TextChoices):
-        USER = 'usr'
-        MOD = 'mod'
-        ADMIN = 'adm'
+    class Meta:
+        permissions = (
+            ("change_user_permission", "Change the permissions of other users"),
+        )
 
-    role = models.CharField(max_length=3, choices=RoleChoices.choices, default=RoleChoices.USER)
+    def add_user(email, firstname, lastname, username, password, groups, isActive):
+        # TODO: preview in javascrip and show to user
+        # TODO: nickname has to be unique (possibly with db)
+        if username == "":
+            username = firstname[0:1] + ". " + lastname
+        # Creates ticketcontrol.user; never create a BaseUser
+        user = User.objects.create_user(username=username, password=password, email=email)
+        user.first_name = firstname
+        user.last_name = lastname
+        if groups is not None:
+            for group in groups:
+                Group.objects.get(id=group).user_set.add(user)
+            user.is_superuser = False
+            user.is_staff = False
+            adminId = Group.objects.get(name="Admin").id
+            for groupId in groups:
+                if int(groupId) == adminId:
+                    user.is_superuser = True
+                    user.is_staff = True
+        else:
+            Group.objects.get(name="user").user_set.add(user)
+        user.is_active = isActive
+        user.save()
+        return user
+
+    def update_user(id, email, firstname, lastname, username, password, groups, isActive):
+        user = User.objects.get(id=id)
+        if user is not None:
+            user.email = email
+            user.first_name = firstname
+            user.last_name = lastname
+            user.username = username
+            if password != "" and password is not None:
+                user.set_password(password)
+
+            if groups is not None:
+                userGroups = user.groups.all()
+                for group in userGroups:
+                    if not group.id in groups:
+                        Group.objects.get(id=group.id).user_set.remove(user)
+                for group in groups:
+                    found = False
+                    for userGroup in userGroups:
+                        if userGroup.id == group:
+                            found = True
+                    if not found:
+                        Group.objects.get(id=group).user_set.add(user)
+
+                user.is_superuser = False
+                user.is_staff = False
+                adminId = Group.objects.get(name="admin").id
+                for groupId in groups:
+                    if int(groupId) == adminId:
+                        user.is_superuser = True
+                        user.is_staff = True
+
+            if isActive is not None:
+                user.is_active = isActive
+            user.save()
+            return user
+        return None
+
+    def delete_user(id):
+        User.objects.get(id=id).delete()
+
+
+class Permission(BasePermission):
+    def __str__(self):
+        return self.name
 
 
 class Category(models.Model):
@@ -48,7 +118,7 @@ class Ticket(models.Model):
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="owner")
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
     participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
-    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)#TODO: 'moderatorS'
+    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
 
     def __str__(self):
         return self.title + " (" + self.owner.username + ")"

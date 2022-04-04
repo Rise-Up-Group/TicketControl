@@ -5,7 +5,7 @@ services:
     build: 
       context: .
     restart: always # this is a temporary fix. see below why it's needed
-    command: >  # we might need to add a wait for database creation script
+    command: >
       sh -c "python manage.py migrate && 
              python manage.py runserver 0.0.0.0:8000"
     ports:
@@ -16,6 +16,10 @@ services:
     environment:
       - SECRET_KEY=localdevelopment
       - DEBUG=1
+      - STATIC_URL=/static/static/
+      - MEDIA_URL=/static/media/
+      - STATIC_ROOT=/vol/web/static/
+      - MEDIA_ROOT=/vol/web/media/
       - DB_HOST=db # can be container name, service name, or real dns / ip
       - DB_NAME=ticketcontrol_dev
       - DB_USER=root
