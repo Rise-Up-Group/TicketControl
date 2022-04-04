@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ticketcontrol" type="Python.DjangoServer" factoryName="Django server">
-    <module name="app" />
+    <module name="ticketcontrol" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
@@ -9,8 +9,8 @@
       <env name="SECRET_KEY" value="changeme" />
       <env name="DB_HOST" value="db" />
       <env name="DB_NAME" value="ticketcontrol" />
-      <env name="DB_USER" value="ticketcontrol" />
-      <env name="DB_PASS" value="ticketcontrol" />
+      <env name="DB_USER" value="root" />
+      <env name="DB_PASS" value="changeme" />
       <env name="ALLOWED_HOSTS" value="*" />
       <env name="STATIC_URL" value="static/" />
       <env name="MEDIA_URL" value="media/" />
