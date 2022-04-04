@@ -33,7 +33,7 @@ class User(BaseUser):
                     user.is_superuser = True
                     user.is_staff = True
         else:
-            Group.objects.get(name="User").user_set.add(user)
+            Group.objects.get(name="user").user_set.add(user)
         user.is_active = isActive
         user.save()
         return user
