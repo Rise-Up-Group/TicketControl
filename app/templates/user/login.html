@@ -1,24 +1,24 @@
-{%  extends "main.html" %}
+{% extends "main.html" %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<br>
-<h1 class="text-center display-4">Login</h1>
-<hr>
-<h5 class="text-center">TicketControl by RiseUp-Group</h5>
+    <br>
+    <h1 class="text-center display-4">Login</h1>
+    <hr>
+    <h5 class="text-center">TicketControl by RiseUp-Group</h5>
 
-<br>
-{% if error %}
-{{ error }}
-{% endif %}
-<form method="POST" action="{% url 'login' %}" >
-    {% csrf_token %}
-    {% if next %}<input type="hidden" name="next" id="next" value="{{ next }}">{% endif %}
-    <input type="text" name="username" id="username" placeholder="Username" autofocus><br><br>
-    <input type="password" name="password" id="password" placeholder="Password"><br><br>
-    <input type="submit" value="Submit"><br>
-    Don't have a login? <a href="{% url 'register' %}">Register</a>
-</form>
+    <br>
+    {% if error %}
+        {{ error }}
+    {% endif %}
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" id="next" value="{{ next }}">{% endif %}
+        <input type="text" name="username" id="username" placeholder="Username" autofocus><br><br>
+        <input type="password" name="password" id="password" placeholder="Password"><br><br>
+        <input type="submit" value="Submit"><br>
+        Don't have a login? <a href="{% url 'register' %}">Register</a>
+    </form>
 
 {% endblock %}

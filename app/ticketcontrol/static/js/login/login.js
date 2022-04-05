@@ -13,8 +13,8 @@ async function submitForm(form) {
     console.log(formJSON)
 
     let res = await fetch(window.location.pathname, {
-        body : formJSON,
-        method : "POST",
+        body: formJSON,
+        method: "POST",
         headers: new Headers({'content-type': 'ma'}),
     });
 }
