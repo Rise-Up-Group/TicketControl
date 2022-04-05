@@ -1,11 +1,10 @@
-
-{%  extends "main.html" %}
+{% extends "main.html" %}
 
 {% block content %}
-<br>
-<h1 class="text-center display-4">Dashboard</h1>
-<hr>
-<h5 class="text-center"> TicketControl by RiseUp-Group</h5>
+    <br>
+    <h1 class="text-center display-4">Dashboard</h1>
+    <hr>
+    <h5 class="text-center"> TicketControl by RiseUp-Group</h5>
 
     <br>
 
@@ -59,12 +58,12 @@
 
                         </tr>
                         {% for index, ticket in tickets %}
-                        <tr>
-                            <th scope="row">#{{ticket.id}}</th>
-                            <td>{{ticket.category}}</td>
-                            <td>{{ticket.title}}</td>
-                            <td>{{ticket.moderator}}</td>
-                        </tr>
+                            <tr>
+                                <th scope="row">#{{ ticket.id }}</th>
+                                <td>{{ ticket.category }}</td>
+                                <td>{{ ticket.title }}</td>
+                                <td>{{ ticket.moderator }}</td>
+                            </tr>
                         {% endfor %}
                     </table>
                 </div>

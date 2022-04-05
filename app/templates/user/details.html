@@ -3,25 +3,39 @@
 {% block title %}View User: {{ user.username }}{% endblock %}
 
 {% block content %}
-<br>
-<h1 class="text-center display-4">{{ user.username }}</h1>
-<hr>
+    <br>
+    <h1 class="text-center display-4">{{ user.username }}</h1>
+    <hr>
 
-<br>
+    <br>
 
-<table>
-<tbody>
-<tr><td>E-Mail:</td><td>{{ user.email }}</td></tr>
-<tr><td>First name:</td><td>{{ user.first_name }}</td></tr>
-<tr><td>Last name:</td><td>{{ user.last_name }}</td></tr>
-<tr><td>Groups:</td><td><ul>{% for group in user.groups.all %}
-    <li>{{ group.name }}</li>
-{% endfor %}</ul></td></tr>
-</tbody>
-</table>
-<br>
-{% if can_change %}
-    <a class="btn btn-primary" href="{% url 'edit_user' id=user.id %}">Edit</a>
-{% endif %}
+    <table>
+        <tbody>
+        <tr>
+            <td>E-Mail:</td>
+            <td>{{ user.email }}</td>
+        </tr>
+        <tr>
+            <td>First name:</td>
+            <td>{{ user.first_name }}</td>
+        </tr>
+        <tr>
+            <td>Last name:</td>
+            <td>{{ user.last_name }}</td>
+        </tr>
+        <tr>
+            <td>Groups:</td>
+            <td>
+                <ul>{% for group in user.groups.all %}
+                    <li>{{ group.name }}</li>
+                {% endfor %}</ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <br>
+    {% if can_change %}
+        <a class="btn btn-primary" href="{% url 'edit_user' id=user.id %}">Edit</a>
+    {% endif %}
 
 {% endblock %}

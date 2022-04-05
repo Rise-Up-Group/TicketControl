@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('ticketcontrol', '0007_comment_user'),
     ]
@@ -15,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ticket',
             name='status',
-            field=models.CharField(choices=[('Unassigned', 'Unassigned'), ('Assigned', 'Assigned'), ('Closed', 'Closed'), ('Open', 'Open'), ('Waiting', 'Waiting')], default='Unassigned', max_length=15),
+            field=models.CharField(
+                choices=[('Unassigned', 'Unassigned'), ('Assigned', 'Assigned'), ('Closed', 'Closed'), ('Open', 'Open'),
+                         ('Waiting', 'Waiting')], default='Unassigned', max_length=15),
         ),
     ]
