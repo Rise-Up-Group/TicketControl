@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 
 {% block content %}
+
     <div class="container bg-transparent text-dark rounded mt-3">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
@@ -81,6 +82,7 @@
                 {% endif %}
             </div>
         </div>
+        <hr>
         <div class="bg-transparent">
             <div class="row d-flex align-items-center h-100">
                 <div class="col">
@@ -96,6 +98,7 @@
                     </figure>
                 </div>
             </div>
+            <br>
             {% for comment in comments %}
                 <div class="row d-flex align-items-center h-100">
                     <div class="col">
@@ -113,6 +116,7 @@
                     </div>
                 </div>
             {% endfor %}
+            <hr>
             <div class="row d-flex align-items-center h-100">
                 <div class="col">
                     <figure class="bg-light p-3 rounded"
@@ -138,7 +142,7 @@
                                     </p>
                                 </div>
                                 <div class="col-auto">
-                                    <button type="button" class="btn btn-danger" data-toggle="modal"
+                                    <button type="button" class="btn btn-warning" data-toggle="modal"
                                             data-target="#confirm-delete-new-comment">
                                         Löschen
                                     </button>
@@ -161,8 +165,8 @@
                     <p>Bitte bestätigen Sie, dass ungespeicherte Veränderungen verloren gehen können!</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Zurück</button>
-                    <button type="button" class="btn btn-danger">Löschen</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Zurück</button>
+                    <button type="button" class="btn btn-warning">Löschen</button>
                 </div>
             </div>
         </div>
@@ -183,4 +187,5 @@
             </div>
         </div>
     </div>
+
 {% endblock %}
