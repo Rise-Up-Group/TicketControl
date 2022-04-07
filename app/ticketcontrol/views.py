@@ -20,7 +20,9 @@ def render_error(request, title, message):
 
 
 def dashboard_view(request):
-    return render(request, "dashboard.html")
+    tickets = Ticket.objects.filter(owner=request.user.id)
+    context = {'tickets': tickets}
+    return render(request, "dashboard.html", context)
 
 
 def home_view(request):
@@ -29,7 +31,7 @@ def home_view(request):
 
 ##TODO: fix
 def mytickets_view(request):
-    context = {"dataset": Ticket.objects.all().filter()}
+    context = {"tickets": Ticket.objects.filter(owner=request.user.id)}
     return render(request, "ticket/manage.html", context)
 
 
@@ -40,16 +42,16 @@ def ticket_view(request, id):
     try:
         ticket = get_object_or_404(Ticket, pk=id)
         try:
-            comments = get_list_or_404(Comment, ticket_id=ticket.id)
-            try:
-                category = get_list_or_404(Category)
-                context = {"ticket": ticket, "moderator": ticket.moderator.all(), "participants": ticket.participating.all(), "comments": comments, "category": category}
-                return render(request, "ticket/detail.html", context)
-            except Http404:
-                return render_error(request, "404 - Not Found", "Unable to load Category")
-        except Http404:
-            return render_error(request, "404 - Not Found", "Comments in Ticket " + id + " Not Found")
+            comments = Comment.objects.filter(ticket_id=ticket.id)
+        except:
+            comments = None
 
+        try:
+            category = get_list_or_404(Category)
+            context = {"ticket": ticket, "moderator": ticket.moderator.all(), "participants": ticket.participating.all(), "comments": comments, "category": category}
+            return render(request, "ticket/detail.html", context)
+        except Http404:
+            return render_error(request, "404 - Not Found", "Unable to load Category")
     except Http404:
         return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
 
@@ -60,13 +62,10 @@ def handler404(request, exception, template_name="error.html"):
     return response
 
 
-def new_ticket_view(request):
-    pass #TODO
-
-  
 def logout_view(request):
     logout(request)
-    return redirect("home")
+    return redirect("/")
+
 
 def login_view(request):
     error = ""
@@ -258,3 +257,24 @@ def delete_group_view(request, id):
         group.delete()
         return redirect("manage_groups")
     return render(request, "user/group/delete.html", {"group": group})
+
+
+def ticket_new_view(request):
+    if request.method == 'POST':
+        Ticket.add_ticket(request.POST["title"], request.POST["description"], User.objects.get(id=request.user.id),
+                          Category.objects.get(id=request.POST["category"]))
+        return redirect('/ticket/my')
+    else:
+        try:
+            category = get_list_or_404(Category)
+            context = {"category": category}
+            return render(request, "ticket/new.html", context)
+        except Http404:
+            return render_error(request, "404 - Not Found", "Unable to load Category")
+
+
+def ticket_comment_add(request, id):
+    if request.method == 'POST':
+        ticket = Ticket.objects.get(id=id)
+        ticket.add_comment(request.POST["comment"], User.objects.get(id=request.user.id))
+        return redirect('/ticket/' + str(id))

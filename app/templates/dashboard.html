@@ -50,6 +50,7 @@
                 </div>
 
                 <div class="card-body bg-light">
+                {% if tickets|length > 1 %}
                     <table class="table table-sm">
                         <tr>
                             <th scope="row">Id</th>
@@ -58,8 +59,8 @@
                             <th>Modarator</th>
 
                         </tr>
-                        {% for index, ticket in tickets %}
-                        <tr>
+                        {% for ticket in tickets %}
+                        <tr onclick="window.location = 'ticket/{{ ticket.id }}'">
                             <th scope="row">#{{ticket.id}}</th>
                             <td>{{ticket.category}}</td>
                             <td>{{ticket.title}}</td>
@@ -67,6 +68,9 @@
                         </tr>
                         {% endfor %}
                     </table>
+                {% else %}
+                <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button" href="/ticket/new">Ticket erstellen?</a></p>
+                {% endif %}
                 </div>
             </div>
         </div>

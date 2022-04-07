@@ -1,17 +1,82 @@
 {% extends "main.html" %}
 
 {% block content %}
-<br>
-<div class="card">
-
-    <div class="row align-items-center card-body bg-light">
-        <h4 class="">Neues Ticket</h4>
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="inputGroup-sizing-default">Ticket #3921</span>
-            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+    <div class="container bg-transparent text-dark rounded mt-3">
+        <form method="POST" action="{% url 'create_ticket' %}">
+        {% csrf_token %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Titel:</span>
+                </div>
+                <input type="text" class="form-control" name="title" placeholder="Titel eingeben...">
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputGroupSelect01">Kategorie:</label>
+                        </div>
+                        <select class="custom-select" id="inputGroupSelect01" name="category">
+                            {% for foo in category %}
+                                <option value="{{ forloop.counter }}">{{ foo.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        <br>
+            <div class="bg-transparent">
+                <div class="row d-flex align-items-center h-100">
+                    <div class="col">
+                        <figure class="bg-light p-3 rounded"
+                                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
+                            <p class="lead">Beschreibung hinzufügen:</p>
+                            <hr>
+                            <div class="form-group">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="15" name="description"></textarea>
+                            </div>
+                            </blockquote>
+                            <div class="file-drop-area bg-white text-center" style="border: .05rem solid #a9a9a9">
+                                <input class="file-input" type="file" multiple>
+                                <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                            </div>
+                            <br>
+                            <div class="text-white">
+                                <div class="row justify-content-between">
+                                    <div class="col-auto">
+                                        <p class="blockquote-footer mb-0 font-italic">
+                                            Ticketcontrol | Ticketsystem by Rise Up Group
+                                        </p>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-danger" data-toggle="modal"
+                                                data-target="#confirm-delete-new-comment">
+                                            Löschen
+                                        </button>
+                                        <button class="btn btn-success text-right" type="submit" value="Submit">Abschicken</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal fade" id="confirm-delete-new-comment" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Löschen bestätigen</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Bitte bestätigen Sie, dass ungespeicherte Veränderungen verloren gehen können!</p>
+                </div>
+                <div class="modal-footer text-white">
+                    <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
+                    <a type="button" class="btn btn-danger" href="/">Löschen</a>
+                </div>
+            </div>
         </div>
     </div>
-
-</div>
-
 {% endblock %}
