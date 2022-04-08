@@ -3,11 +3,11 @@
 {% block title %}Create Group{% endblock %}
 
 {% block content %}
-<br>
-<h1 class="text-center display-4">Create Group</h1>
-<hr>
+    <br>
+    <h1 class="text-center display-4">Create Group</h1>
+    <hr>
 
-<br>
+    <br>
 
 <form method="POST" action="{% url 'create_group' %}" autocomplete="new-password">
     {% csrf_token %}
