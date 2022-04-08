@@ -34,11 +34,11 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/riseupgroup-ticketcontrol-app:latest
       - 
-       name: Build and push app
+       name: Build and push proxy
        uses: docker/build-push-action@v2
        with:
           context: ./proxy
-          file: ./Dockerfile
+          file: ./proxy/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/riseupgroup-ticketcontrol-proxy:latest
           
