@@ -10,7 +10,7 @@
 
 <br>
 
-<form method="POST" action="{% url 'register' %}" >
+<form method="POST" action="{% url 'register' %}" autocomplete="new-password">
     {% csrf_token %}
     <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
     <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>

@@ -10,8 +10,10 @@
 
 <br>
 
-<form method="POST" action="{% url 'create_user' %}">
+<form method="POST" action="{% url 'create_user' %}" autocomplete="new-password">
     {% csrf_token %}
+    <input autocomplete="false" name="hidden" type="text" style="display:none;">
+
     <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
     <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
     <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>

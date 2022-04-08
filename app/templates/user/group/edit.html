@@ -9,7 +9,7 @@
 
 <br>
 
-<form method="POST" action="{% url 'edit_group' id=group.id %}" >
+<form method="POST" action="{% url 'edit_group' id=group.id %}" autocomplete="off">
     {% csrf_token %}
     <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if group.name == "admin" or group.name == "moderator" or group.name == "user" %} disabled{% endif %}><br><br>
     <label for="permissions">Permissions:</label><br>

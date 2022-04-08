@@ -9,8 +9,9 @@
 
 <br>
 
-<form method="POST" action="{% url 'edit_user' id=user.id %}" >
+<form method="POST" action="{% url 'edit_user' id=user.id %}" autocomplete="off">
     {% csrf_token %}
+    <input autocomplete="false" name="hidden" type="text" style="display:none;">
     <input type="email" name="email" id="email" placeholder="eMail" value="{{ user.email }}"><br><br>
     <input type="text" name="firstname" id="firstname" placeholder="Firstname" value="{{ user.first_name }}"><br><br>
     <input type="text" name="lastname" id="lastname" placeholder="Lastname" value="{{ user.last_name }}"><br><br>

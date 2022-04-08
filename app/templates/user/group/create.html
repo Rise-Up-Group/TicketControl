@@ -9,7 +9,7 @@
 
 <br>
 
-<form method="POST" action="{% url 'create_group' %}" >
+<form method="POST" action="{% url 'create_group' %}" autocomplete="new-password">
     {% csrf_token %}
     <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"><br><br>
     <label for="permissions">Permissions:</label><br>
