@@ -112,20 +112,12 @@ class Ticket(models.Model):
         WAITING = 'Waiting'
 
     def add_ticket(title, description, owner, category):
-        ticket = Ticket(title=title, description=description, owner=owner, category=category)
-        ticket.title = title
-        ticket.description = description
-        ticket.owner = owner
-        ticket.category = category
-        ticket.status = 'Unassigned'    # TODO: Set default value instead of 'Unassigned'
+        ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned')
         ticket.save()
         return ticket
 
     def add_comment(self, content, user):
         comment = Comment(content=content, ticket=self, user=user)
-        comment.content = content
-        comment.ticket = self
-        comment.user = user
         try:
             comment.num = Comment.objects.get(ticket=self).count() + 1,
         except:
