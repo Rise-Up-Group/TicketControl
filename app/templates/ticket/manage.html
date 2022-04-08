@@ -21,17 +21,19 @@
                 <tbody>
 
                 {% for ticket in tickets %}
-                    <tr onclick="window.location = '/ticket/{{ ticket.id }}'">
+                    
+                <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
                     <th>#{{ ticket.id }}</th>
                     <td>{{ ticket.category }}</td>
                     <td>{{ ticket.title }}</td>
                     <td>{{ ticket.participating }}</td>
                     <td>{{ ticket.moderator }}</td>
+                </tr>
                 {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button" href="/ticket/new">Ticket erstellen?</a></p>
+            <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button" href="{% url 'ticket_create' %}">Ticket erstellen?</a></p>
         {% endif %}
     </div>
 </div>

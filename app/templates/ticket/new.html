@@ -18,7 +18,7 @@
                         </div>
                         <select class="custom-select" id="inputGroupSelect01" name="category">
                             {% for foo in category %}
-                                <option value="{{ forloop.counter }}">{{ foo.name }}</option>
+                                <option value="{{ foo.id }}">{{ foo.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -74,7 +74,7 @@
                 </div>
                 <div class="modal-footer text-white">
                     <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
-                    <a type="button" class="btn btn-danger" href="/">Löschen</a>
+                    <a type="button" class="btn btn-danger" href="{% url 'dashboard' %}">Löschen</a>
                 </div>
             </div>
         </div>

@@ -25,7 +25,7 @@ urlpatterns = [
     # path('admin/', admin_view),
     # Ticket
     path('ticket/my', mytickets_view),
-    path('ticket/<int:id>', ticket_view),
+    path('ticket/<int:id>', ticket_view, name="ticket_view"),
     path('ticket/<int:id>/comment/add', ticket_comment_add, name="add_comment_to_ticket"),
     path('ticket/new', ticket_new_view, name='create_ticket'),
     path('login/', login_view, name='login'),
