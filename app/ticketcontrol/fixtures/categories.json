@@ -1,0 +1,26 @@
+[
+  {
+    "model": "ticketcontrol.category",
+    "pk" : 1,
+    "fields": {
+      "name": "Default",
+      "color": "FFFFFFFF"
+    }
+  },
+  {
+    "model": "ticketcontrol.category",
+    "pk": 2,
+    "fields": {
+      "name": "Other",
+      "color": "5e5e5e00"
+    }
+  },
+  {
+    "model": "ticketcontrol.category",
+    "ok": 3,
+    "fields": {
+      "name": "IT-Support",
+      "color": "0000FFFF"
+    }
+  }
+]
