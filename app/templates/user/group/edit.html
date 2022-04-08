@@ -3,11 +3,11 @@
 {% block title %}Edit Group: {{ group.name }}{% endblock %}
 
 {% block content %}
-<br>
-<h1 class="text-center display-4">Edit Group</h1>
-<hr>
+    <br>
+    <h1 class="text-center display-4">Edit Group</h1>
+    <hr>
 
-<br>
+    <br>
 
 <form method="POST" action="{% url 'edit_group' id=group.id %}" autocomplete="off">
     {% csrf_token %}

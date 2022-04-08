@@ -1,10 +1,7 @@
-from django.db import models
-
 from django.contrib.auth.models import Group
-from django.contrib.auth.models import User as BaseUser
 from django.contrib.auth.models import Permission as BasePermission
-import datetime
-from django.utils import timezone
+from django.contrib.auth.models import User as BaseUser
+from django.db import models
 
 
 class User(BaseUser):
@@ -100,7 +97,7 @@ class Comment(models.Model):
     user = models.ForeignKey("User", on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return self.ticket.title + " Comment " + self.num
+        return self.ticket.title + " Comment " + str(self.num)
 
 
 class Ticket(models.Model):

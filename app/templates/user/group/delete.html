@@ -3,16 +3,16 @@
 {% block title %}Delete Group: {{ group.name }}{% endblock %}
 
 {% block content %}
-<br>
-<h1 class="text-center display-4">Delete Group</h1>
-<hr>
+    <br>
+    <h1 class="text-center display-4">Delete Group</h1>
+    <hr>
 
-<br>
+    <br>
 
-Really delete group {{ group.name }}?
-<form method="POST" action="{% url 'delete_group' id=group.id %}" >
-    {% csrf_token %}
-    <input class="btn btn-danger" type="submit" value="Delete">
-</form>
+    Really delete group {{ group.name }}?
+    <form method="POST" action="{% url 'delete_group' id=group.id %}">
+        {% csrf_token %}
+        <input class="btn btn-danger" type="submit" value="Delete">
+    </form>
 
 {% endblock %}

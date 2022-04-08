@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('ticketcontrol', '0003_alter_ticket_moderator_alter_ticket_participating'),
     ]

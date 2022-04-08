@@ -1,13 +1,13 @@
 import logging
 
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
+from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.shortcuts import render, redirect
 
 from .models import *
 
@@ -42,9 +42,16 @@ def ticket_view(request, id):
     try:
         ticket = get_object_or_404(Ticket, pk=id)
         try:
-            comments = Comment.objects.filter(ticket_id=ticket.id)
-        except:
-            comments = None
+            comments = get_list_or_404(Comment, ticket_id=ticket.id)
+            try:
+                category = get_list_or_404(Category)
+                context = {"ticket": ticket, "moderator": ticket.moderator.all(),
+                           "participants": ticket.participating.all(), "comments": comments, "category": category}
+                return render(request, "ticket/detail.html", context)
+            except Http404:
+                return render_error(request, "404 - Not Found", "Unable to load Category")
+        except Http404:
+            return render_error(request, "404 - Not Found", "Comments in Ticket " + id + " Not Found")
 
         try:
             category = get_list_or_404(Category)
@@ -61,6 +68,12 @@ def handler404(request, exception, template_name="error.html"):
     response = HttpResponse("404 page")  # TODO: render template
     response.status_code = 404
     return response
+
+
+
+def new_ticket_view(request):
+    pass  # TODO
+
 
 
 def logout_view(request):
