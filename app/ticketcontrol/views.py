@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
 
 from .models import *
@@ -139,6 +139,16 @@ def user_details_view(request, id):
     return redirect("login")
 
 
+@login_required()
+def user_live_search(request, typed_username):
+    some_users = User.objects.filter(username__contains=typed_username)[:10]
+    res = []
+    for user in some_users:
+        newUser = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
+        res.append(newUser)
+    return JsonResponse(res, safe=False) # It's ok. Disables typecheck for dict. Make sure to only pass an array
+
+
 def unrestricted_edit_user_view(request, id, changePermission, deletePermission):
     if request.method == 'POST':
         password = request.POST['password']
@@ -259,6 +269,7 @@ def delete_group_view(request, id):
     return render(request, "user/group/delete.html", {"group": group})
 
 
+@login_required()
 def ticket_new_view(request):
     if request.method == 'POST':
         Ticket.add_ticket(request.POST["title"], request.POST["description"], User.objects.get(id=request.user.id),
@@ -273,6 +284,7 @@ def ticket_new_view(request):
             return render_error(request, "404 - Not Found", "Unable to load Category")
 
 
+@login_required()
 def ticket_comment_add(request, id):
     if request.method == 'POST':
         ticket = Ticket.objects.get(id=id)
