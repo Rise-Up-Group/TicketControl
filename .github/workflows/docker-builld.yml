@@ -3,8 +3,7 @@ name: Docker Build and push app and proxy
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+
 
 jobs:
 
