@@ -49,6 +49,7 @@
                 </div>
 
                 <div class="card-body bg-light">
+                {% if tickets|length > 1 %}
                     <table class="table table-sm">
                         <tr>
                             <th scope="row">Id</th>
@@ -57,15 +58,18 @@
                             <th>Modarator</th>
 
                         </tr>
-                        {% for index, ticket in tickets %}
-                            <tr>
-                                <th scope="row">#{{ ticket.id }}</th>
-                                <td>{{ ticket.category }}</td>
-                                <td>{{ ticket.title }}</td>
-                                <td>{{ ticket.moderator }}</td>
-                            </tr>
+                        {% for ticket in tickets %}
+                        <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
+                            <th scope="row">#{{ticket.id}}</th>
+                            <td>{{ticket.category}}</td>
+                            <td>{{ticket.title}}</td>
+                            <td>{{ticket.moderator}}</td>
+                        </tr>
                         {% endfor %}
                     </table>
+                {% else %}
+                <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button" href="{% url 'create_ticket' %}">Ticket erstellen?</a></p>
+                {% endif %}
                 </div>
             </div>
         </div>

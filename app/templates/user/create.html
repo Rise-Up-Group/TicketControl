@@ -10,32 +10,23 @@
 
     <br>
 
-    <form method="POST" action="{% url 'create_user' %}">
-        {% csrf_token %}
-        <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
-        <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
-        <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>
-        <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
-        <input type="password" name="password" id="password" placeholder="Password"><br><br>
-        <label for="groups">Groups:</label><br>
-        <select multiple="" name="groups" id="groups"{% if not can_change_permission %} disabled{% endif %}>
-            {% for group in groups %}
-                <option class="checkbox" value="{{ group.id }}">{{ group.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <input type="checkbox" name="is_active" id="is_active" checked>
-        <label for="is_active">Active</label><br><br>
-        <input type="submit" value="Submit">
-    </form>
+<form method="POST" action="{% url 'create_user' %}" autocomplete="new-password">
+    {% csrf_token %}
+    <input autocomplete="false" name="hidden" type="text" style="display:none;">
 
-    <style>
-        option.checkbox:before {
-            content: "☐ "
-        }
-
-        option.checkbox:checked:before {
-            content: "☑ "
-        }
-    </style>
-
+    <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
+    <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
+    <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>
+    <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
+    <input type="password" name="password" id="password" placeholder="Password"><br><br>
+    <label for="groups">Groups:</label><br>
+    <select multiple="" name="groups" id="groups"{% if not can_change_permission %} disabled{% endif %}>
+        {% for group in groups %}
+            <option class="checkbox" value="{{ group.id }}">{{ group.name }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input type="checkbox" name="is_active" id="is_active" checked>
+    <label for="is_active">Active</label><br><br>
+    <input type="submit" value="Submit">
+</form>
 {% endblock %}

@@ -9,33 +9,20 @@
 
     <br>
 
-    <form method="POST" action="{% url 'edit_group' id=group.id %}">
-        {% csrf_token %}
-        <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"
-                {% if group.name == "admin" or group.name == "moderator" or group.name == "user" %} disabled{% endif %}><br><br>
-        <label for="permissions">Permissions:</label><br>
-        <select style="height: 50vh;" multiple="" name="permissions" id="permissions"
-                {% if group.name == "admin" or not can_change %} disabled{% endif %}>
-            {% for permission in permissions %}
-                <option class="checkbox" value="{{ permission.id }}"{% if permission.id in group_permissions %}
-                        selected{% endif %}>{{ permission.content_type.app_label }}.{{ permission.content_type.model }}.{{ permission.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        {% if can_change %}
-            <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>
-        {% endif %}
-        {% if can_delete %}
-            <a class="btn btn-danger" href="{% url 'delete_group' id=group.id %}">Delete</a>
-        {% endif %}
-    </form>
-    <style>
-        option.checkbox:before {
-            content: "☐ "
-        }
-
-        option.checkbox:checked:before {
-            content: "☑ "
-        }
-    </style>
-
+<form method="POST" action="{% url 'edit_group' id=group.id %}" autocomplete="off">
+    {% csrf_token %}
+    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if group.name == "admin" or group.name == "moderator" or group.name == "user" %} disabled{% endif %}><br><br>
+    <label for="permissions">Permissions:</label><br>
+    <select style="height: 50vh;" multiple="" name="permissions" id="permissions"{% if group.name == "admin" or not can_change %} disabled{% endif %}>
+        {% for permission in permissions %}
+            <option class="checkbox" value="{{ permission.id }}"{% if permission.id in group_permissions %} selected{% endif %}>{{ permission.content_type.app_label }}.{{ permission.content_type.model }}.{{ permission.name }}</option>
+        {% endfor %}
+    </select><br><br>
+    {% if can_change %}
+    <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>
+    {% endif %}
+    {% if can_delete %}
+    <a class="btn btn-danger" href="{% url 'delete_group' id=group.id %}">Delete</a>
+    {% endif %}
+</form>
 {% endblock %}

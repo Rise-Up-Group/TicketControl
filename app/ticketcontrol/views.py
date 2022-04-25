@@ -3,8 +3,9 @@ import logging
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.core.validators import validate_email
-from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
 
@@ -17,9 +18,10 @@ def render_error(request, title, message):
     context = {'title': title, 'message': message}
     return render(request, "error.html", context)
 
-
 def dashboard_view(request):
-    return render(request, "dashboard.html")
+    tickets = Ticket.objects.filter(owner=request.user.id)
+    context = {'tickets': tickets}
+    return render(request, "dashboard.html", context)
 
 
 def home_view(request):
@@ -27,11 +29,12 @@ def home_view(request):
 
 
 ##TODO: fix
+@login_required()
 def mytickets_view(request):
-    context = {"dataset": Ticket.objects.all().filter()}
+    context = {"tickets": Ticket.objects.filter(owner=request.user.id)}
     return render(request, "ticket/manage.html", context)
 
-
+@login_required()
 def ticket_view(request, id):
     id = str(id)  # TODO: no conversion
 
@@ -50,6 +53,13 @@ def ticket_view(request, id):
         except Http404:
             return render_error(request, "404 - Not Found", "Comments in Ticket " + id + " Not Found")
 
+        try:
+            category = get_list_or_404(Category)
+            context = {"ticket": ticket, "moderator": ticket.moderator.all(),
+                       "participants": ticket.participating.all(), "comments": comments, "category": category}
+            return render(request, "ticket/detail.html", context)
+        except Http404:
+            return render_error(request, "404 - Not Found", "Unable to load Category")
     except Http404:
         return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
 
@@ -58,10 +68,6 @@ def handler404(request, exception, template_name="error.html"):
     response = HttpResponse("404 page")  # TODO: render template
     response.status_code = 404
     return response
-
-
-def new_ticket_view(request):
-    pass  # TODO
 
 
 def logout_view(request):
@@ -148,6 +154,16 @@ def user_details_view(request, id):
                                                      "can_change": request.user.has_perm(
                                                          "ticketcontrol.change_user") or request.user.id == id})
     return redirect("login")
+
+
+@login_required()
+def user_live_search(request, typed_username):
+    some_users = User.objects.filter(username__contains=typed_username)[:10]
+    res = []
+    for user in some_users:
+        newUser = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
+        res.append(newUser)
+    return JsonResponse(res, safe=False) # It's ok. Disables typecheck for dict. Make sure to only pass an array
 
 
 def unrestricted_edit_user_view(request, id, changePermission, deletePermission):
@@ -279,3 +295,26 @@ def delete_group_view(request, id):
         group.delete()
         return redirect("manage_groups")
     return render(request, "user/group/delete.html", {"group": group})
+
+
+@login_required()
+def ticket_new_view(request):
+    if request.method == 'POST':
+        Ticket.add_ticket(request.POST["title"], request.POST["description"], User.objects.get(id=request.user.id),
+                          Category.objects.get(id=request.POST["category"]))
+        return redirect('/ticket/my')
+    else:
+        try:
+            category = get_list_or_404(Category)
+            context = {"category": category}
+            return render(request, "ticket/new.html", context)
+        except Http404:
+            return render_error(request, "404 - Not Found", "Unable to load Category")
+
+
+@login_required()
+def ticket_comment_add(request, id):
+    if request.method == 'POST':
+        ticket = Ticket.objects.get(id=id)
+        ticket.add_comment(request.POST["comment"], User.objects.get(id=request.user.id))
+        return redirect('/ticket/' + str(id))

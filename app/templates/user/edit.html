@@ -9,36 +9,24 @@
 
     <br>
 
-    <form method="POST" action="{% url 'edit_user' id=user.id %}">
-        {% csrf_token %}
-        <input type="email" name="email" id="email" placeholder="eMail" value="{{ user.email }}"><br><br>
-        <input type="text" name="firstname" id="firstname" placeholder="Firstname"
-               value="{{ user.first_name }}"><br><br>
-        <input type="text" name="lastname" id="lastname" placeholder="Lastname" value="{{ user.last_name }}"><br><br>
-        <input type="text" name="username" id="username" placeholder="Nickname" value="{{ user.username }}"><br><br>
-        <input type="password" name="password" id="password" placeholder="Password"><br><br>
-        <input type="password" name="password_retype" id="password_retype" placeholder="Retype password"><br><br>
-        <label for="groups">Groups:</label><br>
-        <select multiple="" name="groups" id="groups"{% if not can_change_permission %} disabled{% endif %}>
-            {% for group in groups %}
-                <option class="checkbox" value="{{ group.id }}"{% if group.id in userGroups %}
-                        selected{% endif %}>{{ group.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <input type="checkbox" name="is_active" id="is_active"{% if user.is_active %} checked{% endif %}>
-        <label for="is_active">Active</label><br><br>
-        {% if can_change %}<input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br>
-            <br>{% endif %}
-        {% if can_delete %}<a class="btn btn-danger" href="{% url 'delete_user' id=user.id %}">Delete</a>{% endif %}
-    </form>
-    <style>
-        option.checkbox:before {
-            content: "☐ "
-        }
-
-        option.checkbox:checked:before {
-            content: "☑ "
-        }
-    </style>
-
+<form method="POST" action="{% url 'edit_user' id=user.id %}" autocomplete="off">
+    {% csrf_token %}
+    <input autocomplete="false" name="hidden" type="text" style="display:none;">
+    <input type="email" name="email" id="email" placeholder="eMail" value="{{ user.email }}"><br><br>
+    <input type="text" name="firstname" id="firstname" placeholder="Firstname" value="{{ user.first_name }}"><br><br>
+    <input type="text" name="lastname" id="lastname" placeholder="Lastname" value="{{ user.last_name }}"><br><br>
+    <input type="text" name="username" id="username" placeholder="Nickname" value="{{ user.username }}"><br><br>
+    <input type="password" name="password" id="password" placeholder="Password"><br><br>
+    <input type="password" name="password_retype" id="password_retype" placeholder="Retype password"><br><br>
+    <label for="groups">Groups:</label><br>
+    <select multiple="" name="groups" id="groups"{% if not can_change_permission %} disabled{% endif %}>
+        {% for group in groups %}
+            <option class="checkbox" value="{{ group.id }}"{% if group.id in userGroups %} selected{% endif %}>{{ group.name }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input type="checkbox" name="is_active" id="is_active"{% if user.is_active %} checked{% endif %}>
+    <label for="is_active">Active</label><br><br>
+    {% if can_change %}<input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>{% endif %}
+    {% if can_delete %}<a class="btn btn-danger" href="{% url 'delete_user' id=user.id %}">Delete</a>{% endif %}
+</form>
 {% endblock %}

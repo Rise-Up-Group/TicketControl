@@ -8,6 +8,7 @@ class User(BaseUser):
     class Meta:
         permissions = (
             ("change_user_permission", "Change the permissions of other users"),
+            ("admin_general", "Allow access to the Admin Panel"),
         )
 
     def add_user(email, firstname, lastname, username, password, groups, isActive):
@@ -107,6 +108,21 @@ class Ticket(models.Model):
         CLOSED = 'Closed'
         OPEN = 'Open'
         WAITING = 'Waiting'
+
+    def add_ticket(title, description, owner, category):
+        ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned')
+        ticket.save()
+        return ticket
+
+    def add_comment(self, content, user):
+        comment = Comment(content=content, ticket=self, user=user)
+        try:
+            comment.num = Comment.objects.get(ticket=self).count() + 1,
+        except:
+            comment.num = 1
+
+        comment.save()
+        return comment
 
     status = models.CharField(max_length=15, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
     creationDate = models.DateTimeField(auto_now_add=True)

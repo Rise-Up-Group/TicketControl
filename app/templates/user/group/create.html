@@ -9,26 +9,15 @@
 
     <br>
 
-    <form method="POST" action="{% url 'create_group' %}">
-        {% csrf_token %}
-        <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"><br><br>
-        <label for="permissions">Permissions:</label><br>
-        <select style="height: 50vh;" multiple="" name="permissions" id="permissions">
-            {% for permission in permissions %}
-                <option class="checkbox"
-                        value="{{ permission.id }}">{{ permission.content_type.app_label }}.{{ permission.content_type.model }}.{{ permission.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Create"><br><br>
-    </form>
-    <style>
-        option.checkbox:before {
-            content: "☐ "
-        }
-
-        option.checkbox:checked:before {
-            content: "☑ "
-        }
-    </style>
-
+<form method="POST" action="{% url 'create_group' %}" autocomplete="new-password">
+    {% csrf_token %}
+    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"><br><br>
+    <label for="permissions">Permissions:</label><br>
+    <select style="height: 50vh;" multiple="" name="permissions" id="permissions">
+        {% for permission in permissions %}
+            <option class="checkbox" value="{{ permission.id }}">{{ permission.content_type.app_label }}.{{ permission.content_type.model }}.{{ permission.name }}</option>
+        {% endfor %}
+    </select><br><br>
+    <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Create"><br><br>
+</form>
 {% endblock %}

@@ -23,9 +23,11 @@ from .views import *
 app_name = "ticketcontrol"
 urlpatterns = [
     # path('admin/', admin_view),
+    # Ticket
     path('ticket/my', mytickets_view),
-    path('ticket/<int:id>', ticket_view),
-    # path('ticket/new', new_ticket_view),
+    path('ticket/<int:id>', ticket_view, name="ticket_view"),
+    path('ticket/<int:id>/comment/add', ticket_comment_add, name="add_comment_to_ticket"),
+    path('ticket/new', ticket_new_view, name='create_ticket'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
@@ -35,6 +37,8 @@ urlpatterns = [
     path('user/<int:id>/delete', delete_user_view, name='delete_user'),
     path('user/profile', profile_view, name='profile'),
     path('user/manage', manage_users_view, name='manage_users'),
+    path('user/live_search/<str:typed_username>', user_live_search, name='user_live_search'),
+    path('user/live_search/', user_live_search, name='user_live_search'),
     path('group/manage', manage_groups_view, name='manage_groups'),
     path('group/create', create_group_view, name='create_group'),
     path('group/<int:id>/delete', delete_group_view, name='delete_group'),
