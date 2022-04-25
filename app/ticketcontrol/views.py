@@ -324,12 +324,19 @@ def ticket_comment_add(request, id):
 def ticket_participant_add(request, id, username):
     try:
         ticket = Ticket.objects.get(id=id)
+        if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
+            ticket.participating.add(User.objects.get(username=username))
+            return HttpResponse(status=200)
+        return HttpResponse(status=403)
     except ObjectDoesNotExist:
         return HttpResponse(status=404)
-    if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
-        try:
-            ticket.participating.add(User.objects.get(username=username))
-        except ObjectDoesNotExist:
-            return HttpResponse(status=404)
-        return HttpResponse(status=200)
-    return HttpResponse(status=403)
+
+
+@permission_required("ticketcontrol.change_ticket")
+def ticket_moderator_add(request, id, username):
+    try:
+        ticket = Ticket.objects.get(id=id)
+        ticket.moderator.add(User.objects.get(username=username))
+    except ObjectDoesNotExist:
+        return HttpResponse(status=404)
+    return HttpResponse(status=200)
