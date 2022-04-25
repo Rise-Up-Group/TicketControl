@@ -62,10 +62,10 @@
                     </div>
                     <input type="text" class="form-control" id="search-user" placeholder="Username"
                            list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);" onchange="add_participant(this.value);">
-                    <datalist id="user-search-dropdown-menu">
-                        <!--Will be filled in with js-->
-                    </datalist>
                 </div>
+                <datalist id="user-search-dropdown-menu">
+                    <!--Will be filled in with js-->
+                </datalist>
             </form>
         </div>
         {% if not participants.count == 0 %}
