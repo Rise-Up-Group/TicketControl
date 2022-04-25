@@ -4,7 +4,7 @@
     "pk" : 1,
     "fields": {
       "name": "Default",
-      "color": "FFFFFFFF"
+      "color": "ffffffff"
     }
   },
   {
@@ -12,15 +12,15 @@
     "pk": 2,
     "fields": {
       "name": "Other",
-      "color": "5e5e5e00"
+      "color": "5e5e5eff"
     }
   },
   {
     "model": "ticketcontrol.category",
-    "ok": 3,
+    "pk": 3,
     "fields": {
       "name": "IT-Support",
-      "color": "0000FFFF"
+      "color": "0000ffff"
     }
   }
 ]
