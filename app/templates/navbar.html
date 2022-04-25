@@ -15,7 +15,7 @@
                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                         <a class="dropdown-item" href="/ticket/new">Open Ticket</a>
                         <a class="dropdown-item" href="/ticket/my">My Tickets</a>
-                        {% if nutzer.rol %}
+                        {% if perms.ticketcontrol.change_ticket %}
                             <a class="dropdown-item" href="/ticket/manage">Manage Tickets</a>
                         {% endif %}
                     </div>
