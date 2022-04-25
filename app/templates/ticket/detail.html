@@ -22,7 +22,9 @@
                 </div>
             </div>
         </div>
-        <div class="input-group mb-3">
+        <div class="mb-3 row">
+                <div class="col-6">
+                <div class="input-group">
             <div class="input-group-prepend">
                 <label class="input-group-text" for="inputGroupSelect01">Kategorie:</label>
             </div>
@@ -34,8 +36,8 @@
                     {% endif %}
                 {% endfor %}
             </select>
-        </div>
-        {% if not moderator.count == 0 %}
+                </div>
+                {% if not moderator.count == 0 %}
             <p class="text-muted">
                 {% if moderator.count == 1 %}
                     Moderator:
@@ -51,7 +53,8 @@
                 {% endfor %}
             </p>
         {% endif %}
-        <div class="dropdown input-group" id="user-searchbar">
+                </div>
+                <div class="col-6"><div class="dropdown" id="user-searchbar">
             <form autocomplete="off">
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -76,7 +79,8 @@
                     {% endif %}
                 {% endfor %}
             </p>
-        {% endif %}
+        {% endif %}</div>
+            </div>
         <br>
         <figure class="bg-light p-3 rounded  border-1"
                 style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
