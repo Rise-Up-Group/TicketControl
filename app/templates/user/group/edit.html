@@ -25,9 +25,4 @@
     <a class="btn btn-danger" href="{% url 'delete_group' id=group.id %}">Delete</a>
     {% endif %}
 </form>
-<style>
-option.checkbox:before { content: "☐ " }
-option.checkbox:checked:before { content: "☑ " }
-</style>
-
 {% endblock %}

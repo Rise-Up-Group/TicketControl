@@ -29,9 +29,4 @@
     {% if can_change %}<input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>{% endif %}
     {% if can_delete %}<a class="btn btn-danger" href="{% url 'delete_user' id=user.id %}">Delete</a>{% endif %}
 </form>
-<style>
-option.checkbox:before { content: "☐ " }
-option.checkbox:checked:before { content: "☑ " }
-</style>
-
 {% endblock %}

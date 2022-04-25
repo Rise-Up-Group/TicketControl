@@ -42,3 +42,11 @@
 .mt-100 {
     margin-top: 100px
 }
+
+option.checkbox:before {
+    content: "☐ "
+}
+
+option.checkbox:checked:before {
+    content: "☑ "
+}
