@@ -70,12 +70,6 @@ def handler404(request, exception, template_name="error.html"):
     return response
 
 
-@login_required()
-def new_ticket_view(request):
-    pass  # TODO
-
-
-
 def logout_view(request):
     logout(request)
     return redirect("/")
