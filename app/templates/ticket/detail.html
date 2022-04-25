@@ -193,7 +193,6 @@
 
     <script>
         async function search_and_update_usernames(typed_username) {
-            console.log(typed_username || "a")
             const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json()
             const dropdown = $("#user-search-dropdown-menu");
             dropdown.children().remove()
