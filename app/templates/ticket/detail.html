@@ -164,25 +164,32 @@
                 dropdown.append($(`<option>${user.username}</option>`))
             }
         }
-        function add_participant(username) {
+        async function get_token() {
+            let tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`)
+            participantToken = new FormData();
+            participantToken.append("csrfmiddlewaretoken", await tokenResponse.text());
+            tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`)
+            moderatorToken = new FormData();
+            moderatorToken.append("csrfmiddlewaretoken", await tokenResponse.text());
+        }
+        get_token();
+        async function add_participant(username) {
             if (username !== "") {
-                fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`).then(response => {
-                    if (response.ok) {
-                        document.getElementById("search-user").value = "";
-                        participants = document.getElementById("participants")
-                        participants.innerHTML = participants.innerHTML.trimEnd() + ", " + username;
-                    }
-                })
+                response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {method: "POST", body: participantToken})
+                if (response.ok) {
+                    document.getElementById("search-user").value = "";
+                    participants = document.getElementById("participants")
+                    participants.innerHTML = participants.innerHTML.trimEnd() + ", " + username;
+                }
             }
         }
-        function add_moderator(username) {
+        async function add_moderator(username) {
             if (username !== "") {
-                fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`).then(response => {
-                    if (response.ok) {
-                        moderators = document.getElementById("moderators")
-                        moderators.innerHTML = moderators.innerHTML.trimEnd() + ", " + username;
-                    }
-                })
+                response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {method: "POST", body: moderatorToken})
+                if (response.ok) {
+                    moderators = document.getElementById("moderators")
+                    moderators.innerHTML = moderators.innerHTML.trimEnd() + ", " + username;
+                }
             }
         }
     </script>

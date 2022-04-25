@@ -3,8 +3,10 @@ import logging
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db.utils import DatabaseError
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
+from django.middleware.csrf import get_token
 from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
@@ -318,25 +320,38 @@ def ticket_comment_add(request, id):
         ticket = Ticket.objects.get(id=id)
         ticket.add_comment(request.POST["comment"], User.objects.get(id=request.user.id))
         return redirect('/ticket/' + str(id))
+    return HttpResponse(status=400)
 
 
 @login_required()
-def ticket_participant_add(request, id, username):
-    try:
-        ticket = Ticket.objects.get(id=id)
-        if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
-            ticket.participating.add(User.objects.get(username=username))
-            return HttpResponse(status=200)
-        return HttpResponse(status=403)
-    except ObjectDoesNotExist:
-        return HttpResponse(status=404)
+def ticket_participant_add(request, id, username=None):
+    if request.method == "POST":
+        if username == None:
+            return HttpResponse(status=409)
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
+                ticket.participating.add(User.objects.get(username=username))
+                return HttpResponse(status=200)
+            return HttpResponse(status=403)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
 
 
 @permission_required("ticketcontrol.change_ticket")
-def ticket_moderator_add(request, id, username):
-    try:
-        ticket = Ticket.objects.get(id=id)
-        ticket.moderator.add(User.objects.get(username=username))
-    except ObjectDoesNotExist:
-        return HttpResponse(status=404)
-    return HttpResponse(status=200)
+def ticket_moderator_add(request, id, username=None):
+    if request.method == "POST":
+        if username == None:
+            return HttpResponse(status=409)
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.moderator.add(User.objects.get(username=username))
+            return HttpResponse(status=200)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
