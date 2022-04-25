@@ -55,13 +55,13 @@
         {% endif %}
                 </div>
                 <div class="col-6"><div class="dropdown" id="user-searchbar">
-            <form autocomplete="off">
+            <form autocomplete="off" onsubmit="return false;">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <div class="input-group-text">@</div>
                     </div>
                     <input type="text" class="form-control" id="search-user" placeholder="Username"
-                           list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);">
+                           list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);" onchange="add_participant(this.value);">
                     <datalist id="user-search-dropdown-menu">
                         <!--Will be filled in with js-->
                     </datalist>
@@ -69,7 +69,7 @@
             </form>
         </div>
         {% if not participants.count == 0 %}
-            <p class="text-muted">
+            <p id="participants" class="text-muted">
                 Teilnehmer:
                 {% for foo in participants %}
                     {% if forloop.last %}
@@ -179,6 +179,17 @@
             dropdown.children().remove()
             for (user of users) {
                 dropdown.append($(`<option>${user.username}</option>`))
+            }
+        }
+        function add_participant(username) {
+            if (username !== "") {
+                fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`).then(response => {
+                    if (response.ok) {
+                        document.getElementById("search-user").value = "";
+                        participants = document.getElementById("participants")
+                        participants.innerHTML = participants.innerHTML.trimEnd() + ", " + username;
+                    }
+                })
             }
         }
     </script>
