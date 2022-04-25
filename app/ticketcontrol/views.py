@@ -18,7 +18,6 @@ def render_error(request, title, message):
     context = {'title': title, 'message': message}
     return render(request, "error.html", context)
 
-
 def dashboard_view(request):
     tickets = Ticket.objects.filter(owner=request.user.id)
     context = {'tickets': tickets}
@@ -30,11 +29,12 @@ def home_view(request):
 
 
 ##TODO: fix
+@login_required()
 def mytickets_view(request):
     context = {"tickets": Ticket.objects.filter(owner=request.user.id)}
     return render(request, "ticket/manage.html", context)
 
-
+@login_required()
 def ticket_view(request, id):
     id = str(id)  # TODO: no conversion
 
@@ -70,7 +70,7 @@ def handler404(request, exception, template_name="error.html"):
     return response
 
 
-
+@login_required()
 def new_ticket_view(request):
     pass  # TODO
 

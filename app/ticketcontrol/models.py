@@ -8,6 +8,7 @@ class User(BaseUser):
     class Meta:
         permissions = (
             ("change_user_permission", "Change the permissions of other users"),
+            ("admin_general", "Allow access to the Admin Panel"),
         )
 
     def add_user(email, firstname, lastname, username, password, groups, isActive):
