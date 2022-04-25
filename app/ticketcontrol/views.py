@@ -251,7 +251,7 @@ def edit_group_view(request, id):
     canEdit = request.user.has_perm("auth.change_group")
     group = get_object_or_404(Group, id=id)
     if request.method == 'POST' and canEdit:
-        if group.name != "admin" and group.name != "modertor" and group.name != "user":
+        if group.name != "admin" and group.name != "moderator" and group.name != "user":
             group.name = request.POST['name']
         if group.name != "admin":  # admin is superuser anyway
             groupPermissions = group.permissions.all()
