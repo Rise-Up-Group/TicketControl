@@ -29,11 +29,11 @@
                                 {% csrf_token %}
                                 <div class="form-outline mb-4">
                                     <label for="username">E-Mail</label>
-                                    <input type="text" id="username" name="username" class="form-control" autofocus/>
+                                    <input type="text" id="username" name="username" class="form-control" autofocus required/>
                                 </div>
                                 <div class="form-outline mb-4">
                                     <label for="password">Password</label>
-                                    <input type="password" id="password" name="password" class="form-control"/>
+                                    <input type="password" id="password" name="password" class="form-control" required/>
                                 </div>
                                 <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
                                 {% if next %}<input type="hidden" name="next" id="next" value="{{ next }}">{% endif %}
