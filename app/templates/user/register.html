@@ -30,24 +30,30 @@
                                 </div>
                                 <div class="form-outline mb-2">
                                     <label for="firstname">Firstname</label>
-                                    <input type="firstname" id="firstname" name="firstname" class="form-control"/>
+                                    <input type="firstname" id="firstname" name="firstname" class="form-control"
+                                           oninput="update_username()"/>
                                 </div>
                                 <div class="form-outline mb-2">
                                     <label for="lastname">Lastname</label>
-                                    <input type="lastname" id="lastname" name="lastname" class="form-control"/>
-                                </div>
-                                <div class="form-outline mb-2">
-                                    <label for="username">Username</label>
-                                    <input type="username" id="username" name="username" class="form-control"/>
+                                    <input type="lastname" id="lastname" name="lastname" class="form-control"
+                                           oninput="update_username()"/>
                                 </div>
                                 <div class="form-outline mb-2">
                                     <label for="password">Password</label>
                                     <input type="password" id="password" name="password" class="form-control"/>
                                 </div>
-                                <div class="form-outline mb-4">
+                                <div class="form-outline mb-2">
                                     <label for="password_retype">Password</label>
                                     <input type="password" id="password_retype" name="confirm_password"
                                            class="form-control"/>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="checkCustomUsername"
+                                           name="checkCustomUsername" onclick="showCustomUsername('div1')">
+                                    <label class="form-check-label" for="checkCustomUsername">Custom username</label>
+                                </div>
+                                <div class="form-outline mb-4" style="display:none" id="customUsername">
+                                    <input type="username" id="username" name="username" class="form-control"/>
                                 </div>
                                 <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
                             </form>
@@ -58,4 +64,24 @@
             </div>
         </div>
     </div>
+    <script>
+        function showCustomUsername() {
+            var chboxs = document.getElementsByName("checkCustomUsername");
+            var vis = "none";
+            for (var i = 0; i < chboxs.length; i++) {
+                if (chboxs[i].checked) {
+                    vis = "block";
+                    break;
+                }
+            }
+            document.getElementById("customUsername").style.display = vis;
+        }
+
+        async function update_username() {
+            var firstname = document.getElementById("firstname").value.substring(0,1);
+            var lastname = document.getElementById("lastname").value;
+            document.getElementById("username").value = firstname + "." + lastname
+        }
+    </script>
+    </script>
 {% endblock %}
