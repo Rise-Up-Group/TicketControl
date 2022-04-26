@@ -22,7 +22,8 @@
                     <div class="card">
                         <div class="card-body py-5 px-md-5">
                             <h3 class="display-4">Sign Up</h3>
-                            <form method="POST" action="{% url 'register' %}" autocomplete="new-password">
+                            <form method="POST" action="{% url 'register' %}" autocomplete="new-password"
+                                  onkeydown="return event.key != 'Enter';">
                                 {% csrf_token %}
                                 <div class="form-outline mb-2">
                                     <label for="email">E-Mail</label>
@@ -78,10 +79,9 @@
         }
 
         async function update_username() {
-            var firstname = document.getElementById("firstname").value.substring(0,1);
+            var firstname = document.getElementById("firstname").value.substring(0, 1);
             var lastname = document.getElementById("lastname").value;
-            document.getElementById("username").value = firstname + "." + lastname
+            document.getElementById("username").value = firstname + "." + lastname;
         }
-    </script>
     </script>
 {% endblock %}
