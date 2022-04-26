@@ -22,118 +22,135 @@
                 </div>
             </div>
         </div>
-        <div class="input-group mb-3">
+        <div class="input-group">
             <div class="input-group-prepend">
                 <label class="input-group-text" for="inputGroupSelect01">Kategorie:</label>
             </div>
             <select class="custom-select" id="inputGroupSelect01">
                 <option selected>{{ ticket.category }}</option>
-                {% for foo in category %}
-                    {% if not foo.name == ticket.category.name %}
-                        <option value="{{ forloop.counter }}">{{ foo.name }}</option>
-                    {% endif %}
-                {% endfor %}
+                    {% for foo in category %}
+                        {% if not foo.name == ticket.category.name %}
+                            <option value="{{ forloop.counter }}">{{ foo.name }}</option>
+                        {% endif %}
+                    {% endfor %}
             </select>
         </div>
-        {% if not moderator.count == 0 %}
-            <p class="text-muted">
-                {% if moderator.count == 1 %}
-                    Moderator:
-                {% else %}
-                    Moderatoren:
+                {% if not moderator.count == 0 %}
+                    <p class="text-muted">
+                        {% if moderator.count == 1 %}
+                            Moderator:
+                        {% else %}
+                            Moderatoren:
+                        {% endif %}
+                        {% for foo in moderator %}
+                            {% if forloop.last %}
+                                {{ foo.username }}
+                            {% else %}
+                                {{ foo.username }},
+                            {% endif %}
+                        {% endfor %}
+                    </p>
                 {% endif %}
-                {% for foo in moderator %}
-                    {% if forloop.last %}
-                        {{ foo.username }}
-                    {% else %}
-                        {{ foo.username }},
-                    {% endif %}
-                {% endfor %}
-            </p>
-        {% endif %}
-        <div class="dropdown input-group" id="user-searchbar">
-            <form autocomplete="off">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text">@</div>
-                    </div>
-                    <input type="text" class="form-control" id="search-user" placeholder="Username"
-                           list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);">
-                    <datalist id="user-search-dropdown-menu">
-                        <!--Will be filled in with js-->
-                    </datalist>
+            </div>
+            <div class="col">
+                <div class="dropdown" id="user-searchbar">
+                    <form autocomplete="off">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">@</div>
+                            </div>
+                            <input type="text" class="form-control" id="search-user" placeholder="Username" list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);">
+                            <datalist id="user-search-dropdown-menu">
+                                <!--Will be filled in with js-->
+                            </datalist>
+                        </div>
+                    </form>
                 </div>
-            </form>
+                {% if not participants.count == 0 %}
+                    <p class="text-muted">
+                        Teilnehmer:
+                        {% for foo in participants %}
+                            {% if forloop.last %}
+                                {{ foo.username }}
+                            {% else %}
+                                {{ foo.username }},
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                {% endif %}
+            </div>
         </div>
-        {% if not participants.count == 0 %}
-            <p class="text-muted">
-                Teilnehmer:
-                {% for foo in participants %}
-                    {% if forloop.last %}
-                        {{ foo.username }}
-                    {% else %}
-                        {{ foo.username }},
-                    {% endif %}
-                {% endfor %}
-            </p>
-        {% endif %}
         <br>
-        <figure class="bg-light p-3 rounded  border-1"
-                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
-            <p class="lead">Beschreibung</p>
-            <hr>
-            <p>{{ ticket.description }}</p>
-            <p class="blockquote-footer mb-0 font-italic">
-                {{ ticket.creationDate }}
-            </p>
-        </figure>
-        {% for comment in comments %}
-            <figure class="bg-light p-3 rounded"
-                    style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ff9f00;">
-                <p class="lead">{{ comment.user.first_name }} {{ comment.user.last_name }}
-                    | {{ comment.user.username }}</p>
-                <hr>
-                <p>{{ comment.content }}</p>
-                <p class="blockquote-footer mb-0 font-italic">
-                    {{ comment.creationDate }}
-                </p>
-            </figure>
-        {% endfor %}
-        <figure class="bg-light p-3 rounded"
-                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #00ff00;">
-            <p class="lead">Kommentar hinzufügen:</p>
-            <hr>
-            <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST">
-                {% csrf_token %}
-                <div class="form-group">
+        <div class="bg-transparent">
+            <div class="row d-flex align-items-center h-100">
+                <div class="col">
+                    <figure class="bg-light p-3 rounded  border-1"
+                            style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
+                        <p class="lead">Beschreibung</p>
+                        <hr>
+                        <p>{{ ticket.description }}</p>
+                        <p class="blockquote-footer mb-0 font-italic">
+                            {{ ticket.creationDate }}
+                        </p>
+                    </figure>
+                </div>
+            </div>
+            {% for comment in comments %}
+                <div class="row d-flex align-items-center h-100">
+                    <div class="col">
+                        <figure class="bg-light p-3 rounded"
+                                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ff9f00;">
+                            <p class="lead">{{ comment.user.first_name }} {{ comment.user.last_name }}
+                                | {{ comment.user.username }}</p>
+                            <hr>
+                            <p>{{ comment.content }}</p>
+                            <p class="blockquote-footer mb-0 font-italic">
+                                {{ comment.creationDate }}
+                            </p>
+                        </figure>
+                    </div>
+                </div>
+            {% endfor %}
+            <div class="row d-flex align-items-center h-100">
+                <div class="col">
+                    <figure class="bg-light p-3 rounded"
+                            style="border: .05rem solid #a9a9a9; border-left: .25rem solid #00ff00;">
+                        <p class="lead">Kommentar hinzufügen:</p>
+                        <hr>
+                        <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
                                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
                                           name="comment"></textarea>
+                            </div>
+                            <div class="file-drop-area bg-white text-center" style="border: .05rem solid #a9a9a9">
+                                <input class="file-input" type="file" multiple />
+                                <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                            </div>
+                            <br>
+                            <div class="text-white">
+                                <div class="row justify-content-between">
+                                    <div class="col-auto">
+                                        <p class="blockquote-footer mb-0 font-italic">
+                                            Ticketcontrol | Ticketsystem by Rise Up Group
+                                        </p>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-danger" data-toggle="modal"
+                                                data-target="#confirm-delete-new-comment">
+                                            Löschen
+                                        </button>
+                                        <button class="btn btn-success text-right" type="submit" value="Submit">
+                                            Abschicken
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </figure>
                 </div>
-                <div class="file-drop-area bg-white text-center" style="border: .05rem solid #a9a9a9">
-                    <input class="file-input" type="file" multiple/>
-                    <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
-                </div>
-                <br>
-                <div class="text-white">
-                    <div class="row justify-content-between">
-                        <div class="col-auto">
-                            <p class="blockquote-footer mb-0 font-italic">
-                                Ticketcontrol | Ticketsystem by Rise Up Group
-                            </p>
-                        </div>
-                        <div class="col-auto">
-                            <button type="button" class="btn btn-warning" data-toggle="modal"
-                                    data-target="#confirm-delete-new-comment">
-                                Abbrechen
-                            </button>
-                            <button class="btn btn-success text-right" type="submit" value="Submit">
-                                Abschicken
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </figure>
+            </div>
+        </div>
     </div>
     <div class="modal fade" id="confirm-delete-new-comment" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
