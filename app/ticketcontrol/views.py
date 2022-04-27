@@ -3,13 +3,16 @@ import logging
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 from .models import *
+from .settings import EMAIL_HOST_USER
 
 logger = logging.getLogger(__name__)
 
@@ -96,13 +99,13 @@ def login_view(request):
                 user = None
 
         if user is not None and user.check_password(password):
-            if user.is_active:
+            if user.is_active and user.email_confirmed:
                 login(request, user)
                 if next is not False:
                     return HttpResponseRedirect(next)
                 return redirect("dashboard")
             else:
-                error = "User is not activated"
+                error = "User is not activated or email address is not confirmed"
         else:
             error = "Wrong username or password"
 
@@ -115,13 +118,42 @@ def register_view(request):
         confirmPassword = request.POST['confirm_password']
         if password == confirmPassword:
             user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                                 request.POST['username'], password, None, 1)  # None: groups, 1: is_active
-            login(request, user)
+                                 request.POST['username'], password, groups=None, is_active=True, email_confirmed=False)
+
+            message = render_to_string("user/activate_mail.html", {
+                'user': user,
+                'domain': get_current_site(request).domain,
+                'token': account_activation_token.make_token(user),
+            })
+            send_mail(
+                subject="Welcome to Ticketcontrol",
+                message="",
+                html_message=message,
+                from_email=EMAIL_HOST_USER,
+                recipient_list=[user.email],
+                fail_silently=False
+            )
+
+            #login(request, user)
             return redirect("profile")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
     return render(request, "user/register.html")
+
+
+def activate_user_view(request):
+    if request.method == "POST":
+        user = User.objects.get(id=request.POST['user-id'])
+        token = request.POST['token']
+        if account_activation_token.check_token(user, token):
+            user.email_confirmed = True
+            user.save()
+            return redirect("login")
+        else:
+            return render_error(request, "Invalid Token", "")
+    user = User.objects.get(id=request.GET['user-id'])
+    return render(request, "user/activate.html", {"user": user, "token": request.GET['token']})
 
 
 @permission_required("ticketcontrol.add_user")

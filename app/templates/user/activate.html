@@ -1,0 +1,20 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block title %}Activate User{% endblock %}
+
+{% block content %}
+    <br>
+    <h1 class="text-center display-4">Activate User</h1>
+    <hr>
+
+    <br>
+
+    {{ user.username }}
+<form method="POST" action="{% url 'activate_user' %}">
+    {% csrf_token %}
+    <input type="hidden" name="user-id" id="user-id" value="{{ user.id }}">
+    <input type="hidden" name="token" id="token" placeholder="token" value="{{ token }}"><br><br>
+    <input type="submit" value="Activate">
+</form>
+{% endblock %}

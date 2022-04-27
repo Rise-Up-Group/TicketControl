@@ -1,8 +1,29 @@
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission as BasePermission
 from django.contrib.auth.models import User as BaseUser
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from six import text_type
 from django.db import models
 
+
+class AccountActivationToken(PasswordResetTokenGenerator):
+    def _make_hash_value(self, user, timestamp):
+        return (
+            text_type(user.pk) + text_type(timestamp) +
+            text_type(user.email_confirmed)
+        )
+
+
+class PasswordResetToken(PasswordResetTokenGenerator):
+    def _make_hash_value(self, user, timestamp):
+        return (
+            text_type(user.pk) + text_type(timestamp) +
+            text_type(user.reset_password)
+        )
+
+
+account_activation_token = AccountActivationToken()
+password_reset_token = PasswordResetToken()
 
 class User(BaseUser):
     class Meta:
@@ -11,7 +32,10 @@ class User(BaseUser):
             ("admin_general", "Allow access to the Admin Panel"),
         )
 
-    def add_user(email, firstname, lastname, username, password, groups, isActive):
+    email_confirmed = models.BooleanField(default=False)
+    reset_password = models.BooleanField(default=False)
+
+    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False):
         # TODO: preview in javascrip and show to user
         # TODO: nickname has to be unique (possibly with db)
         if username == "":
@@ -32,11 +56,12 @@ class User(BaseUser):
                     user.is_staff = True
         else:
             Group.objects.get(name="user").user_set.add(user)
-        user.is_active = isActive
+        user.is_active = is_active
+        user.email_confirmed = email_confirmed
         user.save()
         return user
 
-    def update_user(id, email, firstname, lastname, username, password, groups, isActive):
+    def update_user(id, email, firstname, lastname, username, password, groups, is_active):
         user = User.objects.get(id=id)
         if user is not None:
             user.email = email
@@ -67,8 +92,8 @@ class User(BaseUser):
                         user.is_superuser = True
                         user.is_staff = True
 
-            if isActive is not None:
-                user.is_active = isActive
+            if is_active is not None:
+                user.is_active = is_active
             user.save()
             return user
         return None

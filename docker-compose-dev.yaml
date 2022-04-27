@@ -19,6 +19,11 @@ services:
       - DB_NAME=ticketcontrol
       - DB_USER=root # user has to be root with this default config
       - DB_PASS=changeme
+      - EMAIL_HOST=smtp.ionos.de
+      - EMAIL_PORT=465
+      - EMAIL_TLS=true
+      - EMAIL_ADDRESS=noreply@riseupgroup.net
+      - EMAIL_PASSWORD=Qgvi7Y5xHKGD67qmgd37Qr3dg3ndwpT6prkm22pE
       - SECRET_KEY=changeme
       - ALLOWED_HOSTS=*
       - DEBUG=1
