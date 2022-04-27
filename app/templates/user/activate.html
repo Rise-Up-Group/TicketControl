@@ -10,6 +10,7 @@
 
     <br>
 
+    {% if token %}
     {{ user.username }}
 <form method="POST" action="{% url 'activate_user' %}">
     {% csrf_token %}
@@ -17,4 +18,7 @@
     <input type="hidden" name="token" id="token" placeholder="token" value="{{ token }}"><br><br>
     <input type="submit" value="Activate">
 </form>
+    {% else %}
+    You should have an EMail with a verification link in your inbox.
+    {% endif %}
 {% endblock %}

@@ -119,22 +119,8 @@ def register_view(request):
         if password == confirmPassword:
             user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
                                  request.POST['username'], password, groups=None, is_active=True, email_confirmed=False)
-
-            message = render_to_string("user/activate_mail.html", {
-                'user': user,
-                'domain': get_current_site(request).domain,
-                'token': account_activation_token.make_token(user),
-            })
-            send_mail(
-                subject="Welcome to Ticketcontrol",
-                message="",
-                html_message=message,
-                from_email=EMAIL_HOST_USER,
-                recipient_list=[user.email],
-                fail_silently=False
-            )
-
-            return redirect("login")
+            User.send_emailverification_mail(user, request)
+            return render(request, "user/activate.html")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
@@ -179,19 +165,7 @@ def user_passwordreset_request_view(request):
             user = User.objects.get(email=username)
         except ValidationError:
             user = User.objects.get(username=username)
-        message = render_to_string("user/passwordreset_mail.html", {
-            'user': user,
-            'domain': get_current_site(request).domain,
-            'token': password_reset_token.make_token(user),
-        })
-        send_mail(
-            subject="[Ticketcontrol] Reset your password",
-            message="",
-            html_message=message,
-            from_email=EMAIL_HOST_USER,
-            recipient_list=[user.email],
-            fail_silently=False
-        )
+        user.send_passwordreset_mail(request)
         return render(request, "user/passwordreset_request.html", {"sent_email": True})
     return render(request, "user/passwordreset_request.html")
 
@@ -238,35 +212,39 @@ def user_live_search(request, typed_username):
     return JsonResponse(res, safe=False) # It's ok. Disables typecheck for dict. Make sure to only pass an array
 
 
-def unrestricted_edit_user_view(request, id, changePermission, deletePermission):
-    if request.method == 'POST':
-        password = request.POST['password']
-        passwordRetype = request.POST['password_retype']
-        if password == "" or password == passwordRetype:
-            groups = None
-            if request.user.has_perm("ticketcontrol.change_user_permission"):
-                groups = request.POST.getlist("groups")
-            User.update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                             request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
-            return redirect("user_details", id=id)
-        else:
-            # Should not happen anyway
-            return render_error(request, "Passwords do not match", "")
-    user = get_object_or_404(User, pk=id)
-    groups = []
-    for group in user.groups.all():
-        groups.append(group.id)
-    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(),
-                                              "can_change_permission": request.user.has_perm(
-                                                  "ticketcontrol.change_user_permission"),
-                                              "can_change": changePermission, "can_delete": deletePermission})
-
-
 @login_required()
 def edit_user_view(request, id):
     if request.user.has_perm("ticketcontrol.change_user") or request.user.id == id:
-        return unrestricted_edit_user_view(request, id, True,
-                                           request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id)
+        if request.method == 'POST':
+            password = request.POST['password']
+            passwordRetype = request.POST['password_retype']
+            if password == "" or password == passwordRetype:
+                groups = None
+                if request.user.has_perm("ticketcontrol.change_user_permission"):
+                    groups = request.POST.getlist("groups")
+                user = User.objects.get(id=id)
+                email_confirmed = None
+                if user.email != request.POST['email'] and not request.user.has_perm("ticketcontrol.change_user"):
+                    email_confirmed = False
+                user.update_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
+                                 request.POST['username'], password, groups,
+                                 request.POST.get("is_active", False) == "on", email_confirmed=email_confirmed)
+                if email_confirmed == False:
+                    user.send_emailverification_mail(request)
+                    logout(request)
+                    return render(request, "user/activate.html")
+                return redirect("user_details", id=id)
+            else:
+                # Should not happen anyway
+                return render_error(request, "Passwords do not match", "")
+        user = get_object_or_404(User, pk=id)
+        groups = []
+        for group in user.groups.all():
+            groups.append(group.id)
+        return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(),
+                                                  "can_change_permission": request.user.has_perm(
+                                                      "ticketcontrol.change_user_permission"),
+                                                  "can_change": True, "can_delete": request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id})
     return redirect("login")
 
 
