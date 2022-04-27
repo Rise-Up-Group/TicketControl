@@ -17,73 +17,76 @@
                     <a class="dropdown-item" href="#">Löschen</a>
                     <a class="dropdown-item" href="#">Aus Datenbank löschen</a>
                     <div role="separator" class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`)">Mir zuweisen</a>
+                    <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
+                        zuweisen</a>
                     <a class="dropdown-item" href="#">Zuweisung ändern</a>
                 </div>
             </div>
         </div>
         <div class="mb-3 row">
-                <div class="col-6">
-                <div class="input-group">
-            <div class="input-group-prepend">
-                <label class="input-group-text" for="inputGroupSelect01">Kategorie:</label>
-            </div>
-            <select class="custom-select" id="inputGroupSelect01">
-                <option selected>{{ ticket.category }}</option>
-                {% for foo in category %}
-                    {% if not foo.name == ticket.category.name %}
-                        <option value="{{ forloop.counter }}">{{ foo.name }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-                </div>
-            <p class="text-muted">
-                Moderatoren:
-                    <span id="moderators">
-                    {% if not moderator.count == 0 %}
-                {% for foo in moderator %}
-                    {% if forloop.last %}
-                        {{ foo.username }}
-                    {% else %}
-                        {{ foo.username }},
-                    {% endif %}
-                {% endfor %}
-                    {% endif %}
-                    </span>
-            </p>
-
-                </div>
-                <div class="col-6"><div class="dropdown" id="user-searchbar">
-            <form autocomplete="off" onsubmit="return false;">
+            <div class="col-6">
                 <div class="input-group">
                     <div class="input-group-prepend">
-                        <div class="input-group-text">@</div>
+                        <label class="input-group-text" for="inputGroupSelect01">Kategorie:</label>
                     </div>
-                    <input type="text" class="form-control" id="search-user" placeholder="Username"
-                           list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);" onchange="add_user(`participants`, this.value);">
+                    <select class="custom-select" id="inputGroupSelect01">
+                        <option selected>{{ ticket.category }}</option>
+                        {% for foo in category %}
+                            {% if not foo.name == ticket.category.name %}
+                                <option value="{{ forloop.counter }}">{{ foo.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
                 </div>
-                <datalist id="user-search-dropdown-menu">
-                    <!--Will be filled in with js-->
-                </datalist>
-            </form>
-        </div>
-
-            <p class="text-muted">
-                Teilnehmer:
-                <span id="participants">
-                {% if not participants.count == 0 %}
-                {% for foo in participants %}
-                    {% if forloop.last %}
-                        {{ foo.username }}
-                    {% else %}
-                        {{ foo.username }},
+                <p class="text-muted">
+                    Moderatoren:
+                    <span id="moderators">
+                    {% if not moderator.count == 0 %}
+                        {% for foo in moderator %}
+                            {% if forloop.last %}
+                                {{ foo.username }}
+                            {% else %}
+                                {{ foo.username }},
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
-                {% endfor %}
+                    </span>
+                </p>
+
+            </div>
+            <div class="col-6">
+                <div class="dropdown" id="user-searchbar">
+                    <form autocomplete="off" onsubmit="return false;">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">@</div>
+                            </div>
+                            <input type="text" class="form-control" id="search-user" placeholder="Username"
+                                   list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);"
+                                   onchange="add_user(`participants`, this.value);">
+                        </div>
+                        <datalist id="user-search-dropdown-menu">
+                            <!--Will be filled in with js-->
+                        </datalist>
+                    </form>
+                </div>
+
+                <p class="text-muted">
+                    Teilnehmer:
+                    <span id="participants">
+                {% if not participants.count == 0 %}
+                    {% for foo in participants %}
+                        {% if forloop.last %}
+                            {{ foo.username }}
+                        {% else %}
+                            {{ foo.username }},
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
                 </span>
-            </p>
-        </div>
+                </p>
             </div>
+        </div>
         <br>
         <figure class="bg-light p-3 rounded  border-1"
                 style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
@@ -157,32 +160,44 @@
 
     <script>
         async function search_and_update_usernames(typed_username) {
-            const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json()
+            const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json();
             const dropdown = $("#user-search-dropdown-menu");
-            dropdown.children().remove()
+            dropdown.children().remove();
             for (user of users) {
-                dropdown.append($(`<option>${user.username}</option>`))
+                dropdown.append($(`<option>${user.username}</option>`));
             }
         }
+
+        var participantToken, moderatorToken;
         async function get_token() {
-            let tokenResponse = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}`)
+            let tokenResponse = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}`);
             participantToken = new FormData();
             participantToken.append("csrfmiddlewaretoken", await tokenResponse.text());
-            tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`)
+            tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`);
             moderatorToken = new FormData();
             moderatorToken.append("csrfmiddlewaretoken", await tokenResponse.text());
         }
+
         get_token();
+
         async function add_user(mode, username) {
             if (username !== "") {
-                if (mode === "participants")
-                    response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {method: "POST", body: participantToken})
-                else if (mode === "moderators")
-                    response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {method: "POST", body: moderatorToken})
+                let response;
+                if (mode === "participants") {
+                    response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {
+                        method: "POST",
+                        body: participantToken
+                    });
+                } else if (mode === "moderators") {
+                    response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {
+                        method: "POST",
+                        body: moderatorToken
+                    });
+                }
                 if (response.ok) {
                     document.getElementById("search-user").value = "";
-                    userList = document.getElementById(mode);
-                    userListHtml = userList.innerHTML.trim();
+                    let userList = document.getElementById(mode);
+                    let userListHtml = userList.innerHTML.trim();
                     if (typeof userListHtml === "undefined" || userListHtml === "") {
                         userList.innerHTML = userListHtml + username;
                     } else {
