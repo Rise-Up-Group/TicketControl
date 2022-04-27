@@ -126,7 +126,7 @@ def register_view(request):
                 'token': account_activation_token.make_token(user),
             })
             send_mail(
-                subject="Welcome to Ticketcontrol",
+                subject="Wilkommen zu TicketControl!",
                 message="",
                 html_message=message,
                 from_email=EMAIL_HOST_USER,

@@ -1,11 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-{{ user.username }}<br>
-<a href="http://{{ domain }}{% url 'activate_user' %}?user-id={{ user.id }}&token={{ token }}">activate</a>
+<div class="px-4 py-5 px-md-5 text-center text-lg-start">
+    <div class="container">
+        <div class="row gx-lg-5 align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h1 class="my-5 display-3 fw-bold ls-tight">
+                    Ticketcontrol
+                    <br/>
+                    <span class="text-primary display-4">by RiseUp Group</span>
+                </h1>
+                <p class="text-muted">
+                    Tickets sind problembezogene Diskussionen die vom Anwender erstellt werden können.
+                    Diese Diskussionen bestehen aus einem Ticket, sowie beliebig vielen Kommentaren darunter.
+                    Dabei wird meist ein z.B. technisches Problem erstellt und von den Moderatoren beantwortet.
+                </p>
+            </div>
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="card">
+                    <div class="card-body py-5 px-md-5">
+                        <h3 class="display-4">E-Mail Bestätigung</h3>
+                        <p>Hey {{ user.first_name }}, Willkommen zu TicketControl!</p>
+                        <p class="text-muted">
+                            Nur noch ein kleiner Schritt von ihrem Account entfernt. Bitte bestätigen Sie Ihre
+                            E-Mail-Adresse um Ihre Registrierung abzuschließen.
+                        </p>
+                        <a class="btn btn-primary mb-4"
+                           href="http://{{ domain }}{% url 'activate_user' %}?user-id={{ user.id }}&token={{ token }}">
+                            Registration Abschließen
+                        </a>
+                        <p class="text-muted">
+                            Sie erhalten diese E-Mail, weil Sie kürzlich ein Konto erstellt oder Ihre E-Mail-Adresse
+                            geändert haben. Wenn Sie dies nicht getan haben, kontaktieren Sie uns bitte.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
