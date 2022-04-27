@@ -23,7 +23,7 @@ services:
       - EMAIL_PORT=465
       - EMAIL_TLS=true
       - EMAIL_ADDRESS=noreply@riseupgroup.net
-      - EMAIL_PASSWORD=Qgvi7Y5xHKGD67qmgd37Qr3dg3ndwpT6prkm22pE
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - SECRET_KEY=changeme
       - ALLOWED_HOSTS=*
       - DEBUG=1
