@@ -134,8 +134,7 @@ def register_view(request):
                 fail_silently=False
             )
 
-            #login(request, user)
-            return redirect("profile")
+            return redirect("login")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
@@ -154,6 +153,47 @@ def activate_user_view(request):
             return render_error(request, "Invalid Token", "")
     user = User.objects.get(id=request.GET['user-id'])
     return render(request, "user/activate.html", {"user": user, "token": request.GET['token']})
+
+
+def user_passwordreset_view(request):
+    if request.method == "POST":
+        user = User.objects.get(id=request.POST['user-id'])
+        token = request.POST['token']
+        if password_reset_token.check_token(user, token):
+            if request.POST['password'] == request.POST['confirm_password']:
+                user.set_password(request.POST['password'])
+                user.save()
+                login(request, user)
+                return redirect("dashboard")
+            return render_error(request, "Passwords do not match", "")
+        else:
+            return render_error(request, "Invalid Token", "")
+    return render(request, "user/passwordreset.html", {"user": User.objects.get(id=request.GET['user-id']), "token": request.GET['token']})
+
+
+def user_passwordreset_request_view(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        try:
+            validate_email(username)
+            user = User.objects.get(email=username)
+        except ValidationError:
+            user = User.objects.get(username=username)
+        message = render_to_string("user/passwordreset_mail.html", {
+            'user': user,
+            'domain': get_current_site(request).domain,
+            'token': password_reset_token.make_token(user),
+        })
+        send_mail(
+            subject="[Ticketcontrol] Reset your password",
+            message="",
+            html_message=message,
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email],
+            fail_silently=False
+        )
+        return render(request, "user/passwordreset_request.html", {"sent_email": True})
+    return render(request, "user/passwordreset_request.html")
 
 
 @permission_required("ticketcontrol.add_user")

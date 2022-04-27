@@ -38,7 +38,8 @@
                                 <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
                                 {% if next %}<input type="hidden" name="next" id="next" value="{{ next }}">{% endif %}
                             </form>
-                            Don't have a login? <a href="{% url 'register' %}">Register</a>
+                            Don't have a login? <a href="{% url 'register' %}">Register</a><br>
+                            Forgot password? <a href="{% url 'reset_password_request' %}">Reset</a>
                         </div>
                     </div>
                 </div>
