@@ -17,7 +17,7 @@
                     <a class="dropdown-item" href="#">Löschen</a>
                     <a class="dropdown-item" href="#">Aus Datenbank löschen</a>
                     <div role="separator" class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#" onclick="add_moderator('{{ user.username }}')">Mir zuweisen</a>
+                    <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`)">Mir zuweisen</a>
                     <a class="dropdown-item" href="#">Zuweisung ändern</a>
                 </div>
             </div>
@@ -37,13 +37,10 @@
                 {% endfor %}
             </select>
                 </div>
-            <p id="moderators" class="text-muted">
-                {% if not moderator.count == 0 %}
-                {% if moderator.count == 1 %}
-                    Moderator:
-                {% else %}
-                    Moderatoren:
-                {% endif %}
+            <p class="text-muted">
+                Moderatoren:
+                    <span id="moderators">
+                    {% if not moderator.count == 0 %}
                 {% for foo in moderator %}
                     {% if forloop.last %}
                         {{ foo.username }}
@@ -51,7 +48,8 @@
                         {{ foo.username }},
                     {% endif %}
                 {% endfor %}
-            {% endif %}
+                    {% endif %}
+                    </span>
             </p>
 
                 </div>
@@ -62,7 +60,7 @@
                         <div class="input-group-text">@</div>
                     </div>
                     <input type="text" class="form-control" id="search-user" placeholder="Username"
-                           list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);" onchange="add_participant(this.value);">
+                           list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);" onchange="add_user(`participants`, this.value);">
                 </div>
                 <datalist id="user-search-dropdown-menu">
                     <!--Will be filled in with js-->
@@ -70,9 +68,10 @@
             </form>
         </div>
 
-            <p id="participants" class="text-muted">
-            {% if not participants.count == 0 %}
+            <p class="text-muted">
                 Teilnehmer:
+                <span id="participants">
+                {% if not participants.count == 0 %}
                 {% for foo in participants %}
                     {% if forloop.last %}
                         {{ foo.username }}
@@ -80,7 +79,8 @@
                         {{ foo.username }},
                     {% endif %}
                 {% endfor %}
-            {% endif %}
+                {% endif %}
+                </span>
             </p>
         </div>
             </div>
@@ -165,7 +165,7 @@
             }
         }
         async function get_token() {
-            let tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`)
+            let tokenResponse = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}`)
             participantToken = new FormData();
             participantToken.append("csrfmiddlewaretoken", await tokenResponse.text());
             tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`)
@@ -173,22 +173,21 @@
             moderatorToken.append("csrfmiddlewaretoken", await tokenResponse.text());
         }
         get_token();
-        async function add_participant(username) {
+        async function add_user(mode, username) {
             if (username !== "") {
-                response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {method: "POST", body: participantToken})
+                if (mode === "participants")
+                    response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {method: "POST", body: participantToken})
+                else if (mode === "moderators")
+                    response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {method: "POST", body: moderatorToken})
                 if (response.ok) {
                     document.getElementById("search-user").value = "";
-                    participants = document.getElementById("participants")
-                    participants.innerHTML = participants.innerHTML.trimEnd() + ", " + username;
-                }
-            }
-        }
-        async function add_moderator(username) {
-            if (username !== "") {
-                response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {method: "POST", body: moderatorToken})
-                if (response.ok) {
-                    moderators = document.getElementById("moderators")
-                    moderators.innerHTML = moderators.innerHTML.trimEnd() + ", " + username;
+                    userList = document.getElementById(mode);
+                    userListHtml = userList.innerHTML.trim();
+                    if (typeof userListHtml === "undefined" || userListHtml === "") {
+                        userList.innerHTML = userListHtml + username;
+                    } else {
+                        userList.innerHTML = userListHtml + ", " + username;
+                    }
                 }
             }
         }
