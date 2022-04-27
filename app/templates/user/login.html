@@ -3,22 +3,46 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-    <br>
-    <h1 class="text-center display-4">Login</h1>
-    <hr>
-    <h5 class="text-center">TicketControl by RiseUp-Group</h5>
-
-    <br>
-    {% if error %}
-        {{ error }}
-    {% endif %}
-    <form method="POST" action="{% url 'login' %}">
-        {% csrf_token %}
-        {% if next %}<input type="hidden" name="next" id="next" value="{{ next }}">{% endif %}
-        <input type="text" name="username" id="username" placeholder="Username" autofocus><br><br>
-        <input type="password" name="password" id="password" placeholder="Password"><br><br>
-        <input type="submit" value="Submit"><br>
-        Don't have a login? <a href="{% url 'register' %}">Register</a>
-    </form>
-
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start">
+        <div class="container">
+            <div class="row gx-lg-5 align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <h1 class="my-5 display-3 fw-bold ls-tight">
+                        Ticketcontrol
+                        <br/>
+                        <span class="text-primary display-4">by RiseUp Group</span>
+                    </h1>
+                    <p class="text-muted">
+                        Tickets sind problembezogene Diskussionen die vom Anwender erstellt werden können.
+                        Diese Diskussionen bestehen aus einem Ticket, sowie beliebig vielen Kommentaren darunter.
+                        Dabei wird meist ein z.B. technisches Problem erstellt und von den Moderatoren beantwortet.
+                    </p>
+                </div>
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <div class="card">
+                        <div class="card-body py-5 px-md-5">
+                            <h3 class="display-4">Login</h3>
+                            {% if error %}
+                                <h4 class="text-danger h5 mb-4">{{ error }}</h4>
+                            {% endif %}
+                            <form method="POST" action="{% url 'login' %}">
+                                {% csrf_token %}
+                                <div class="form-outline mb-4">
+                                    <label for="username">E-Mail</label>
+                                    <input type="text" id="username" name="username" class="form-control" autofocus required/>
+                                </div>
+                                <div class="form-outline mb-4">
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" class="form-control" required/>
+                                </div>
+                                <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
+                                {% if next %}<input type="hidden" name="next" id="next" value="{{ next }}">{% endif %}
+                            </form>
+                            Don't have a login? <a href="{% url 'register' %}">Register</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

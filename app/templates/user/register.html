@@ -3,25 +3,84 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-    <br>
-    <h1 class="text-center display-4">Register</h1>
-    <hr>
-    <h5 class="text-center">TicketControl by RiseUp-Group</h5>
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start">
+        <div class="container">
+            <div class="row gx-lg-5 align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <h1 class="my-5 display-3 fw-bold ls-tight">
+                        Ticketcontrol
+                        <br/>
+                        <span class="text-primary display-4">by RiseUp Group</span>
+                    </h1>
+                    <p class="text-muted">
+                        Tickets sind problembezogene Diskussionen die vom Anwender erstellt werden können.
+                        Diese Diskussionen bestehen aus einem Ticket, sowie beliebig vielen Kommentaren darunter.
+                        Dabei wird meist ein z.B. technisches Problem erstellt und von den Moderatoren beantwortet.
+                    </p>
+                </div>
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <div class="card">
+                        <div class="card-body py-5 px-md-5">
+                            <h3 class="display-4">Sign Up</h3>
+                            <form method="POST" action="{% url 'register' %}" autocomplete="new-password">
+                                {% csrf_token %}
+                                <div class="form-outline mb-2">
+                                    <label for="email">E-Mail</label>
+                                    <input type="text" id="email" name="email" class="form-control" autofocus required/>
+                                </div>
+                                <div class="form-outline mb-2">
+                                    <label for="firstname">Firstname</label>
+                                    <input type="firstname" id="firstname" name="firstname" class="form-control"
+                                           oninput="update_username()" required/>
+                                </div>
+                                <div class="form-outline mb-2">
+                                    <label for="lastname">Lastname</label>
+                                    <input type="lastname" id="lastname" name="lastname" class="form-control"
+                                           oninput="update_username()" required/>
+                                </div>
+                                <div class="form-outline mb-2">
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" class="form-control" required/>
+                                </div>
+                                <div class="form-outline mb-2">
+                                    <label for="password_retype">Password</label>
+                                    <input type="password" id="password_retype" name="confirm_password"
+                                           class="form-control" required/>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="checkCustomUsername"
+                                           name="checkCustomUsername" onclick="showCustomUsername()">
+                                    <label class="form-check-label" for="checkCustomUsername">Custom username</label>
+                                </div>
+                                <div class="form-outline mb-4" style="display:none" id="customUsername">
+                                    <input type="username" id="username" name="username" class="form-control" required/>
+                                </div>
+                                <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
+                            </form>
+                            Have a login? <a href="{% url 'login' %}">Login</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showCustomUsername() {
+            var chboxs = document.getElementsByName("checkCustomUsername");
+            var vis = "none";
+            for (var i = 0; i < chboxs.length; i++) {
+                if (chboxs[i].checked) {
+                    vis = "block";
+                    break;
+                }
+            }
+            document.getElementById("customUsername").style.display = vis;
+        }
 
-    <br>
-
-
-<form method="POST" action="{% url 'register' %}" autocomplete="new-password">
-    {% csrf_token %}
-    <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
-    <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
-    <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>
-    <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
-    <input type="password" name="password" id="password" placeholder="Password"><br><br>
-    <input type="password" name="confirm_password" id="password_retype" placeholder="Retype password"><br><br>
-    <input type="submit" value="Submit"><br>
-    Have a login? <a href="{% url 'login' %}">Login</a>
-</form>
-
-
+        async function update_username() {
+            var firstname = document.getElementById("firstname").value.substring(0, 1);
+            var lastname = document.getElementById("lastname").value;
+            document.getElementById("username").value = firstname + "." + lastname;
+        }
+    </script>
 {% endblock %}
