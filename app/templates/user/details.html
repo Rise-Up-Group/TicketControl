@@ -15,6 +15,12 @@
             <td>E-Mail:</td>
             <td>{{ user.email }}</td>
         </tr>
+        {% if user.new_email %}
+            <tr>
+                <td>New E-Mail (unverified):</td>
+                <td>{{ user.new_email }}</td>
+            </tr>
+        {% endif %}
         <tr>
             <td>First name:</td>
             <td>{{ user.first_name }}</td>
