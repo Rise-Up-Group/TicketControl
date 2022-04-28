@@ -132,7 +132,11 @@ def activate_user_view(request):
         user = User.objects.get(id=request.POST['user-id'])
         token = request.POST['token']
         if account_activation_token.check_token(user, token):
-            user.email_confirmed = True
+            if not user.email_confirmed:
+                user.email_confirmed = True
+            else:
+                user.email = user.new_email
+                user.new_email = ""
             user.save()
             return redirect("login")
         else:
@@ -223,16 +227,16 @@ def edit_user_view(request, id):
                 if request.user.has_perm("ticketcontrol.change_user_permission"):
                     groups = request.POST.getlist("groups")
                 user = User.objects.get(id=id)
-                email_confirmed = None
-                if user.email != request.POST['email'] and not request.user.has_perm("ticketcontrol.change_user"):
-                    email_confirmed = False
-                user.update_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
+                user.update_user(None, request.POST['firstname'], request.POST['lastname'],
                                  request.POST['username'], password, groups,
-                                 request.POST.get("is_active", False) == "on", email_confirmed=email_confirmed)
-                if email_confirmed == False:
-                    user.send_emailverification_mail(request)
-                    logout(request)
-                    return render(request, "user/activate.html")
+                                 request.POST.get("is_active", False) == "on")
+                if user.email != request.POST['email']:
+                    if request.user.has_perm("ticketcontrol.change_user"):
+                        user.email = request.POST['email']
+                    else:
+                        user.update_user(email=request.POST['email'])
+                        user.send_emailverification_mail(request)
+                        return render(request, "user/activate.html")
                 return redirect("user_details", id=id)
             else:
                 # Should not happen anyway

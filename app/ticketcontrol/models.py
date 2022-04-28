@@ -15,7 +15,7 @@ class AccountActivationToken(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
         return (
             text_type(user.pk) + text_type(timestamp) +
-            text_type(user.email_confirmed)
+            text_type(user.email_confirmed) + text_type(user.email)
         )
 
 
@@ -37,6 +37,7 @@ class User(BaseUser):
             ("admin_general", "Allow access to the Admin Panel"),
         )
 
+    new_email = models.EmailField(blank=True)
     email_confirmed = models.BooleanField(default=False)
     reset_password = models.BooleanField(default=False)
 
@@ -66,11 +67,15 @@ class User(BaseUser):
         user.save()
         return user
 
-    def update_user(self, email, firstname, lastname, username, password, groups, is_active, email_confirmed=None):
-        self.email = email
-        self.first_name = firstname
-        self.last_name = lastname
-        self.username = username
+    def update_user(self, email=None, first_name=None, last_name=None, username=None, password=None, groups=None, is_active=None, email_confirmed=None):
+        if email is not None and self.email != email:
+            self.new_email = email
+        if first_name is not None:
+            self.first_name = first_name
+        if last_name is not None:
+            self.last_name = last_name
+        if username is not None:
+            self.username = username
         if password != "" and password is not None:
             self.set_password(password)
 
