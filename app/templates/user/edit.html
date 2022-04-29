@@ -16,8 +16,8 @@
     <input type="text" name="firstname" id="firstname" placeholder="Firstname" value="{{ content_user.first_name }}"><br><br>
     <input type="text" name="lastname" id="lastname" placeholder="Lastname" value="{{ content_user.last_name }}"><br><br>
     <input type="text" name="username" id="username" placeholder="Nickname" value="{{ content_user.username }}"><br><br>
-    <input type="password" name="password" id="password" placeholder="Password"><br><br>
-    <input type="password" name="password_retype" id="password_retype" placeholder="Retype password"><br><br>
+    <input type="password" name="password" id="password" placeholder="Password" minlength="8"><br><br>
+    <input type="password" name="password_retype" id="password_retype" placeholder="Retype password" minlength="8"><br><br>
     <label for="groups">Groups:</label><br>
     <select multiple="" name="groups" id="groups"{% if not can_change_permission %} disabled{% endif %}>
         {% for group in groups %}
