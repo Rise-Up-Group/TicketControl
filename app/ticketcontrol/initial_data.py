@@ -77,23 +77,13 @@ def load_groups():
             }
         }
         for group_name in default_groups:
-            print("name:"+group_name)
             group = Group.objects.create(name=str(group_name))
-            print(group.name)
-            print(default_groups[group_name])
             for app in default_groups[group_name]:
-                print("2")
                 app_label, model = app.split(".")
-                print(app_label)
                 contenttype = ContentType.objects.get(app_label=app_label, model=model)
-                print(contenttype)
-                print(default_groups[group_name][app])
                 for codename in default_groups[group_name][app]:
-                    print("3")
-                    print(contenttype.id, codename)
                     permission = BasePermission.objects.get(content_type=contenttype, codename=codename)
                     group.permissions.add(permission)
-                    print("4")
             group.save()
 
 
