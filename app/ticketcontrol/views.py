@@ -49,15 +49,16 @@ def ticket_view(request, id):
         ticket = get_object_or_404(Ticket, pk=id)
         try:
             comments = get_list_or_404(Comment, ticket_id=ticket.id)
-            try:
-                category = get_list_or_404(Category)
-                context = {"ticket": ticket, "moderators": ticket.moderator.all(),
-                           "participants": ticket.participating.all(), "comments": comments, "category": category}
-                return render(request, "ticket/detail.html", context)
-            except Http404:
-                return render_error(request, "404 - Not Found", "Unable to load Category")
         except Http404:
-            return render_error(request, "404 - Not Found", "Comments in Ticket " + id + " Not Found")
+            comments = None
+
+        try:
+            category = get_list_or_404(Category)
+            context = {"ticket": ticket, "moderators": ticket.moderator.all(),
+                       "participants": ticket.participating.all(), "comments": comments, "category": category}
+            return render(request, "ticket/detail.html", context)
+        except Http404:
+            return render_error(request, "404 - Not Found", "Unable to load Category")
 
         try:
             category = get_list_or_404(Category)
