@@ -36,12 +36,11 @@ class User(BaseUser):
             ("change_user_permission", "Change the permissions of other users"),
             ("admin_general", "Allow access to the Admin Panel"),
         )
-
     new_email = models.EmailField(blank=True)
     email_confirmed = models.BooleanField(default=False)
     reset_password = models.BooleanField(default=False)
 
-    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False):
+    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False, is_superuser=None):
         # TODO: preview in javascrip and show to user
         # TODO: nickname has to be unique (possibly with db)
         if username == "":
@@ -64,6 +63,8 @@ class User(BaseUser):
             Group.objects.get(name="user").user_set.add(user)
         user.is_active = is_active
         user.email_confirmed = email_confirmed
+        if is_superuser is not None:
+            user.is_superuser = is_superuser
         user.save()
         return user
 
@@ -144,9 +145,10 @@ class User(BaseUser):
         )
 
 
-class Permission(BasePermission):
+class Permission(models.Model):
+    perm = models.OneToOneField(BasePermission, on_delete=models.DO_NOTHING)
     def __str__(self):
-        return self.name
+        return self.perm.name
 
 
 class Category(models.Model):

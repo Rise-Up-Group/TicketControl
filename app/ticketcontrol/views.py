@@ -288,11 +288,11 @@ def create_group_view(request):
     if request.method == 'POST':
         group = Group.objects.create(name=request.POST['name'])
         permissions = request.POST.getlist("permissions")
-        allPermissions = Permission.objects.all().values_list("id", flat=True)
+        allPermissions = Permission.objects.all()
         for permission in permissions:
             inAllPermissions = False
             for perm in allPermissions:
-                if int(perm) == int(permission):
+                if int(perm.perm.id) == int(permission):
                     inAllPermissions = True
             if inAllPermissions:
                 group.permissions.add(permission)
@@ -311,7 +311,7 @@ def edit_group_view(request, id):
         if group.name != "admin":  # admin is superuser anyway
             groupPermissions = group.permissions.all()
             permissions = request.POST.getlist("permissions")
-            allPermissions = Permission.objects.all().values_list("id", flat=True)
+            allPermissions = Permission.objects.all()
             for permission in groupPermissions:
                 if not permission.id in permissions:
                     group.permissions.remove(permission.id)
@@ -323,7 +323,7 @@ def edit_group_view(request, id):
                         inGroupPermissions = True
                 inAllPermissions = False
                 for perm in allPermissions:
-                    if int(perm) == int(permission):
+                    if int(perm.perm.id) == int(permission):
                         inAllPermissions = True
                 if not inGroupPermissions and inAllPermissions:
                     group.permissions.add(permission)

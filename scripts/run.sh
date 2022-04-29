@@ -11,7 +11,6 @@ done
 
 python manage.py collectstatic --noinput
 python manage.py migrate
-ls -d ticketcontrol/fixtures/* | xargs python manage.py loaddata
 
 
 uwsgi --socket :9000 --workers 4 --master --enable-threads --module ticketcontrol.wsgi
