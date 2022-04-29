@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ticketcontrol', '0009_alter_user_options_user_email_confirmed_and_more'),
+        ('ticketcontrol', '0011_alter_user_options_user_email_confirmed_and_more'),
     ]
 
     operations = [

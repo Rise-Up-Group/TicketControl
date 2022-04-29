@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ticketcontrol', '0008_alter_ticket_status'),
+        ('ticketcontrol', '0010_permission'),
     ]
 
     operations = [
