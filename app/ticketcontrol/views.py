@@ -51,7 +51,7 @@ def ticket_view(request, id):
             comments = get_list_or_404(Comment, ticket_id=ticket.id)
             try:
                 category = get_list_or_404(Category)
-                context = {"ticket": ticket, "moderator": ticket.moderator.all(),
+                context = {"ticket": ticket, "moderators": ticket.moderator.all(),
                            "participants": ticket.participating.all(), "comments": comments, "category": category}
                 return render(request, "ticket/detail.html", context)
             except Http404:
@@ -61,7 +61,7 @@ def ticket_view(request, id):
 
         try:
             category = get_list_or_404(Category)
-            context = {"ticket": ticket, "moderator": ticket.moderator.all(),
+            context = {"ticket": ticket, "moderators": ticket.moderator.all(),
                        "participants": ticket.participating.all(), "comments": comments, "category": category}
             return render(request, "ticket/detail.html", context)
         except Http404:

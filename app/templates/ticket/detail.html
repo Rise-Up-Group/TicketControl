@@ -41,15 +41,15 @@
                 <p class="text-muted">
                     Moderatoren:
                     <span id="moderators">
-                    {% if not moderator.count == 0 %}
-                        {% for foo in moderator %}
-                            {% if forloop.last %}
-                                {{ foo.username }}
-                            {% else %}
-                                {{ foo.username }},
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
+                        {% if not moderators.count == 0 %}
+                            {% for moderator in moderators %}
+                                {% if forloop.last %}
+                                    {{ moderator.username }}
+                                {% else %}
+                                    {{ moderator.username }},
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
                     </span>
                 </p>
 
@@ -70,20 +70,19 @@
                         </datalist>
                     </form>
                 </div>
-
                 <p class="text-muted">
                     Teilnehmer:
                     <span id="participants">
-                {% if not participants.count == 0 %}
-                    {% for foo in participants %}
-                        {% if forloop.last %}
-                            {{ foo.username }}
-                        {% else %}
-                            {{ foo.username }},
+                        {% if not participants.count == 0 %}
+                            {% for participant in participants %}
+                                {% if forloop.last %}
+                                    {{ participant.username }}
+                                {% else %}
+                                    {{ participant.username }},
+                                {% endif %}
+                            {% endfor %}
                         {% endif %}
-                    {% endfor %}
-                {% endif %}
-                </span>
+                    </span>
                 </p>
             </div>
         </div>
