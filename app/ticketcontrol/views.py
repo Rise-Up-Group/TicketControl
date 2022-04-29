@@ -59,14 +59,6 @@ def ticket_view(request, id):
             return render(request, "ticket/detail.html", context)
         except Http404:
             return render_error(request, "404 - Not Found", "Unable to load Category")
-
-        try:
-            category = get_list_or_404(Category)
-            context = {"ticket": ticket, "moderators": ticket.moderator.all(),
-                       "participants": ticket.participating.all(), "comments": comments, "category": category}
-            return render(request, "ticket/detail.html", context)
-        except Http404:
-            return render_error(request, "404 - Not Found", "Unable to load Category")
     except Http404:
         return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
 
@@ -122,6 +114,8 @@ def register_view(request):
         password = request.POST['password']
         confirmPassword = request.POST['confirm_password']
         if password == confirmPassword:
+            if len(password) < 8:
+                return HttpResponse(status=411)
             user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
                                  request.POST['username'], password, groups=None, is_active=True, email_confirmed=False)
             User.send_emailverification_mail(user, request)
@@ -183,6 +177,8 @@ def user_passwordreset_request_view(request):
 def create_user_view(request):
     if (request.method == 'POST'):
         password = request.POST['password']
+        if len(password) < 8:
+            return HttpResponse(status=411)
         groups = None
         if request.user.has_perm("ticketcontrol.change_user_permission"):
             groups = request.POST.getlist("groups")
@@ -228,6 +224,8 @@ def edit_user_view(request, id):
             password = request.POST['password']
             passwordRetype = request.POST['password_retype']
             if password == "" or password == passwordRetype:
+                if password != "" and len(password) < 8:
+                    return HttpResponse(status=411)
                 groups = None
                 if request.user.has_perm("ticketcontrol.change_user_permission"):
                     groups = request.POST.getlist("groups")
