@@ -1,10 +1,10 @@
 {% extends "main.html" %}
 
-{% block title %}View User: {{ user.username }}{% endblock %}
+{% block title %}View User: {{ content_user.username }}{% endblock %}
 
 {% block content %}
     <br>
-    <h1 class="text-center display-4">{{ user.username }}</h1>
+    <h1 class="text-center display-4">{{ content_user.username }}</h1>
     <hr>
 
     <br>
@@ -13,26 +13,26 @@
         <tbody>
         <tr>
             <td>E-Mail:</td>
-            <td>{{ user.email }}</td>
+            <td>{{ content_user.email }}</td>
         </tr>
-        {% if user.new_email %}
+        {% if content_user.new_email %}
             <tr>
                 <td>New E-Mail (unverified):</td>
-                <td>{{ user.new_email }}</td>
+                <td>{{ content_user.new_email }}</td>
             </tr>
         {% endif %}
         <tr>
             <td>First name:</td>
-            <td>{{ user.first_name }}</td>
+            <td>{{ content_user.first_name }}</td>
         </tr>
         <tr>
             <td>Last name:</td>
-            <td>{{ user.last_name }}</td>
+            <td>{{ content_user.last_name }}</td>
         </tr>
         <tr>
             <td>Groups:</td>
             <td>
-                <ul>{% for group in user.groups.all %}
+                <ul>{% for group in content_user.groups.all %}
                     <li>{{ group.name }}</li>
                 {% endfor %}</ul>
             </td>
@@ -41,7 +41,7 @@
     </table>
     <br>
     {% if can_change %}
-        <a class="btn btn-primary" href="{% url 'edit_user' id=user.id %}">Edit</a>
+        <a class="btn btn-primary" href="{% url 'edit_user' id=content_user.id %}">Edit</a>
     {% endif %}
 
 {% endblock %}

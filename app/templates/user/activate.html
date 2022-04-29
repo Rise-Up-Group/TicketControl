@@ -11,10 +11,10 @@
     <br>
 
     {% if token %}
-    {{ user.username }}
+    {{ content_user.username }}
 <form method="POST" action="{% url 'activate_user' %}">
     {% csrf_token %}
-    <input type="hidden" name="user-id" id="user-id" value="{{ user.id }}">
+    <input type="hidden" name="user-id" id="user-id" value="{{ content_user.id }}">
     <input type="hidden" name="token" id="token" placeholder="token" value="{{ token }}"><br><br>
     <input type="submit" value="Activate">
 </form>

@@ -143,7 +143,7 @@ def activate_user_view(request):
         else:
             return render_error(request, "Invalid Token", "")
     user = User.objects.get(id=request.GET['user-id'])
-    return render(request, "user/activate.html", {"user": user, "token": request.GET['token']})
+    return render(request, "user/activate.html", {"content_user": user, "token": request.GET['token']})
 
 
 def user_passwordreset_view(request):
@@ -159,7 +159,7 @@ def user_passwordreset_view(request):
             return render_error(request, "Passwords do not match", "")
         else:
             return render_error(request, "Invalid Token", "")
-    return render(request, "user/passwordreset.html", {"user": User.objects.get(id=request.GET['user-id']), "token": request.GET['token']})
+    return render(request, "user/passwordreset.html", {"content_user": User.objects.get(id=request.GET['user-id']), "token": request.GET['token']})
 
 
 def user_passwordreset_request_view(request):
@@ -201,7 +201,7 @@ def manage_users_view(request):
 @login_required()
 def user_details_view(request, id):
     if request.user.has_perm("ticketcontrol.view_user") or request.user.id == id:
-        return render(request, "user/details.html", {"user": User.objects.get(id=id),
+        return render(request, "user/details.html", {"content_user": User.objects.get(id=id),
                                                      "can_change": request.user.has_perm(
                                                          "ticketcontrol.change_user") or request.user.id == id})
     return redirect("login")
@@ -234,6 +234,7 @@ def edit_user_view(request, id):
                 if user.email != request.POST['email']:
                     if request.user.has_perm("ticketcontrol.change_user"):
                         user.email = request.POST['email']
+                        user.save()
                     else:
                         user.update_user(email=request.POST['email'])
                         user.send_emailverification_mail(request)
@@ -246,7 +247,7 @@ def edit_user_view(request, id):
         groups = []
         for group in user.groups.all():
             groups.append(group.id)
-        return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(),
+        return render(request, "user/edit.html", {"content_user": user, "userGroups": groups, "groups": Group.objects.all(),
                                                   "can_change_permission": request.user.has_perm(
                                                       "ticketcontrol.change_user_permission"),
                                                   "can_change": True, "can_delete": request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id})
@@ -262,7 +263,7 @@ def unrestricted_delete_user_view(request, id):
     if request.method == 'POST':
         User.delete_user(id)
         return redirect("manage_users")
-    return render(request, "user/delete.html", {"user": get_object_or_404(User, pk=id)})
+    return render(request, "user/delete.html", {"content_user": get_object_or_404(User, pk=id)})
 
 
 @permission_required("ticketcontrol.delete_user")

@@ -1,6 +1,6 @@
 {% extends "main.html" %}
 
-{% block title %}Delete User: {{ user.username }}{% endblock %}
+{% block title %}Delete User: {{ content_user.username }}{% endblock %}
 
 {% block content %}
     <br>
@@ -9,8 +9,8 @@
 
     <br>
 
-    Really delete user {{ user.username }}?
-    <form method="POST" action="{% url 'delete_user' id=user.id %}">
+    Really delete user {{ content_user.username }}?
+    <form method="POST" action="{% url 'delete_user' id=content_user.id %}">
         {% csrf_token %}
         <input class="btn btn-danger" type="submit" value="Delete">
     </form>
