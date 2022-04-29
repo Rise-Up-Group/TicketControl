@@ -139,7 +139,7 @@ def activate_user_view(request):
             user.save()
             return redirect("login")
         else:
-            return render_error(request, "Invalid Token", "")
+            return HttpResponse(status=498)
     user = User.objects.get(id=request.GET['user-id'])
     return render(request, "user/activate.html", {"content_user": user, "token": request.GET['token']})
 
@@ -156,7 +156,7 @@ def user_passwordreset_view(request):
                 return redirect("dashboard")
             return render_error(request, "Passwords do not match", "")
         else:
-            return render_error(request, "Invalid Token", "")
+            return HttpResponse(status=498)
     return render(request, "user/passwordreset.html", {"content_user": User.objects.get(id=request.GET['user-id']), "token": request.GET['token']})
 
 
