@@ -116,10 +116,15 @@ def register_view(request):
         if password == confirmPassword:
             if len(password) < 8:
                 return HttpResponse(status=411)
-            user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                                 request.POST['username'], password, groups=None, is_active=True, email_confirmed=False)
-            User.send_emailverification_mail(user, request)
-            return render(request, "user/activate.html")
+            if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(username=request.POST['username']).exists():
+                user = User.add_user("", request.POST['firstname'], request.POST['lastname'],
+                                     request.POST['username'], password, groups=None, is_active=True, email_confirmed=False)
+                user.new_email = request.POST['email']
+                user.save()
+                User.send_emailverification_mail(user, request)
+                return render(request, "user/activate.html")
+            else:
+                return HttpResponse(status=409)
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
@@ -131,13 +136,17 @@ def activate_user_view(request):
         user = User.objects.get(id=request.POST['user-id'])
         token = request.POST['token']
         if account_activation_token.check_token(user, token):
-            if not user.email_confirmed:
-                user.email_confirmed = True
-            else:
-                user.email = user.new_email
-                user.new_email = ""
-            user.save()
-            return redirect("login")
+            if not User.objects.filter(email=user.new_email).exists():
+                if not user.email_confirmed:
+                    user.email_confirmed = True
+                    user.email = user.new_email
+                    user.new_email = ""
+                else:
+                    user.email = user.new_email
+                    user.new_email = ""
+                user.save()
+                return redirect("login")
+            return HttpResponse(status=409)
         else:
             return HttpResponse(status=498)
     user = User.objects.get(id=request.GET['user-id'])
@@ -182,9 +191,12 @@ def create_user_view(request):
         groups = None
         if request.user.has_perm("ticketcontrol.change_user_permission"):
             groups = request.POST.getlist("groups")
-        User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                      request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
-        return redirect("manage_users")
+        if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(username=request.POST['username']).exists():
+            User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
+                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
+            return redirect("manage_users")
+        else:
+            return HttpResponse(status=409)
     return render(request, "user/create.html", {"groups": Group.objects.all(),
                                                 "can_change_permission": request.user.has_perm(
                                                     "ticketcontrol.change_user_permission")})
@@ -230,18 +242,24 @@ def edit_user_view(request, id):
                 if request.user.has_perm("ticketcontrol.change_user_permission"):
                     groups = request.POST.getlist("groups")
                 user = User.objects.get(id=id)
-                user.update_user(None, request.POST['firstname'], request.POST['lastname'],
-                                 request.POST['username'], password, groups,
-                                 request.POST.get("is_active", False) == "on")
-                if user.email != request.POST['email']:
-                    if request.user.has_perm("ticketcontrol.change_user"):
-                        user.email = request.POST['email']
-                        user.save()
-                    else:
-                        user.update_user(email=request.POST['email'])
-                        user.send_emailverification_mail(request)
-                        return render(request, "user/activate.html")
-                return redirect("user_details", id=id)
+                if not User.objects.filter(username=request.POST['username']).exists():
+                    user.update_user(None, request.POST['firstname'], request.POST['lastname'],
+                                     request.POST['username'], password, groups,
+                                     request.POST.get("is_active", False) == "on")
+                    if user.email != request.POST['email']:
+                        if not User.objects.filter(email=request.POST['email']).exists():
+                            if request.user.has_perm("ticketcontrol.change_user"):
+                                user.email = request.POST['email']
+                                user.save()
+                            else:
+                                user.update_user(email=request.POST['email'])
+                                user.send_emailverification_mail(request)
+                                return render(request, "user/activate.html")
+                        else:
+                            return HttpResponse(status=409)
+                        return redirect("user_details", id=id)
+                else:
+                    return HttpResponse(status=409)
             else:
                 # Should not happen anyway
                 return render_error(request, "Passwords do not match", "")
