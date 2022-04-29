@@ -4,6 +4,7 @@ from django.db import connection
 
 from .models import Permission, User, Category
 
+
 def load_permissions():
     if Permission.objects.count() == 0:
         default_permissions = {
@@ -43,20 +44,24 @@ def load_permissions():
                     perm = Permission.objects.create(perm=permission)
                     perm.save()
 
+
 def load_groups():
     if Group.objects.count() == 0:
         default_groups = {
-            "admin": {
-
-            },
+            "admin": {},
             "moderator": {
                 "ticketcontrol": [
-                    "view_ticket", "add_ticket", "change_ticket", "delete_ticket"
+                    "view_ticket", "add_ticket", "change_ticket", "delete_ticket",
+                    "view_comment", "add_comment", "change_comment", "delete_comment",
+                    "view_attachment", "add_attachment", "change_attachment", "delete_attachment",
+                    "view_group", "view_user", "view_category"
                 ]
             },
             "user": {
                 "ticketcontrol": [
-
+                    "view_comment", "add_comment",
+                    "view_ticket", "add_ticket",
+                    "view_attachment", "view_category", "view_user"
                 ]
             }
         }
@@ -68,15 +73,19 @@ def load_groups():
                     perm = Permission.objects.get(contenttype=contenttype, codename=permission)
                     group.permissions.add(perm)
 
+
 def load_admin_user():
     if User.objects.count() == 0:
-        User.add_user("admin@example.com", "admin", "admin", "admin", "admin", groups=[Group.objects.get(name="admin").id], is_active=True, is_superuser=True)
+        User.add_user("admin@example.com", "admin", "admin", "admin", "admin",
+                      groups=[Group.objects.get(name="admin").id], is_active=True, is_superuser=True)
+
 
 def load_categories():
     if Category.objects.count() == 0:
         Category.objects.create(name="Default", color="ffffffff")
         Category.objects.create(name="Other", color="5e5e5eff")
         Category.objects.create(name="IT-Support", color="0000ffff")
+
 
 def load_initial_data():
     if "ticketcontrol_permission" in connection.introspection.table_names():
