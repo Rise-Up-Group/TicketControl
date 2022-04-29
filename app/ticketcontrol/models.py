@@ -1,8 +1,34 @@
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission as BasePermission
 from django.contrib.auth.models import User as BaseUser
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from six import text_type
 from django.db import models
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
+from .settings import EMAIL_HOST_USER
+
+
+class AccountActivationToken(PasswordResetTokenGenerator):
+    def _make_hash_value(self, user, timestamp):
+        return (
+            text_type(user.pk) + text_type(timestamp) +
+            text_type(user.email_confirmed) + text_type(user.email)
+        )
+
+
+class PasswordResetToken(PasswordResetTokenGenerator):
+    def _make_hash_value(self, user, timestamp):
+        return (
+            text_type(user.pk) + text_type(timestamp) +
+            text_type(user.reset_password) + text_type(user.password)
+        )
+
+
+account_activation_token = AccountActivationToken()
+password_reset_token = PasswordResetToken()
 
 class User(BaseUser):
     class Meta:
@@ -10,8 +36,11 @@ class User(BaseUser):
             ("change_user_permission", "Change the permissions of other users"),
             ("admin_general", "Allow access to the Admin Panel"),
         )
+    new_email = models.EmailField(blank=True)
+    email_confirmed = models.BooleanField(default=False)
+    reset_password = models.BooleanField(default=False)
 
-    def add_user(email, firstname, lastname, username, password, groups, is_active, is_superuser=None):
+    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False, is_superuser=None):
         # TODO: preview in javascrip and show to user
         # TODO: nickname has to be unique (possibly with db)
         if username == "":
@@ -33,50 +62,87 @@ class User(BaseUser):
         else:
             Group.objects.get(name="user").user_set.add(user)
         user.is_active = is_active
+        user.email_confirmed = email_confirmed
         if is_superuser is not None:
             user.is_superuser = is_superuser
         user.save()
         return user
 
-    def update_user(id, email, firstname, lastname, username, password, groups, is_active):
-        user = User.objects.get(id=id)
-        if user is not None:
-            user.email = email
-            user.first_name = firstname
-            user.last_name = lastname
-            user.username = username
-            if password != "" and password is not None:
-                user.set_password(password)
+    def update_user(self, email=None, first_name=None, last_name=None, username=None, password=None, groups=None, is_active=None, email_confirmed=None):
+        if email is not None and self.email != email:
+            self.new_email = email
+        if first_name is not None:
+            self.first_name = first_name
+        if last_name is not None:
+            self.last_name = last_name
+        if username is not None:
+            self.username = username
+        if password != "" and password is not None:
+            self.set_password(password)
 
-            if groups is not None:
-                userGroups = user.groups.all()
-                for group in userGroups:
-                    if not group.id in groups:
-                        Group.objects.get(id=group.id).user_set.remove(user)
-                for group in groups:
-                    found = False
-                    for userGroup in userGroups:
-                        if userGroup.id == group:
-                            found = True
-                    if not found:
-                        Group.objects.get(id=group).user_set.add(user)
+        if groups is not None:
+            userGroups = self.groups.all()
+            for group in userGroups:
+                if not group.id in groups:
+                    Group.objects.get(id=group.id).user_set.remove(self)
+            for group in groups:
+                found = False
+                for userGroup in userGroups:
+                    if userGroup.id == group:
+                        found = True
+                if not found:
+                    Group.objects.get(id=group).user_set.add(self)
 
-                user.is_superuser = False
-                user.is_staff = False
-                adminId = Group.objects.get(name="admin").id
-                for groupId in groups:
-                    if int(groupId) == adminId:
-                        user.is_superuser = True
-                        user.is_staff = True
+            self.is_superuser = False
+            self.is_staff = False
+            adminId = Group.objects.get(name="admin").id
+            for groupId in groups:
+                if int(groupId) == adminId:
+                    self.is_superuser = True
+                    self.is_staff = True
 
-            if is_active is not None:
-                user.is_active = is_active
-            user.save()
-            return user
-        return None
+        if is_active is not None:
+            self.is_active = is_active
+        if email_confirmed is not None:
+            self.email_confirmed = email_confirmed
+        self.save()
 
     def delete_user(id):
         User.objects.get(id=id).delete()
+
+    def send_emailverification_mail(self, request, new_user=True):
+        message = render_to_string("user/activate_mail.html", {
+            'user': self,
+            'domain': get_current_site(request).domain,
+            'token': account_activation_token.make_token(self),
+        })
+        if new_user:
+            subject = "Welcome to Ticketcontrol"
+        else:
+            subject="[Ticketcontrol] Confirm your EMail address"
+        send_mail(
+            subject=subject,
+            message="",
+            html_message=message,
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[self.email],
+            fail_silently=False
+        )
+
+    def send_passwordreset_mail(self, request):
+        message = render_to_string("user/passwordreset_mail.html", {
+            'user': self,
+            'domain': get_current_site(request).domain,
+            'token': password_reset_token.make_token(self),
+        })
+        send_mail(
+            subject="[Ticketcontrol] Reset your password",
+            message="",
+            html_message=message,
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[self.email],
+            fail_silently=False
+        )
 
 
 class Permission(models.Model):

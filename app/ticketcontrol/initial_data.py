@@ -50,34 +50,47 @@ def load_groups():
         default_groups = {
             "admin": {},
             "moderator": {
-                "ticketcontrol": [
-                    "view_ticket", "add_ticket", "change_ticket", "delete_ticket",
-                    "view_comment", "add_comment", "change_comment", "delete_comment",
-                    "view_attachment", "add_attachment", "change_attachment", "delete_attachment",
-                    "view_group", "view_user", "view_category"
-                ]
+                "ticketcontrol.ticket": [
+                    "view_ticket", "add_ticket", "change_ticket", "delete_ticket"
+                    ],
+                "ticketcontrol.comment": [
+                    "view_comment", "add_comment", "change_comment", "delete_comment"
+                ],
+                "ticketcontrol.attachment": [
+                    "view_attachment", "add_attachment", "change_attachment", "delete_attachment"
+                ],
+                "ticketcontrol.user": ["view_user"],
+                "ticketcontrol.category": ["view_category"]
             },
             "user": {
-                "ticketcontrol": [
-                    "view_comment", "add_comment",
-                    "view_ticket", "add_ticket",
-                    "view_attachment", "view_category", "view_user"
-                ]
+                "ticketcontrol.comment": [
+                    "view_comment", "add_comment"
+                ],
+                "ticketcontrol.ticket": [
+                    "view_ticket", "add_ticket"
+                ],
+                "ticketcontrol.attachment": [
+                    "view_attachment"
+                ],
+                "ticketcontrol.category": ["view_category"],
+                "ticketcontrol.user": ["view_user"]
             }
         }
         for group_name in default_groups:
-            group = Group.objects.create(name=group_name)
-            for app_label in default_groups[group_name]:
-                contenttype = ContentType.objects.get(app_label=app_label)
-                for permission in default_groups[group_name][app_label]:
-                    perm = Permission.objects.get(contenttype=contenttype, codename=permission)
-                    group.permissions.add(perm)
+            group = Group.objects.create(name=str(group_name))
+            for app in default_groups[group_name]:
+                app_label, model = app.split(".")
+                contenttype = ContentType.objects.get(app_label=app_label, model=model)
+                for codename in default_groups[group_name][app]:
+                    permission = BasePermission.objects.get(content_type=contenttype, codename=codename)
+                    group.permissions.add(permission)
+            group.save()
 
 
 def load_admin_user():
     if User.objects.count() == 0:
         User.add_user("admin@example.com", "admin", "admin", "admin", "admin",
-                      groups=[Group.objects.get(name="admin").id], is_active=True, is_superuser=True)
+                      groups=[Group.objects.get(name="admin").id], is_active=True, email_confirmed=True, is_superuser=True)
 
 
 def load_categories():
