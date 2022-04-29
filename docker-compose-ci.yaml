@@ -11,6 +11,12 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER} # user has to be root with this default config
       - DB_PASS=${DB_PASS}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_TLS=${EMAIL_TLS}
+      - EMAIL_SSL=${EMAIL_SSL}
+      - EMAIL_ADDRESS=${EMAIL_ADDRESS}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - STATIC_URL=/static/static/

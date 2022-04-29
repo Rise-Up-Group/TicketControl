@@ -3,13 +3,16 @@ import logging
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.core.validators import validate_email
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, redirect
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 from .models import *
+from .settings import EMAIL_HOST_USER
 
 logger = logging.getLogger(__name__)
 
@@ -96,16 +99,17 @@ def login_view(request):
                 user = None
 
         if user is not None and user.check_password(password):
-            if user.is_active:
+            if user.is_active and user.email_confirmed:
                 login(request, user)
                 if next is not False:
                     return HttpResponseRedirect(next)
                 return redirect("dashboard")
             else:
-                error = "User is not activated"
+                error = "User is not activated or email address is not confirmed"
         else:
             error = "Wrong username or password"
-
+    if request.user.is_authenticated:
+        return redirect("dashboard")
     return render(request, "user/login.html", {"error": error, "next": next})
 
 
@@ -115,13 +119,60 @@ def register_view(request):
         confirmPassword = request.POST['confirm_password']
         if password == confirmPassword:
             user = User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                                 request.POST['username'], password, None, 1)  # None: groups, 1: is_active
-            login(request, user)
-            return redirect("profile")
+                                 request.POST['username'], password, groups=None, is_active=True, email_confirmed=False)
+            User.send_emailverification_mail(user, request)
+            return render(request, "user/activate.html")
         else:
             # Should not happen anyway
             return render_error(request, "Passwords do not match", "")
     return render(request, "user/register.html")
+
+
+def activate_user_view(request):
+    if request.method == "POST":
+        user = User.objects.get(id=request.POST['user-id'])
+        token = request.POST['token']
+        if account_activation_token.check_token(user, token):
+            if not user.email_confirmed:
+                user.email_confirmed = True
+            else:
+                user.email = user.new_email
+                user.new_email = ""
+            user.save()
+            return redirect("login")
+        else:
+            return render_error(request, "Invalid Token", "")
+    user = User.objects.get(id=request.GET['user-id'])
+    return render(request, "user/activate.html", {"user": user, "token": request.GET['token']})
+
+
+def user_passwordreset_view(request):
+    if request.method == "POST":
+        user = User.objects.get(id=request.POST['user-id'])
+        token = request.POST['token']
+        if password_reset_token.check_token(user, token):
+            if request.POST['password'] == request.POST['confirm_password']:
+                user.set_password(request.POST['password'])
+                user.save()
+                login(request, user)
+                return redirect("dashboard")
+            return render_error(request, "Passwords do not match", "")
+        else:
+            return render_error(request, "Invalid Token", "")
+    return render(request, "user/passwordreset.html", {"user": User.objects.get(id=request.GET['user-id']), "token": request.GET['token']})
+
+
+def user_passwordreset_request_view(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        try:
+            validate_email(username)
+            user = User.objects.get(email=username)
+        except ValidationError:
+            user = User.objects.get(username=username)
+        user.send_passwordreset_mail(request)
+        return render(request, "user/passwordreset_request.html", {"sent_email": True})
+    return render(request, "user/passwordreset_request.html")
 
 
 @permission_required("ticketcontrol.add_user")
@@ -166,35 +217,39 @@ def user_live_search(request, typed_username):
     return JsonResponse(res, safe=False) # It's ok. Disables typecheck for dict. Make sure to only pass an array
 
 
-def unrestricted_edit_user_view(request, id, changePermission, deletePermission):
-    if request.method == 'POST':
-        password = request.POST['password']
-        passwordRetype = request.POST['password_retype']
-        if password == "" or password == passwordRetype:
-            groups = None
-            if request.user.has_perm("ticketcontrol.change_user_permission"):
-                groups = request.POST.getlist("groups")
-            User.update_user(id, request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                             request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
-            return redirect("user_details", id=id)
-        else:
-            # Should not happen anyway
-            return render_error(request, "Passwords do not match", "")
-    user = get_object_or_404(User, pk=id)
-    groups = []
-    for group in user.groups.all():
-        groups.append(group.id)
-    return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(),
-                                              "can_change_permission": request.user.has_perm(
-                                                  "ticketcontrol.change_user_permission"),
-                                              "can_change": changePermission, "can_delete": deletePermission})
-
-
 @login_required()
 def edit_user_view(request, id):
     if request.user.has_perm("ticketcontrol.change_user") or request.user.id == id:
-        return unrestricted_edit_user_view(request, id, True,
-                                           request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id)
+        if request.method == 'POST':
+            password = request.POST['password']
+            passwordRetype = request.POST['password_retype']
+            if password == "" or password == passwordRetype:
+                groups = None
+                if request.user.has_perm("ticketcontrol.change_user_permission"):
+                    groups = request.POST.getlist("groups")
+                user = User.objects.get(id=id)
+                user.update_user(None, request.POST['firstname'], request.POST['lastname'],
+                                 request.POST['username'], password, groups,
+                                 request.POST.get("is_active", False) == "on")
+                if user.email != request.POST['email']:
+                    if request.user.has_perm("ticketcontrol.change_user"):
+                        user.email = request.POST['email']
+                    else:
+                        user.update_user(email=request.POST['email'])
+                        user.send_emailverification_mail(request)
+                        return render(request, "user/activate.html")
+                return redirect("user_details", id=id)
+            else:
+                # Should not happen anyway
+                return render_error(request, "Passwords do not match", "")
+        user = get_object_or_404(User, pk=id)
+        groups = []
+        for group in user.groups.all():
+            groups.append(group.id)
+        return render(request, "user/edit.html", {"user": user, "userGroups": groups, "groups": Group.objects.all(),
+                                                  "can_change_permission": request.user.has_perm(
+                                                      "ticketcontrol.change_user_permission"),
+                                                  "can_change": True, "can_delete": request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id})
     return redirect("login")
 
 
