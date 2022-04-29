@@ -22,6 +22,7 @@ services:
       - EMAIL_HOST=smtp.ionos.de
       - EMAIL_PORT=465
       - EMAIL_TLS=true
+      - EMAIL_SSL=false
       - EMAIL_ADDRESS=noreply@riseupgroup.net
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - SECRET_KEY=changeme
