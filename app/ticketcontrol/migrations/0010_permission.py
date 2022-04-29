@@ -7,8 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('ticketcontrol', '0011_delete_permission'),
+        ('ticketcontrol', '0009_delete_permission'),
     ]
 
     operations = [

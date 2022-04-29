@@ -18,6 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
+from .initial_data import load_initial_data
 from .views import *
 
 app_name = "ticketcontrol"
@@ -55,3 +56,5 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
+
+load_initial_data()
