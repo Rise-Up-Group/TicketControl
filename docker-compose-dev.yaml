@@ -20,8 +20,8 @@ services:
       - DB_PASS=changeme
       - EMAIL_HOST=smtp.ionos.de
       - EMAIL_PORT=465
-      - EMAIL_TLS=true
-      - EMAIL_SSL=false
+      - EMAIL_TLS=True
+      - EMAIL_SSL=False
       - EMAIL_ADDRESS=noreply@riseupgroup.net
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - SECRET_KEY=changeme
