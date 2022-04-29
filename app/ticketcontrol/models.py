@@ -125,7 +125,7 @@ class User(BaseUser):
             message="",
             html_message=message,
             from_email=EMAIL_HOST_USER,
-            recipient_list=[self.email],
+            recipient_list=[self.new_email],
             fail_silently=False
         )
 
