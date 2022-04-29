@@ -77,9 +77,10 @@ class User(BaseUser):
         User.objects.get(id=id).delete()
 
 
-class Permission(BasePermission):
+class Permission(models.Model):
+    perm = models.OneToOneField(BasePermission, on_delete=models.DO_NOTHING)
     def __str__(self):
-        return self.name
+        return self.perm.name
 
 
 class Category(models.Model):
