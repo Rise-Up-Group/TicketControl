@@ -1,3 +1,4 @@
 Django>=4.0.3,<4.1
 mysql-connector-python>=8.0.28,<8.1 # native driver 'may' be faster
 uWSGI>=2.0.20,<2.1
+six>=1.16.0

@@ -15,7 +15,7 @@
     <label for="permissions">Permissions:</label><br>
     <select style="height: 50vh;" multiple="" name="permissions" id="permissions"{% if group.name == "admin" or not can_change %} disabled{% endif %}>
         {% for permission in permissions %}
-            <option class="checkbox" value="{{ permission.id }}"{% if permission.id in group_permissions %} selected{% endif %}>{{ permission.content_type.app_label }}.{{ permission.content_type.model }}.{{ permission.name }}</option>
+            <option class="checkbox" value="{{ permission.perm.id }}"{% if permission.perm.id in group_permissions %} selected{% endif %}>{{ permission.perm.content_type.app_label }}.{{ permission.perm.content_type.model }}.{{ permission.perm.name }}</option>
         {% endfor %}
     </select><br><br>
     {% if can_change %}

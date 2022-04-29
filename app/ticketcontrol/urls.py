@@ -18,6 +18,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
+from .initial_data import load_initial_data
 from .views import *
 
 app_name = "ticketcontrol"
@@ -35,10 +36,13 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
+    path('register/activate', activate_user_view, name='activate_user'),
     path('user/create', create_user_view, name='create_user'),
     path('user/<int:id>', user_details_view, name='user_details'),
     path('user/<int:id>/edit', edit_user_view, name='edit_user'),
     path('user/<int:id>/delete', delete_user_view, name='delete_user'),
+    path('user/passwordreset', user_passwordreset_view, name='reset_password'),
+    path('user/passwordreset/request', user_passwordreset_request_view, name='reset_password_request'),
     path('user/profile', profile_view, name='profile'),
     path('user/manage', manage_users_view, name='manage_users'),
     path('user/live_search/<str:typed_username>', user_live_search, name='user_live_search'),
@@ -59,3 +63,5 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
+
+load_initial_data()

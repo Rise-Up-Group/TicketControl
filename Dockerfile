@@ -1,5 +1,5 @@
 FROM python:3.9.10-alpine3.15
-LABEL maintainer="https://github.com/Rise-Up-Group"
+LABEL maintainer="https://github.com/riseupgroup"
 
 ENV PYTHONUNBUFFERED 1
 
