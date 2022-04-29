@@ -18,7 +18,7 @@
     <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
     <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>
     <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
-    <input type="password" name="password" id="password" placeholder="Password"><br><br>
+    <input type="password" name="password" id="password" placeholder="Password" minlength="8"><br><br>
     <label for="groups">Groups:</label><br>
     <select multiple="" name="groups" id="groups"{% if not can_change_permission %} disabled{% endif %}>
         {% for group in groups %}
