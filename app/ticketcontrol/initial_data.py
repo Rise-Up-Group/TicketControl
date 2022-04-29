@@ -100,7 +100,7 @@ def load_groups():
 def load_admin_user():
     if User.objects.count() == 0:
         User.add_user("admin@example.com", "admin", "admin", "admin", "admin",
-                      groups=[Group.objects.get(name="admin").id], is_active=True, is_superuser=True)
+                      groups=[Group.objects.get(name="admin").id], is_active=True, email_confirmed=True, is_superuser=True)
 
 
 def load_categories():
