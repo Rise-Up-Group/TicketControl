@@ -246,8 +246,8 @@ def edit_user_view(request, id):
             if request.user.has_perm("ticketcontrol.change_user_permission"):
                 groups = request.POST.getlist("groups")
             user = User.objects.get(id=id)
-            #TODO: check if the not should be removed:
-            if not User.objects.filter(username=request.POST['username']).exists():
+            if user.username == request.POST['username'] or not User.objects.filter(
+                    username=request.POST['username']).exists():
                 user.update_user(None, request.POST['firstname'], request.POST['lastname'],
                                  request.POST['username'], password, groups,
                                  request.POST.get("is_active", False) == "on")
@@ -262,20 +262,18 @@ def edit_user_view(request, id):
                             return render(request, "user/activate.html")
                     else:
                         return HttpResponse(status=409)
-                    return redirect("user_details", id=id)
+                    return redirect("edit_user", id=id)
             else:
                 return HttpResponse(status=409)
         user = get_object_or_404(User, pk=id)
         groups = []
         for group in user.groups.all():
             groups.append(group.id)
-        return render(request, "user/edit.html", {"content_user": user, "userGroups": groups, "groups": Group.objects.all(),
-                                                  "can_change_permission": request.user.has_perm(
-                                                      "ticketcontrol.change_user_permission"),
-                                                  "can_change": True, "can_delete": request.user.has_perm(
-                "ticketcontrol.delete_user") or request.user.id == id})
-
-
+        return render(request, "user/edit.html",
+                      {"content_user": user, "userGroups": groups, "groups": Group.objects.all(),
+                       "can_change_permission": request.user.has_perm("ticketcontrol.change_user_permission"),
+                       "can_change": True,
+                       "can_delete": request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id})
     return redirect("login")
 
 
