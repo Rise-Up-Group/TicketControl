@@ -438,14 +438,19 @@ def ticket_moderator_add(request, id, username=None):
     return HttpResponse(get_token(request))
 
 
-def attachment_access_control(request, id):
+def attachment_access_control(request, id, name=None):
+    if name is None:
+        name = str(id)
     attachment = Attachment.objects.get(id=id)
     if attachment.user.id == request.user.id:
         if not settings.DEBUG:
             response = HttpResponse()
             # Content-type will be detected by nginx
             del response['Content-Type']
-            response['X-Accel-Redirect'] = "/serve_attachment/" + str(id)
+            response['X-Accel-Redirect'] = '/serve_attachment/' + str(id)
+            response['Content-Disposition'] = 'attachment;filename="'+name+'"'
             return response
         else:
-            return serve(request, str(id), document_root="uploads")
+            response = serve(request, str(id), document_root="uploads")
+            response['Content-Disposition'] = 'attachment;filename="' + name + '"'
+            return response

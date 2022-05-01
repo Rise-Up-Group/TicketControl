@@ -221,4 +221,4 @@ class Attachment(models.Model):
                 for chunk in file.chunks():
                     destination.write(chunk)
     def __str__(self):
-        return self.filename + " (" + str(self.size) + ")"
+        return self.filename + " (size: " + str(self.size) + ")"

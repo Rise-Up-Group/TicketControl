@@ -94,7 +94,7 @@
             {% if ticket.attachment_set.count > 0 %}
                 Attachments:<br>
                 {% for attachment in ticket.attachment_set.all %}
-                {{ attachment }}<br>
+                    <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a><br>
                 {% endfor %}
             {% endif %}
             <p class="blockquote-footer mb-0 font-italic">
@@ -109,11 +109,11 @@
                 <hr>
                 <p>{{ comment.content }}</p>
                 {% if comment.attachment_set.count > 0 %}
-                Attachments:<br>
-                {% for attachment in comment.attachment_set.all %}
-                {{ attachment }}<br>
-                {% endfor %}
-            {% endif %}
+                    Attachments:<br>
+                    {% for attachment in comment.attachment_set.all %}
+                        <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a><br>
+                    {% endfor %}
+                {% endif %}
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ comment.creationDate }}
                 </p>
