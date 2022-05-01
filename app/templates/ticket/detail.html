@@ -91,6 +91,12 @@
             <p class="lead">Beschreibung</p>
             <hr>
             <p>{{ ticket.description }}</p>
+            {% if ticket.attachment_set.count > 0 %}
+                Attachments:<br>
+                {% for attachment in ticket.attachment_set.all %}
+                {{ attachment }}<br>
+                {% endfor %}
+            {% endif %}
             <p class="blockquote-footer mb-0 font-italic">
                 {{ ticket.creationDate }}
             </p>
@@ -102,6 +108,12 @@
                     | {{ comment.user.username }}</p>
                 <hr>
                 <p>{{ comment.content }}</p>
+                {% if comment.attachment_set.count > 0 %}
+                Attachments:<br>
+                {% for attachment in comment.attachment_set.all %}
+                {{ attachment }}<br>
+                {% endfor %}
+            {% endif %}
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ comment.creationDate }}
                 </p>
@@ -111,14 +123,14 @@
                 style="border: .05rem solid #a9a9a9; border-left: .25rem solid #00ff00;">
             <p class="lead">Kommentar hinzufügen:</p>
             <hr>
-            <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST">
+            <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
                                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
                                           name="comment"></textarea>
                 </div>
                 <div class="file-drop-area bg-white text-center" style="border: .05rem solid #a9a9a9">
-                    <input class="file-input" type="file" multiple/>
+                    <input class="file-input" type="file" name="attachments" multiple/>
                     <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
                 </div>
                 <br>

@@ -376,8 +376,10 @@ def delete_group_view(request, id):
 @login_required()
 def ticket_new_view(request):
     if request.method == 'POST':
-        Ticket.add_ticket(request.POST["title"], request.POST["description"], User.objects.get(id=request.user.id),
+        user = User.objects.get(id=request.user.id)
+        ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
                           Category.objects.get(id=request.POST["category"]))
+        Attachment.add_attachments(request.FILES.getlist("attachments"), ticket=ticket, user=user)
         return redirect('/ticket/my')
     else:
         try:
@@ -392,7 +394,9 @@ def ticket_new_view(request):
 def ticket_comment_add(request, id):
     if request.method == 'POST':
         ticket = Ticket.objects.get(id=id)
-        ticket.add_comment(request.POST["comment"], User.objects.get(id=request.user.id))
+        user = User.objects.get(id=request.user.id)
+        comment = ticket.add_comment(request.POST["comment"], user)
+        Attachment.add_attachments(request.FILES.getlist("attachments"), comment=comment, user=user)
         return redirect('/ticket/' + str(id))
     return HttpResponse(status=400)
 

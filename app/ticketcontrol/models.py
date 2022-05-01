@@ -214,5 +214,11 @@ class Attachment(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.DO_NOTHING, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, blank=False)
 
+    def add_attachments(attachments:list, user, ticket=None, comment=None):
+        for file in attachments:
+            attachment = Attachment.objects.create(filename=file.name, size=file.size, ticket=ticket, comment=comment, user=user)
+            with open("uploads/" + str(attachment.id), "wb+") as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
     def __str__(self):
-        return self.ticket.title + " File: " + self.filename + "(" + self.size + ")"
+        return self.filename + " (" + str(self.size) + ")"
