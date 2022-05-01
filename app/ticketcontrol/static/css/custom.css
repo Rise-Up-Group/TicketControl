@@ -1,13 +1,30 @@
 
 .file-drop-area {
     position: relative;
+    display: flex;
     align-items: center;
     max-width: 100%;
-    padding: 25px;
+    padding: 0.5rem;
     border: 1px dashed rgba(255, 255, 255, 0.4);
     border-radius: 3px;
     transition: 0.2s
 }
+.file-drop-area > span {
+    flex: 100% 1 1;
+    margin: 20px;
+}
+
+
+.file-drop-list {
+    flex: 0px 1 1;
+    margin: 0 1rem 0 1rem;
+    text-align: left;
+}
+.file-drop-list > span {
+    white-space: nowrap;
+
+}
+
 
 .choose-file-button {
     flex-shrink: 0;

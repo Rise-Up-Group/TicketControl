@@ -1,5 +1,5 @@
 {% extends "main.html" %}
-
+{% load static %}
 {% block content %}
     <div class="container bg-transparent text-dark rounded mt-3">
         <form method="POST" action="{% url 'create_ticket' %}" enctype="multipart/form-data">
@@ -31,7 +31,8 @@
                                       name="description"></textarea>
                     </div>
                     <div class="file-drop-area bg-white text-center" style="border: .05rem solid #a9a9a9">
-                        <input class="file-input" type="file" name="attachments" multiple />
+                        <input class="file-input" type="file" name="attachments" onchange="updateFileDropArea(this);" multiple />
+                        <div class="file-drop-list"></div>
                         <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
                     </div>
                     <br>
@@ -72,4 +73,5 @@
             </div>
         </div>
     </div>
+    <script src="{% static '/js/fileDropArea.js' %}"></script>
 {% endblock %}
