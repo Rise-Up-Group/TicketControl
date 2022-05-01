@@ -1,47 +1,51 @@
 {% extends "main.html" %}
 
+{% load static %}
+
 {% block title %}View User: {{ content_user.username }}{% endblock %}
 
 {% block content %}
-    <br>
-    <h1 class="text-center display-4">{{ content_user.username }}</h1>
-    <hr>
-
-    <br>
-
-    <table>
-        <tbody>
-        <tr>
-            <td>E-Mail:</td>
-            <td>{{ content_user.email }}</td>
-        </tr>
-        {% if content_user.new_email %}
-            <tr>
-                <td>New E-Mail (unverified):</td>
-                <td>{{ content_user.new_email }}</td>
-            </tr>
-        {% endif %}
-        <tr>
-            <td>First name:</td>
-            <td>{{ content_user.first_name }}</td>
-        </tr>
-        <tr>
-            <td>Last name:</td>
-            <td>{{ content_user.last_name }}</td>
-        </tr>
-        <tr>
-            <td>Groups:</td>
-            <td>
-                <ul>{% for group in content_user.groups.all %}
-                    <li>{{ group.name }}</li>
-                {% endfor %}</ul>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <br>
-    {% if can_change %}
-        <a class="btn btn-primary" href="{% url 'edit_user' id=content_user.id %}">Edit</a>
-    {% endif %}
-
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start">
+        <div class="container">
+            <div class="row gx-lg-5 align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <h1 class="display-2 fw-bold ls-tight">Nutzer</h1>
+                    <!--<h2 class="text-primary display-3" id="preview_username">{{ content_user.username }}</h2>-->
+                    <div class="col-md-6 mb-4 mx-auto bg-light rounded">
+                        <!--<img class="rounded-circle" alt="100x100" src="" data-holder-rendered="true">-->
+                        <p class="display-1" id="preview_initials">
+                            {{ content_user.first_name|make_list|first }}{{ content_user.last_name|make_list|first }}</p>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <div class="card">
+                        <div class="card-body py-5 px-md-5">
+                            <input autocomplete="false" name="hidden" type="text" style="display:none;">
+                            <div class="form-outline mb-2">
+                                <label>Firstname</label>
+                                <input class="form-control" value="{{ content_user.first_name }}"
+                                       disabled/>
+                            </div>
+                            <div class="form-outline mb-2">
+                                <label>Lastname</label>
+                                <input class="form-control" value="{{ content_user.last_name }}"
+                                        disabled/>
+                            </div>
+                            <div class="form-outline mb-2">
+                                <label>Username</label>
+                                <input class="form-control" value="{{ content_user.username }}" disabled/>
+                            </div>
+                            <div class="form-outline mb-4">
+                                <label>Date</label>
+                                <input class="form-control" value="{{ content_user.date_joined|date}}" disabled/>
+                            </div>
+                            {% if can_change %}
+                                <a class="btn btn-primary btn-block mb-2" href="{% url 'edit_user' id=content_user.id %}">Edit</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

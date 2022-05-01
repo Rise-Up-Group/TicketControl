@@ -111,7 +111,7 @@ class User(BaseUser):
         User.objects.get(id=id).delete()
 
     def send_emailverification_mail(self, request, new_user=True):
-        message = render_to_string("user/activate_mail.html", {
+        message = render_to_string("email/activate_mail.html", {
             'user': self,
             'domain': get_current_site(request).domain,
             'token': account_activation_token.make_token(self),
@@ -130,7 +130,7 @@ class User(BaseUser):
         )
 
     def send_passwordreset_mail(self, request):
-        message = render_to_string("user/passwordreset_mail.html", {
+        message = render_to_string("email/passwordreset_mail.html", {
             'user': self,
             'domain': get_current_site(request).domain,
             'token': password_reset_token.make_token(self),

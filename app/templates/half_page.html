@@ -1,0 +1,31 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <div class="px-4 py-5 px-md-5 text-center text-lg-start">
+        <div class="container">
+            <div class="row gx-lg-5 align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <h1 class="my-5 display-3 fw-bold ls-tight">
+                        Ticketcontrol
+                        <br/>
+                        <span class="text-primary display-4">by RiseUp Group</span>
+                    </h1>
+                    <p class="text-muted">
+                        Tickets sind problembezogene Diskussionen die vom Anwender erstellt werden können.
+                        Diese Diskussionen bestehen aus einem Ticket, sowie beliebig vielen Kommentaren darunter.
+                        Dabei wird meist ein z.B. technisches Problem erstellt und von den Moderatoren beantwortet.
+                    </p>
+                </div>
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <div class="card">
+                        <div class="card-body py-5 px-md-5">
+                            {% block half %}
+
+                            {% endblock %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
