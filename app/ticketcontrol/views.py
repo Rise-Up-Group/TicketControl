@@ -1,4 +1,5 @@
 import logging
+import os
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
@@ -13,6 +14,8 @@ from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.conf import settings
+from django.views.static import serve
 
 from .models import *
 from .settings import EMAIL_HOST_USER
@@ -433,3 +436,16 @@ def ticket_moderator_add(request, id, username=None):
         except DatabaseError:
             return HttpResponse(status=409)
     return HttpResponse(get_token(request))
+
+
+def attachment_access_control(request, id):
+    attachment = Attachment.objects.get(id=id)
+    if attachment.user.id == request.user.id:
+        if not settings.DEBUG:
+            response = HttpResponse()
+            # Content-type will be detected by nginx
+            del response['Content-Type']
+            response['X-Accel-Redirect'] = "/serve_attachment/" + str(id)
+            return response
+        else:
+            return serve(request, str(id), document_root="uploads")
