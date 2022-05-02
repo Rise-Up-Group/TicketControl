@@ -442,7 +442,20 @@ def attachment_access_control(request, id, name=None):
     if name is None:
         name = str(id)
     attachment = Attachment.objects.get(id=id)
-    if attachment.user.id == request.user.id:
+    print(attachment.ticket.participating.all())
+    authorized = False
+    if request.user.id == attachment.user.id or \
+            request.user.id == attachment.ticket.owner.id:
+        authorized = True
+    else:
+        for participant in attachment.ticket.participating.all():
+            if request.user.id == participant.id:
+                authorized = True
+        if not authorized:
+            for moderator in attachment.ticket.moderator.all():
+                if request.user.id == moderator.id:
+                    authorized = True
+    if authorized:
         if not settings.DEBUG:
             response = HttpResponse()
             # Content-type will be detected by nginx
@@ -454,3 +467,5 @@ def attachment_access_control(request, id, name=None):
             response = serve(request, str(id), document_root="uploads")
             response['Content-Disposition'] = 'attachment;filename="' + name + '"'
             return response
+    else:
+        return HttpResponse(status=403)
