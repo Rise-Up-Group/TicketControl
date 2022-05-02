@@ -6,36 +6,48 @@
         <div class="card-header bg-secondary text-white">
             <h5>Meine Tickets</h5>
         </div>
-    <div class="card-body bg-light">
-        {% if tickets|length > 0 %}
-            <table class="table table-sm table-hover">
-                <thead>
-                <tr>
-                    <th scope="row">Id</th>
-                    <th>Kategorie</th>
-                    <th>Titel</th>
-                    <th>Participants</th>
-                    <th>Modarator</th>
-                </tr>
-                </thead>
-                <tbody>
+        <div class="card-body bg-light">
+            {% if tickets|length > 0 %}
+                <table class="table table-sm table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="row">Id</th>
+                        <th>Kategorie</th>
+                        <th>Titel</th>
+                        <th>Participants</th>
+                        <th>Modarator</th>
+                    </tr>
+                    </thead>
+                    <tbody>
 
-                {% for ticket in tickets %}
-                    
-                <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
-                    <th>#{{ ticket.id }}</th>
-                    <td>{{ ticket.category }}</td>
-                    <td>{{ ticket.title }}</td>
-                    <td>{{ ticket.participating }}</td>
-                    <td>{{ ticket.moderator }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button" href="{% url 'create_ticket' %}">Ticket erstellen?</a></p>
-        {% endif %}
+                    {% for ticket in tickets %}
+
+                        <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
+                            <th>#{{ ticket.id }}</th>
+                            <td>{{ ticket.category }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>
+                                {% for participant in ticket.participating.all %}
+                                    <a href="{% url 'user_details' id=participant.id %}">{{ participant.username }}</a>
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for moderator in ticket.moderator.all %}
+                                    <a href="{% url 'user_details' id=moderator.id %}">{{ moderator.username }}</a>
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button"
+                                                                    href="{% url 'create_ticket' %}">Ticket
+                    erstellen?</a></p>
+            {% endif %}
+        </div>
     </div>
-</div>
 
 {% endblock %}
