@@ -13,7 +13,8 @@
                         aria-haspopup="true" aria-expanded="false">options
                 </button>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Status ändern</a>
+                    <a class="dropdown-item" type="button" data-toggle="modal" data-target="#change-status">Status
+                        ändern</a>
                     <a class="dropdown-item" href="#">Löschen</a>
                     <a class="dropdown-item" href="#">Aus Datenbank löschen</a>
                     <div role="separator" class="dropdown-divider"></div>
@@ -139,23 +140,34 @@
             </form>
         </figure>
     </div>
-    <div class="modal fade" id="change-ticket-status" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="change-status" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4>Ticket Status ändern</h4>
+                    <h5 class="modal-title" id="exampleModalLongTitle">Status von Ticket #{{ ticket.id }} ändern</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="modal-body">
-                    <p>Bitte bestätigen Sie, dass ungespeicherte Veränderungen verloren gehen können!</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Zurück</button>
-                    <button type="button" class="btn btn-warning">Löschen</button>
-                </div>
+                <form method="POST" action="{% url 'update_status_ticket' id=ticket.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <select class="custom-select" id="status_choice" name="status_choice">
+                            {% for StatusChoice in ticket.StatusChoices %}
+                                <option value="{{ StatusChoice }}">{{ StatusChoice }}</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zurück</button>
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
     <script>
         async function search_and_update_usernames(typed_username) {
             const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json();
@@ -167,6 +179,7 @@
         }
 
         var participantToken, moderatorToken;
+
         async function get_token() {
             let tokenResponse = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}`);
             participantToken = new FormData();

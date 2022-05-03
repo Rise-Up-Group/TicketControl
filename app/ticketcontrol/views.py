@@ -24,6 +24,7 @@ def render_error(request, title, message):
     context = {'title': title, 'message': message}
     return render(request, "error.html", context)
 
+
 def dashboard_view(request):
     tickets = Ticket.objects.filter(owner=request.user.id)
     context = {'tickets': tickets}
@@ -39,6 +40,7 @@ def home_view(request):
 def mytickets_view(request):
     context = {"tickets": Ticket.objects.filter(owner=request.user.id)}
     return render(request, "ticket/manage.html", context)
+
 
 @login_required()
 def ticket_view(request, id):
@@ -116,9 +118,11 @@ def register_view(request):
         if password == confirmPassword:
             if len(password) < 8:
                 return HttpResponse(status=411)
-            if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(username=request.POST['username']).exists():
+            if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(
+                    username=request.POST['username']).exists():
                 user = User.add_user("", request.POST['firstname'], request.POST['lastname'],
-                                     request.POST['username'], password, groups=None, is_active=True, email_confirmed=False)
+                                     request.POST['username'], password, groups=None, is_active=True,
+                                     email_confirmed=False)
                 user.new_email = request.POST['email']
                 user.save()
                 User.send_emailverification_mail(user, request)
@@ -166,7 +170,8 @@ def user_passwordreset_view(request):
             return render_error(request, "Passwords do not match", "")
         else:
             return HttpResponse(status=498)
-    return render(request, "user/passwordreset.html", {"content_user": User.objects.get(id=request.GET['user-id']), "token": request.GET['token']})
+    return render(request, "user/passwordreset.html",
+                  {"content_user": User.objects.get(id=request.GET['user-id']), "token": request.GET['token']})
 
 
 def user_passwordreset_request_view(request):
@@ -191,7 +196,8 @@ def create_user_view(request):
         groups = None
         if request.user.has_perm("ticketcontrol.change_user_permission"):
             groups = request.POST.getlist("groups")
-        if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(username=request.POST['username']).exists():
+        if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(
+                username=request.POST['username']).exists():
             User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
                           request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
             return redirect("manage_users")
@@ -226,7 +232,7 @@ def user_live_search(request, typed_username):
     for user in some_users:
         newUser = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
         res.append(newUser)
-    return JsonResponse(res, safe=False) # It's ok. Disables typecheck for dict. Make sure to only pass an array
+    return JsonResponse(res, safe=False)  # It's ok. Disables typecheck for dict. Make sure to only pass an array
 
 
 @login_required()
@@ -267,10 +273,12 @@ def edit_user_view(request, id):
         groups = []
         for group in user.groups.all():
             groups.append(group.id)
-        return render(request, "user/edit.html", {"content_user": user, "userGroups": groups, "groups": Group.objects.all(),
-                                                  "can_change_permission": request.user.has_perm(
-                                                      "ticketcontrol.change_user_permission"),
-                                                  "can_change": True, "can_delete": request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id})
+        return render(request, "user/edit.html",
+                      {"content_user": user, "userGroups": groups, "groups": Group.objects.all(),
+                       "can_change_permission": request.user.has_perm(
+                           "ticketcontrol.change_user_permission"),
+                       "can_change": True,
+                       "can_delete": request.user.has_perm("ticketcontrol.delete_user") or request.user.id == id})
     return redirect("login")
 
 
@@ -423,6 +431,23 @@ def ticket_moderator_add(request, id, username=None):
         try:
             ticket = Ticket.objects.get(id=id)
             ticket.moderator.add(User.objects.get(username=username))
+            if ticket.status == "Unassigned":
+                ticket.set_status("Assigned")
+                ticket.save()
+            return HttpResponse(status=200)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
+
+
+@permission_required("ticketcontrol.change_ticket")
+def ticket_status_update(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_status(request.POST['status_choice'])
             return HttpResponse(status=200)
         except ObjectDoesNotExist:
             return HttpResponse(status=404)
