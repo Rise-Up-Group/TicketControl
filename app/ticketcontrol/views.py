@@ -448,7 +448,7 @@ def ticket_status_update(request, id):
         try:
             ticket = Ticket.objects.get(id=id)
             ticket.set_status(request.POST['status_choice'])
-            return HttpResponse(status=200)
+            return redirect("ticket_view", id=id)
         except ObjectDoesNotExist:
             return HttpResponse(status=404)
         except DatabaseError:
