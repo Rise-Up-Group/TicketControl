@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
     <div class="container bg-transparent text-dark rounded mt-3">
-        <form method="POST" action="{% url 'create_ticket' %}" enctype="multipart/form-data">
+        <form method="POST" action="{% url 'create_ticket' %}">
             {% csrf_token %}
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
@@ -30,10 +30,12 @@
                             <textarea class="form-control" id="exampleFormControlTextarea1" rows="15"
                                       name="description"></textarea>
                     </div>
-                    <div class="file-drop-area bg-white text-center" style="border: .05rem solid #a9a9a9">
-                        <input class="file-input" type="file" name="attachments" onchange="updateFileDropArea(this);" multiple />
+                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9">
                         <div class="file-drop-list"></div>
-                        <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                        <div class="file-drop-area">
+                            <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this);" multiple />
+                            <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                        </div>
                     </div>
                     <br>
                     <div class="text-white">

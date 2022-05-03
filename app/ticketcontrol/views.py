@@ -196,7 +196,7 @@ def create_user_view(request):
             groups = request.POST.getlist("groups")
         if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(username=request.POST['username']).exists():
             User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
+                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on", email_confirmed=True)
             return redirect("manage_users")
         else:
             return HttpResponse(status=409)
@@ -382,7 +382,11 @@ def ticket_new_view(request):
         user = User.objects.get(id=request.user.id)
         ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
                           Category.objects.get(id=request.POST["category"]))
-        Attachment.add_attachments(request.FILES.getlist("attachments"), ticket=ticket, user=user)
+        for attachment_id in request.POST.getlist("attachments"):
+            attachment = Attachment.objects.get(id=attachment_id)
+            if attachment.user.id == request.user.id:
+                ticket.attachment_set.add(attachment)
+        ticket.save()
         return redirect('/ticket/my')
     else:
         try:
@@ -399,7 +403,10 @@ def ticket_comment_add(request, id):
         ticket = Ticket.objects.get(id=id)
         user = User.objects.get(id=request.user.id)
         comment = ticket.add_comment(request.POST["comment"], user)
-        Attachment.add_attachments(request.FILES.getlist("attachments"), comment=comment, user=user)
+        for attachment_id in request.POST.getlist("attachments"):
+            attachment = Attachment.objects.get(id=attachment_id)
+            if attachment.user.id == request.user.id:
+                comment.attachment_set.add(attachment)
         return redirect('/ticket/' + str(id))
     return HttpResponse(status=400)
 
@@ -442,10 +449,10 @@ def attachment_access_control(request, id, name=None):
     if name is None:
         name = str(id)
     attachment = Attachment.objects.get(id=id)
-    print(attachment.ticket.participating.all())
     authorized = False
     if request.user.id == attachment.user.id or \
-            request.user.id == attachment.ticket.owner.id:
+            request.user.id == attachment.ticket.owner.id or \
+            request.user.has_perm("ticketcontrol.view_attachment"):
         authorized = True
     else:
         for participant in attachment.ticket.participating.all():
@@ -469,3 +476,15 @@ def attachment_access_control(request, id, name=None):
             return response
     else:
         return HttpResponse(status=403)
+
+
+@permission_required("ticketcontrol.add_attachment")
+def upload_attachment_view(request):
+    if request.method == "POST":
+        file = request.FILES['attachment']
+        attachment = Attachment.objects.create(filename=file.name, size=file.size, ticket=None, comment=None,
+                                               user=User.objects.get(id=request.user.id))
+        with open("uploads/" + str(attachment.id), "wb+") as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        return HttpResponse(str(attachment.id))
