@@ -26,8 +26,10 @@ def render_error(request, title, message):
 
 
 def dashboard_view(request):
-    tickets = Ticket.objects.filter(owner=request.user.id)
-    context = {'tickets': tickets}
+    own_tickets = Ticket.objects.filter(owner=request.user.id)
+    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id)
+    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id)
+    context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "dashboard.html", context)
 
 
@@ -35,10 +37,12 @@ def home_view(request):
     return render(request, "home.html")
 
 
-##TODO: fix
 @login_required()
 def mytickets_view(request):
-    context = {"tickets": Ticket.objects.filter(owner=request.user.id)}
+    own_tickets = Ticket.objects.filter(owner=request.user.id)
+    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id)
+    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id)
+    context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets, 'closed': closed_tickets}}
     return render(request, "ticket/manage.html", context)
 
 

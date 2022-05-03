@@ -2,12 +2,12 @@
 
 {% block content %}
     <br>
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header bg-secondary text-white">
             <h5>Meine Tickets</h5>
         </div>
         <div class="card-body bg-light">
-            {% if tickets|length > 0 %}
+            {% if tickets.own|length > 0 %}
                 <table class="table table-sm table-hover">
                     <thead>
                     <tr>
@@ -19,8 +19,7 @@
                     </tr>
                     </thead>
                     <tbody>
-
-                    {% for ticket in tickets %}
+                    {% for ticket in tickets.own %}
 
                         <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
                             <th>#{{ ticket.id }}</th>
@@ -49,5 +48,44 @@
             {% endif %}
         </div>
     </div>
+    {% if tickets.part|length > 0 %}
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5>Teilnahme an Tickets</h5>
+            </div>
+            <div class="card-body bg-light">
 
+                <table class="table table-sm table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="row">Id</th>
+                        <th>Kategorie</th>
+                        <th>Titel</th>
+                        <th>Participants</th>
+                        <th>Besitzer</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ticket in tickets.part %}
+
+                        <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
+                            <th>#{{ ticket.id }}</th>
+                            <td>{{ ticket.category }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>
+                                {% for participant in ticket.participating.all %}
+                                    <a href="{% url 'user_details' id=participant.id %}">{{ participant.username }}</a>
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{% url 'user_details' id=ticket.owner.id %}">{{ ticket.owner.username }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
