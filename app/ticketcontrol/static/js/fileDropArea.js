@@ -1,11 +1,10 @@
 async function uploadAttachment(file, fileLink, dropBox, ticket, comment) {
-    let formData = new FormData();
     let token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let formData = new FormData();
     formData.append("attachment", file);
     if (typeof ticket !== "undefined") {
         formData.append("ticket", ticket);
-    }
-    else if (typeof comment !== "undefined") {
+    } else if (typeof comment !== "undefined") {
         formData.append("comment", comment);
     }
 
@@ -28,7 +27,6 @@ async function uploadAttachment(file, fileLink, dropBox, ticket, comment) {
         deleteLink.setAttribute("attachment-id", id);
         deleteLink.setAttribute("file-drop-box-id", dropBox.getAttribute("id"));
         deleteLink.setAttribute("onclick", "selectAttachmentForDelete(this)");
-        //deleteLink.addEventListener("click", event => selectAttachmentForDelete(event));
         let div = fileLink.parentNode;
         div.innerHTML += " ";
         div.appendChild(deleteLink);
@@ -43,7 +41,7 @@ async function uploadAttachment(file, fileLink, dropBox, ticket, comment) {
 
 function selectAttachmentForDelete(target) {
     let deleteButton = document.getElementById("confirm-delete-attachment").querySelector(
-            `button[name="delete-attachment"]`)
+        `button[name="delete-attachment"]`)
     deleteButton.setAttribute("attachment-id", target.getAttribute("attachment-id"));
     deleteButton.setAttribute("file-drop-box-id", target.getAttribute("file-drop-box-id"))
 }
@@ -52,21 +50,20 @@ async function deleteAttachment(button) {
     let id = button.getAttribute("attachment-id");
     $("#confirm-delete-attachment").modal("toggle");
     let fileDropBox = document.getElementById(button.getAttribute("file-drop-box-id"))
-    let input = fileDropBox.querySelector(`input[name="attachments"][value="`+id+`"]`)
+    let input = fileDropBox.querySelector(`input[name="attachments"][value="` + id + `"]`)
     if (input) input.remove();
-    let deleteLink = fileDropBox.querySelector(".file-drop-list").querySelector(`[attachment-id="`+id+`"]`)
+    let deleteLink = fileDropBox.querySelector(".file-drop-list").querySelector(`[attachment-id="` + id + `"]`)
     deleteLink.parentNode.remove();
 
     let token = document.querySelector(`input[name="csrfmiddlewaretoken"]`).value;
-    let response = await fetch("/attachment/"+id+"/delete", {
+    let response = await fetch("/attachment/" + id + "/delete", {
         method: "POST",
         headers: {'X-CSRFToken': token}
     });
 }
 
-function updateFileDropArea(input, ticket=undefined, comment=undefined) {
+function updateFileDropArea(input, ticket = undefined, comment = undefined) {
     let fileDropList = input.parentNode.parentNode.querySelector("div.file-drop-list");
-    let attachments = input.parentNode.parentNode.querySelector(`input[name="attachments"]`);
     for (let file of input.files) {
         let div = document.createElement("div");
         let fileLink = document.createElement("a");

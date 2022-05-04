@@ -92,27 +92,30 @@
             <hr>
             <p>{{ ticket.description }}</p>
             {% if ticket.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
-            Attachments:<br>
-            <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-ticket">
-                <div class="file-drop-list">
-                    {% for attachment in ticket.attachment_set.all %}
-                        <div>
-                            <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
-                            {% if perms.ticketcontrol.delete_attachment or user.id == ticket.owner.id or user.id == attachment.user.id %}
-                            <a class="text-danger" href="" data-toggle="modal" data-target="#confirm-delete-attachment"
-                               attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-ticket"
-                               onclick="selectAttachmentForDelete(this);">Delete</a>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-                {% if perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
-                    <div class="file-drop-area">
-                        <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, {{ ticket.id }});" multiple />
-                        <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                Attachments:<br>
+                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
+                     id="file-drop-box-ticket">
+                    <div class="file-drop-list">
+                        {% for attachment in ticket.attachment_set.all %}
+                            <div>
+                                <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
+                                {% if perms.ticketcontrol.delete_attachment or user.id == ticket.owner.id or user.id == attachment.user.id %}
+                                    <a class="text-danger" href="" data-toggle="modal"
+                                       data-target="#confirm-delete-attachment"
+                                       attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-ticket"
+                                       onclick="selectAttachmentForDelete(this);">Delete</a>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endif %}
-            </div>
+                    {% if perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
+                        <div class="file-drop-area">
+                            <input class="file-input" type="file" name="attachments-input"
+                                   onchange="updateFileDropArea(this, {{ ticket.id }});" multiple/>
+                            <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                        </div>
+                    {% endif %}
+                </div>
             {% endif %}
             <p class="blockquote-footer mb-0 font-italic">
                 {{ ticket.creationDate }}
@@ -127,27 +130,31 @@
                 <p>{{ comment.content }}</p>
                 {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
                     Attachments:<br>
-                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-comment-{{ comment.id }}">
+                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
+                         id="file-drop-box-comment-{{ comment.id }}">
                         <div class="file-drop-list">
                             {% for attachment in comment.attachment_set.all %}
                                 <div>
                                     <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
                                     {% if perms.ticketcontrol.delete_attachment or user.id == comment.user.id or user.id == attachment.user.id %}
-                                    <a class="text-danger" href="" data-toggle="modal" data-target="#confirm-delete-attachment"
-                                       attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-comment-{{ comment.id }}"
-                                       onclick="selectAttachmentForDelete(this);">Delete</a>
+                                        <a class="text-danger" href="" data-toggle="modal"
+                                           data-target="#confirm-delete-attachment"
+                                           attachment-id="{{ attachment.id }}"
+                                           file-drop-box-id="file-drop-box-comment-{{ comment.id }}"
+                                           onclick="selectAttachmentForDelete(this);">Delete</a>
                                     {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
                         {% if perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
-                        <div class="file-drop-area">
-                            <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, undefined, {{ comment.id }});" multiple />
-                            <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
-                        </div>
+                            <div class="file-drop-area">
+                                <input class="file-input" type="file" name="attachments-input"
+                                       onchange="updateFileDropArea(this, undefined, {{ comment.id }});" multiple/>
+                                <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                            </div>
                         {% endif %}
                     </div>
-                    {% endif %}
+                {% endif %}
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ comment.creationDate }}
                 </p>
@@ -163,10 +170,12 @@
                                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
                                           name="comment"></textarea>
                 </div>
-                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-new-comment">
+                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
+                     id="file-drop-box-new-comment">
                     <div class="file-drop-list"></div>
                     <div class="file-drop-area">
-                        <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this);" multiple />
+                        <input class="file-input" type="file" name="attachments-input"
+                               onchange="updateFileDropArea(this);" multiple/>
                         <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
                     </div>
                 </div>
@@ -216,7 +225,9 @@
                 <div class="modal-footer text-white">
                     {% csrf_token %}
                     <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
-                    <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model" onclick="deleteAttachment(this);">Löschen</button>
+                    <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model"
+                            onclick="deleteAttachment(this);">Löschen
+                    </button>
                 </div>
             </div>
         </div>
@@ -234,6 +245,7 @@
         }
 
         var participantToken, moderatorToken;
+
         async function get_token() {
             let tokenResponse = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}`);
             participantToken = new FormData();
