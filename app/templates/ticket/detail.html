@@ -91,22 +91,29 @@
             <p class="lead">Beschreibung</p>
             <hr>
             <p>{{ ticket.description }}</p>
+            {% if ticket.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
             Attachments:<br>
-
             <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-ticket">
                 <div class="file-drop-list">
                     {% for attachment in ticket.attachment_set.all %}
-                        <div><a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
+                        <div>
+                            <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
+                            {% if perms.ticketcontrol.delete_attachment or user.id == ticket.owner.id or user.id == attachment.user.id %}
                             <a class="text-danger" href="" data-toggle="modal" data-target="#confirm-delete-attachment"
                                attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-ticket"
-                               onclick="selectAttachmentForDelete(this);">Delete</a></div>
+                               onclick="selectAttachmentForDelete(this);">Delete</a>
+                            {% endif %}
+                        </div>
                     {% endfor %}
                 </div>
-                <div class="file-drop-area">
-                    <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, {{ ticket.id }});" multiple />
-                    <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
-                </div>
+                {% if perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
+                    <div class="file-drop-area">
+                        <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, {{ ticket.id }});" multiple />
+                        <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                    </div>
+                {% endif %}
             </div>
+            {% endif %}
             <p class="blockquote-footer mb-0 font-italic">
                 {{ ticket.creationDate }}
             </p>
@@ -118,21 +125,29 @@
                     | {{ comment.user.username }}</p>
                 <hr>
                 <p>{{ comment.content }}</p>
-                Attachments:
-                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-comment-{{ comment.id }}">
-                    <div class="file-drop-list">
-                        {% for attachment in comment.attachment_set.all %}
-                            <div><a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
-                                <a class="text-danger" href="" data-toggle="modal" data-target="#confirm-delete-attachment"
-                                   attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-comment-{{ comment.id }}"
-                                   onclick="selectAttachmentForDelete(this);">Delete</a></div>
-                        {% endfor %}
+                {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
+                    Attachments:<br>
+                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-comment-{{ comment.id }}">
+                        <div class="file-drop-list">
+                            {% for attachment in comment.attachment_set.all %}
+                                <div>
+                                    <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
+                                    {% if perms.ticketcontrol.delete_attachment or user.id == comment.user.id or user.id == attachment.user.id %}
+                                    <a class="text-danger" href="" data-toggle="modal" data-target="#confirm-delete-attachment"
+                                       attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-comment-{{ comment.id }}"
+                                       onclick="selectAttachmentForDelete(this);">Delete</a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
+                        <div class="file-drop-area">
+                            <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, undefined, {{ comment.id }});" multiple />
+                            <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                        </div>
+                        {% endif %}
                     </div>
-                    <div class="file-drop-area">
-                        <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, undefined, {{ comment.id }});" multiple />
-                        <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
-                    </div>
-                </div>
+                    {% endif %}
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ comment.creationDate }}
                 </p>

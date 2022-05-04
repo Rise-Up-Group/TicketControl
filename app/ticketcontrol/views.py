@@ -450,9 +450,11 @@ def attachment_access_control(request, id, name=None):
         name = str(id)
     attachment = Attachment.objects.get(id=id)
     authorized = False
-    if request.user.id == attachment.user.id or \
-            request.user.id == attachment.ticket.owner.id or \
-            request.user.has_perm("ticketcontrol.view_attachment"):
+    if request.user.id == attachment.user.id:
+        authorized = True
+    elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
+        authorized = True
+    elif attachment.comment is not None and request.user.has_perm("ticketcontrol.view_attachment"):
         authorized = True
     else:
         for participant in attachment.ticket.participating.all():
@@ -502,7 +504,14 @@ def upload_attachment(request):
 def delete_attachment(request, id):
     if request.method == "POST":
         attachment = Attachment.objects.get(id=id)
+        authorized = False
         if request.user.id == attachment.user.id or request.user.has_perm("ticketcontrol.delete_attachment"):
+            authorized = True
+        elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
+            authorized = True
+        elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
+            authorized = True
+        if authorized:
             os.remove("uploads/"+str(id))
             attachment.delete()
             return HttpResponse(status=200)
