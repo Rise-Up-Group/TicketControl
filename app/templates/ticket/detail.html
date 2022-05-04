@@ -93,14 +93,17 @@
             <p>{{ ticket.description }}</p>
             Attachments:<br>
 
-            <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9">
+            <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-ticket">
                 <div class="file-drop-list">
                     {% for attachment in ticket.attachment_set.all %}
-                        <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a><br>
+                        <div><a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
+                            <a class="text-danger" href="" data-toggle="modal" data-target="#confirm-delete-attachment"
+                               attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-ticket"
+                               onclick="selectAttachmentForDelete(this);">Delete</a></div>
                     {% endfor %}
                 </div>
                 <div class="file-drop-area">
-                    <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this);" multiple />
+                    <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, {{ ticket.id }});" multiple />
                     <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
                 </div>
             </div>
@@ -115,12 +118,21 @@
                     | {{ comment.user.username }}</p>
                 <hr>
                 <p>{{ comment.content }}</p>
-                {% if comment.attachment_set.count > 0 %}
-                    Attachments:<br>
-                    {% for attachment in comment.attachment_set.all %}
-                        <a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a><br>
-                    {% endfor %}
-                {% endif %}
+                Attachments:
+                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-comment-{{ comment.id }}">
+                    <div class="file-drop-list">
+                        {% for attachment in comment.attachment_set.all %}
+                            <div><a href="{% url 'attachment' id=attachment.id name=attachment.filename %}">{{ attachment }}</a>
+                                <a class="text-danger" href="" data-toggle="modal" data-target="#confirm-delete-attachment"
+                                   attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-comment-{{ comment.id }}"
+                                   onclick="selectAttachmentForDelete(this);">Delete</a></div>
+                        {% endfor %}
+                    </div>
+                    <div class="file-drop-area">
+                        <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this, undefined, {{ comment.id }});" multiple />
+                        <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                    </div>
+                </div>
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ comment.creationDate }}
                 </p>
@@ -136,7 +148,7 @@
                                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
                                           name="comment"></textarea>
                 </div>
-                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9">
+                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9" id="file-drop-box-new-comment">
                     <div class="file-drop-list"></div>
                     <div class="file-drop-area">
                         <input class="file-input" type="file" name="attachments-input" onchange="updateFileDropArea(this);" multiple />
@@ -173,6 +185,23 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Zurück</button>
                     <button type="button" class="btn btn-warning">Löschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirm-delete-attachment" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Löschen bestätigen</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Anhang wirklich löschen?</p>
+                </div>
+                <div class="modal-footer text-white">
+                    {% csrf_token %}
+                    <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
+                    <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model" onclick="deleteAttachment(this);">Löschen</button>
                 </div>
             </div>
         </div>

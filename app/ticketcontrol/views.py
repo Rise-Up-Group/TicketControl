@@ -479,7 +479,7 @@ def attachment_access_control(request, id, name=None):
 
 
 @permission_required("ticketcontrol.add_attachment")
-def upload_attachment_view(request):
+def upload_attachment(request):
     if request.method == "POST":
         file = request.FILES['attachment']
         attachment = Attachment.objects.create(filename=file.name, size=file.size, ticket=None, comment=None,
@@ -487,4 +487,22 @@ def upload_attachment_view(request):
         with open("uploads/" + str(attachment.id), "wb+") as destination:
             for chunk in file.chunks():
                 destination.write(chunk)
+        if request.POST.get("ticket"):
+            ticket = Ticket.objects.get(id=request.POST['ticket'])
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.add_attachment"):
+                attachment.ticket = ticket
+        elif request.POST.get("comment"):
+            comment = Comment.objects.get(id=request.POST['comment'])
+            if request.user.id == comment.user.id or request.user.has_perm("ticketcontrol.add_attachment"):
+                attachment.comment = comment
+        attachment.save()
         return HttpResponse(str(attachment.id))
+
+
+def delete_attachment(request, id):
+    if request.method == "POST":
+        attachment = Attachment.objects.get(id=id)
+        if request.user.id == attachment.user.id or request.user.has_perm("ticketcontrol.delete_attachment"):
+            os.remove("uploads/"+str(id))
+            attachment.delete()
+            return HttpResponse(status=200)

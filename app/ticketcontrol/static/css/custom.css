@@ -14,7 +14,7 @@
     max-width: 100%;
     padding: 0.5rem;
 }
-.file-drop-area > span {
+.file-drop-area span {
     margin: 20px;
 }
 
@@ -24,7 +24,7 @@
     margin: 0 1rem 0 1rem;
     text-align: left;
 }
-.file-drop-list a {
+.file-drop-list div {
     white-space: nowrap;
 
 }
