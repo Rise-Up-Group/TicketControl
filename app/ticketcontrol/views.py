@@ -447,6 +447,9 @@ def ticket_moderator_add(request, id, username=None):
         try:
             ticket = Ticket.objects.get(id=id)
             ticket.moderator.add(User.objects.get(username=username))
+            if ticket.status == "Unassigned":
+                ticket.set_status("Assigned")
+                ticket.save()
             return HttpResponse(status=200)
         except ObjectDoesNotExist:
             return HttpResponse(status=404)
@@ -526,3 +529,18 @@ def delete_attachment(request, id):
             os.remove("uploads/" + str(id))
             attachment.delete()
             return HttpResponse(status=200)
+
+          
+@permission_required("ticketcontrol.change_ticket")
+def ticket_status_update(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_status(request.POST['status_choice'])
+            return redirect("ticket_view", id=id)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
+
