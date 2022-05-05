@@ -28,6 +28,7 @@ urlpatterns = [
     path('ticket/my', mytickets_view),
     path('ticket/<int:id>', ticket_view, name="ticket_view"),
     path('ticket/<int:id>/comment/add', ticket_comment_add, name="add_comment_to_ticket"),
+    path('ticket/<int:id>/status/update', ticket_status_update, name="update_status_ticket"),
     path('ticket/<int:id>/participants/add/<str:username>', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/participants/add/', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/moderators/add/<str:username>', ticket_moderator_add, name="ticket_add_moderator"),
@@ -51,7 +52,6 @@ urlpatterns = [
     path('group/create', create_group_view, name='create_group'),
     path('group/<int:id>/delete', delete_group_view, name='delete_group'),
     path('group/<int:id>', edit_group_view, name='edit_group'),
-    path('djangoadmin/', admin.site.urls),
     path('', dashboard_view, name='dashboard'),
     path('home/', home_view, name='home'),
 ]
@@ -63,5 +63,6 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
+    urlpatterns += path('djangoadmin/', admin.site.urls),
 
 load_initial_data()
