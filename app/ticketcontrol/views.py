@@ -416,6 +416,7 @@ def ticket_comment_add(request, id):
             attachment = Attachment.objects.get(id=attachment_id)
             if attachment.user.id == request.user.id:
                 comment.attachment_set.add(attachment)
+        comment.save()
         return redirect('/ticket/' + str(id))
     return HttpResponse(status=400)
 
@@ -463,7 +464,9 @@ def attachment_access_control(request, id, name=None):
         authorized = True
     elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
         authorized = True
-    elif attachment.comment is not None and request.user.has_perm("ticketcontrol.view_attachment"):
+    elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
+        authorized = True
+    elif request.user.has_perm("ticketcontrol.view_attachment"):
         authorized = True
     else:
         for participant in attachment.ticket.participating.all():
@@ -489,7 +492,6 @@ def attachment_access_control(request, id, name=None):
         return HttpResponse(status=403)
 
 
-@permission_required("ticketcontrol.add_attachment")
 def upload_attachment(request):
     if request.method == "POST":
         file = request.FILES['attachment']
