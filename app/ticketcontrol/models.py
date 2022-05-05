@@ -219,4 +219,4 @@ class Attachment(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, blank=False)
 
     def __str__(self):
-        return self.ticket.title + " File: " + self.filename + "(" + self.size + ")"
+        return self.filename + " (size: " + str(self.size) + ")"

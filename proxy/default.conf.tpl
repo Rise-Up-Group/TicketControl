@@ -5,6 +5,11 @@ server {
     location /static {
         alias /vol/static;
     }
+    
+    location /serve_attachment {
+        internal;
+        alias /uploads/;
+    }
 
     location / {
         uwsgi_pass              ${APP_HOST}:${APP_PORT};

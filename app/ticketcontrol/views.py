@@ -1,4 +1,5 @@
 import logging
+import os
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
@@ -13,6 +14,8 @@ from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.conf import settings
+from django.views.static import serve
 
 from .models import *
 from .settings import EMAIL_HOST_USER
@@ -199,7 +202,8 @@ def create_user_view(request):
         if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(
                 username=request.POST['username']).exists():
             User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
+                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on",
+                          email_confirmed=True)
             return redirect("manage_users")
         else:
             return HttpResponse(status=409)
@@ -384,8 +388,14 @@ def delete_group_view(request, id):
 @login_required()
 def ticket_new_view(request):
     if request.method == 'POST':
-        Ticket.add_ticket(request.POST["title"], request.POST["description"], User.objects.get(id=request.user.id),
-                          Category.objects.get(id=request.POST["category"]))
+        user = User.objects.get(id=request.user.id)
+        ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
+                                   Category.objects.get(id=request.POST["category"]))
+        for attachment_id in request.POST.getlist("attachments"):
+            attachment = Attachment.objects.get(id=attachment_id)
+            if attachment.user.id == request.user.id:
+                ticket.attachment_set.add(attachment)
+        ticket.save()
         return redirect('/ticket/my')
     else:
         try:
@@ -400,7 +410,13 @@ def ticket_new_view(request):
 def ticket_comment_add(request, id):
     if request.method == 'POST':
         ticket = Ticket.objects.get(id=id)
-        ticket.add_comment(request.POST["comment"], User.objects.get(id=request.user.id))
+        user = User.objects.get(id=request.user.id)
+        comment = ticket.add_comment(request.POST["comment"], user)
+        for attachment_id in request.POST.getlist("attachments"):
+            attachment = Attachment.objects.get(id=attachment_id)
+            if attachment.user.id == request.user.id:
+                comment.attachment_set.add(attachment)
+        comment.save()
         return redirect('/ticket/' + str(id))
     return HttpResponse(status=400)
 
@@ -442,6 +458,79 @@ def ticket_moderator_add(request, id, username=None):
     return HttpResponse(get_token(request))
 
 
+def attachment_access_control(request, id, name=None):
+    if name is None:
+        name = str(id)
+    attachment = Attachment.objects.get(id=id)
+    authorized = False
+    if request.user.id == attachment.user.id:
+        authorized = True
+    elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
+        authorized = True
+    elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
+        authorized = True
+    elif request.user.has_perm("ticketcontrol.view_attachment"):
+        authorized = True
+    else:
+        for participant in attachment.ticket.participating.all():
+            if request.user.id == participant.id:
+                authorized = True
+        if not authorized:
+            for moderator in attachment.ticket.moderator.all():
+                if request.user.id == moderator.id:
+                    authorized = True
+    if authorized:
+        if not settings.DEBUG:
+            response = HttpResponse()
+            # Content-type will be detected by nginx
+            del response['Content-Type']
+            response['X-Accel-Redirect'] = '/serve_attachment/' + str(id)
+            response['Content-Disposition'] = 'attachment;filename="' + name + '"'
+            return response
+        else:
+            response = serve(request, str(id), document_root="uploads")
+            response['Content-Disposition'] = 'attachment;filename="' + name + '"'
+            return response
+    else:
+        return HttpResponse(status=403)
+
+
+def upload_attachment(request):
+    if request.method == "POST":
+        file = request.FILES['attachment']
+        attachment = Attachment.objects.create(filename=file.name, size=file.size, ticket=None, comment=None,
+                                               user=User.objects.get(id=request.user.id))
+        with open("uploads/" + str(attachment.id), "wb+") as destination:
+            for chunk in file.chunks():
+                destination.write(chunk)
+        if request.POST.get("ticket"):
+            ticket = Ticket.objects.get(id=request.POST['ticket'])
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.add_attachment"):
+                attachment.ticket = ticket
+        elif request.POST.get("comment"):
+            comment = Comment.objects.get(id=request.POST['comment'])
+            if request.user.id == comment.user.id or request.user.has_perm("ticketcontrol.add_attachment"):
+                attachment.comment = comment
+        attachment.save()
+        return HttpResponse(str(attachment.id))
+
+
+def delete_attachment(request, id):
+    if request.method == "POST":
+        attachment = Attachment.objects.get(id=id)
+        authorized = False
+        if request.user.id == attachment.user.id or request.user.has_perm("ticketcontrol.delete_attachment"):
+            authorized = True
+        elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
+            authorized = True
+        elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
+            authorized = True
+        if authorized:
+            os.remove("uploads/" + str(id))
+            attachment.delete()
+            return HttpResponse(status=200)
+
+          
 @permission_required("ticketcontrol.change_ticket")
 def ticket_status_update(request, id):
     if request.method == "POST":
@@ -454,3 +543,4 @@ def ticket_status_update(request, id):
         except DatabaseError:
             return HttpResponse(status=409)
     return HttpResponse(get_token(request))
+

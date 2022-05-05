@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     volumes:
       - ticketcontrol-static-data:/vol/web
+      - ticketcontrol-uploads:/app/uploads
     environment:
       - DB_HOST=${DB_HOST} # can be container name, service name, or real dns / ip
       - DB_NAME=${DB_NAME}
@@ -46,9 +47,11 @@ services:
       - 80:8000
     volumes:
       - ticketcontrol-static-data:/vol/static
+      - ticketcontrol-uploads:/uploads
     environment:
       - MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE}
 
 volumes:
   ticketcontrol-static-data:
+  ticketcontrol-uploads:
   ticketcontrol-mariadb-data:
