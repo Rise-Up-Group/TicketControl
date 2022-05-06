@@ -2,7 +2,7 @@
 
 {% block title %}Login{% endblock %}
 
-{% block half %}
+{% block right %}
     <h3 class="display-4">Sign Up</h3>
     <form method="POST" action="{% url 'register' %}" autocomplete="new-password">
         {% csrf_token %}

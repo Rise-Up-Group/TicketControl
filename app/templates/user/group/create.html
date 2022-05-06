@@ -1,23 +1,95 @@
-{% extends "main.html" %}
+{% extends "half_page.html" %}
 
 {% block title %}Create Group{% endblock %}
 
-{% block content %}
-    <br>
-    <h1 class="text-center display-4">Create Group</h1>
-    <hr>
-
-    <br>
-
-<form method="POST" action="{% url 'create_group' %}" autocomplete="new-password">
-    {% csrf_token %}
-    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"><br><br>
-    <label for="permissions">Permissions:</label><br>
-    <select style="height: 50vh;" multiple="" name="permissions" id="permissions">
-        {% for permission in permissions %}
-            <option class="checkbox" value="{{ permission.perm.id }}">{{ permission.perm.content_type.app_label }}.{{ permission.perm.content_type.model }}.{{ permission.perm.name }}</option>
+{% block left %}
+    <h1 class="display-3 fw-bold ls-tight">Gruppe erstellen</h1>
+    <h2 class="text-primary display-4 mb-4" id="preview_username">Vorhandene Gruppen</h2>
+    <table class="table table-sm">
+        <thead class="text-left">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Aktionen</th>
+        </tr>
+        </thead>
+        <tbody class="text-left">
+        {% for group in groups %}
+            <tr>
+                <th>#{{ group.id }}</th>
+                <td>{{ group.name }}</td>
+                <td><a type="button" href="" data-toggle="modal" data-target="#showGroup">Anzeigen</a></td>
+            </tr>
         {% endfor %}
-    </select><br><br>
-    <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Create"><br><br>
-</form>
+        </tbody>
+    </table>
+    <p class="text-muted">
+        Um eine Gruppe ähnlich von einer anderen zu gestalten, können Berechtigungen von einer anderen Gruppe kopiert
+        werden. Die neue Gruppe wird nicht von der kopierten Gruppe abhängig und ist selbständig individuell.
+    </p>
+    <!-- Modal -->
+    <div class="modal fade bd-example-modal-lg" id="showGroup" tabindex="-1" role="dialog" aria-labelledby="showGroup"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="showGroupLabel">Permission Group Admin</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm">
+                        <thead class="text-left">
+                        <tr>
+                            <th>Berechtigt</th>
+                            <th>Permission</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-left">
+                        <!-- TODO: Replace with real values -->
+                        <tr>
+                            <td>Yes
+                            <td class="checkbox" value="9">auth.group.Can add group</td>
+                        </tr>
+                        <tr>
+                            <td>Yes
+                            <td class="checkbox" value="10">auth.group.Can change group</td>
+                        </tr>
+                        <tr>
+                            <td>Yes
+                            <td class="checkbox" value="11">auth.group.Can delete group</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+                    <!-- TODO: Make Copy Button work -->
+                    <button type="button" class="btn btn-primary">Kopieren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block right %}
+    <form method="POST" action="{% url 'create_group' %}" autocomplete="new-password">
+        {% csrf_token %}
+        <div class="form-outline mb-4">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Name" value="{{ group.name }}"
+                   autofocus required/>
+        </div>
+        <label for="permissions">Berechtigungen</label>
+        <div class="form-outline">
+            <select style="height: 50vh;" multiple="" name="permissions" id="permissions" class="mb-4">
+                {% for permission in permissions %}
+                    <option class="checkbox"
+                            value="{{ permission.perm.id }}">{{ permission.perm.content_type.app_label }}.{{ permission.perm.content_type.model }}.{{ permission.perm.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" value="Gruppe erstellen" class="btn btn-primary btn-block"/>
+    </form>
 {% endblock %}

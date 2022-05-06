@@ -290,7 +290,6 @@ def unrestricted_delete_user_view(request, id):
     if request.method == 'POST':
         User.delete_user(id)
         return redirect("manage_users")
-    return render(request, "user/delete.html", {"content_user": get_object_or_404(User, pk=id)})
 
 
 @permission_required("ticketcontrol.delete_user")
@@ -326,7 +325,7 @@ def create_group_view(request):
                 group.permissions.add(permission)
         group.save()
         return redirect("manage_groups")
-    return render(request, "user/group/create.html", {"permissions": Permission.objects.all()})
+    return render(request, "user/group/create.html", {"permissions": Permission.objects.all(), "groups": Group.objects.all()})
 
 
 @permission_required("auth.view_group")
@@ -377,7 +376,6 @@ def delete_group_view(request, id):
     if request.method == 'POST':
         group.delete()
         return redirect("manage_groups")
-    return render(request, "user/group/delete.html", {"group": group})
 
 
 @login_required()

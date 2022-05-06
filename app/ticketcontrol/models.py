@@ -14,21 +14,22 @@ from .settings import EMAIL_HOST_USER
 class AccountActivationToken(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
         return (
-            text_type(user.pk) + text_type(timestamp) +
-            text_type(user.email_confirmed) + text_type(user.email)
+                text_type(user.pk) + text_type(timestamp) +
+                text_type(user.email_confirmed) + text_type(user.email)
         )
 
 
 class PasswordResetToken(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
         return (
-            text_type(user.pk) + text_type(timestamp) +
-            text_type(user.reset_password) + text_type(user.password)
+                text_type(user.pk) + text_type(timestamp) +
+                text_type(user.reset_password) + text_type(user.password)
         )
 
 
 account_activation_token = AccountActivationToken()
 password_reset_token = PasswordResetToken()
+
 
 class User(BaseUser):
     class Meta:
@@ -36,11 +37,13 @@ class User(BaseUser):
             ("change_user_permission", "Change the permissions of other users"),
             ("admin_general", "Allow access to the Admin Panel"),
         )
+
     new_email = models.EmailField(blank=True)
     email_confirmed = models.BooleanField(default=False)
     reset_password = models.BooleanField(default=False)
 
-    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False, is_superuser=None):
+    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False,
+                 is_superuser=None):
         # TODO: preview in javascrip and show to user
         # TODO: nickname has to be unique (possibly with db)
         if username == "":
@@ -68,7 +71,8 @@ class User(BaseUser):
         user.save()
         return user
 
-    def update_user(self, email=None, first_name=None, last_name=None, username=None, password=None, groups=None, is_active=None, email_confirmed=None):
+    def update_user(self, email=None, first_name=None, last_name=None, username=None, password=None, groups=None,
+                    is_active=None, email_confirmed=None):
         if email is not None and self.email != email:
             self.new_email = email
         if first_name is not None:
@@ -119,7 +123,7 @@ class User(BaseUser):
         if new_user:
             subject = "Welcome to Ticketcontrol"
         else:
-            subject="[Ticketcontrol] Confirm your EMail address"
+            subject = "[Ticketcontrol] Confirm your EMail address"
         send_mail(
             subject=subject,
             message="",
@@ -147,6 +151,7 @@ class User(BaseUser):
 
 class Permission(models.Model):
     perm = models.OneToOneField(BasePermission, on_delete=models.DO_NOTHING)
+
     def __str__(self):
         return self.perm.name
 
