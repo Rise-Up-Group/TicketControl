@@ -9,8 +9,13 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
+import json
 import os
 from pathlib import Path
+
+settings_file = open("settings/settings.json")
+settings = json.load(settings_file)
+settings_file.close()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,12 +94,12 @@ DATABASES = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-EMAIL_POST = os.environ.get("EMAIL_PORT")
-EMAIL_USE_TLS = os.environ.get("EMAIL_TLS") == "True"
-EMAIL_USE_SSL = os.environ.get("EMAIL_SSL") == "True"
-EMAIL_HOST_USER = os.environ.get('EMAIL_ADDRESS')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+EMAIL_HOST = settings["email_server"]["smtp_host"]
+EMAIL_POST = settings["email_server"]["smtp_port"]
+EMAIL_USE_TLS = settings["email_server"]["smtp_use_tls"]
+EMAIL_USE_SSL = settings["email_server"]["smtp_use_ssl"]
+EMAIL_HOST_USER = settings["email_server"]["smtp_user"]
+EMAIL_HOST_PASSWORD = settings["email_server"]["smtp_password"]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
