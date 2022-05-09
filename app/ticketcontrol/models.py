@@ -198,6 +198,10 @@ class Ticket(models.Model):
         comment.save()
         return comment
 
+    def set_status(self, status):
+        self.status = status
+        self.save()
+
     status = models.CharField(max_length=15, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
     creationDate = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
@@ -220,4 +224,4 @@ class Attachment(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, blank=False)
 
     def __str__(self):
-        return self.ticket.title + " File: " + self.filename + "(" + self.size + ")"
+        return self.filename + " (size: " + str(self.size) + ")"

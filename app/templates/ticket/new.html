@@ -1,5 +1,5 @@
 {% extends "main.html" %}
-
+{% load static %}
 {% block content %}
     <div class="container bg-transparent text-dark rounded mt-3">
         <form method="POST" action="{% url 'create_ticket' %}">
@@ -30,9 +30,14 @@
                             <textarea class="form-control" id="exampleFormControlTextarea1" rows="15"
                                       name="description"></textarea>
                     </div>
-                    <div class="file-drop-area bg-white text-center" style="border: .05rem solid #a9a9a9">
-                        <input class="file-input" type="file" multiple />
-                        <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
+                         id="file-drop-box-ticket">
+                        <div class="file-drop-list"></div>
+                        <div class="file-drop-area">
+                            <input class="file-input" type="file" name="attachments-input"
+                                   onchange="updateFileDropArea(this);" multiple/>
+                            <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
+                        </div>
                     </div>
                     <br>
                     <div class="text-white">
@@ -72,4 +77,24 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="confirm-delete-attachment" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Löschen bestätigen</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Anhang wirklich löschen?</p>
+                </div>
+                <div class="modal-footer text-white">
+                    {% csrf_token %}
+                    <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
+                    <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model"
+                            onclick="deleteAttachment(this);">Löschen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static '/js/fileDropArea.js' %}"></script>
 {% endblock %}

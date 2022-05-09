@@ -28,11 +28,16 @@ urlpatterns = [
     path('ticket/my', mytickets_view),
     path('ticket/<int:id>', ticket_view, name="ticket_view"),
     path('ticket/<int:id>/comment/add', ticket_comment_add, name="add_comment_to_ticket"),
+    path('ticket/<int:id>/status/update', ticket_status_update, name="update_status_ticket"),
     path('ticket/<int:id>/participants/add/<str:username>', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/participants/add/', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/moderators/add/<str:username>', ticket_moderator_add, name="ticket_add_moderator"),
     path('ticket/<int:id>/moderators/add/', ticket_moderator_add, name="ticket_add_moderator"),
     path('ticket/new', ticket_new_view, name='create_ticket'),
+    path('attachment/<int:id>', attachment_access_control, name='attachment'),
+    path('attachment/<int:id>/name/<str:name>', attachment_access_control, name='attachment'),
+    path('attachment/<int:id>/delete', delete_attachment, name="delete_attachment"),
+    path('attachment/upload', upload_attachment, name="upload_attachment"),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
@@ -51,7 +56,6 @@ urlpatterns = [
     path('group/create', create_group_view, name='create_group'),
     path('group/<int:id>/delete', delete_group_view, name='delete_group'),
     path('group/<int:id>', edit_group_view, name='edit_group'),
-    path('djangoadmin/', admin.site.urls),
     path('', dashboard_view, name='dashboard'),
 ]
 
@@ -62,5 +66,6 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
+    urlpatterns += path('djangoadmin/', admin.site.urls),
 
 load_initial_data()
