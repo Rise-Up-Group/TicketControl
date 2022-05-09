@@ -34,7 +34,7 @@
                             <a class="dropdown-item" href="/user/manage">Users</a>
                         {% endif %}
                         {% if user.is_superuser %}
-                            <a class="dropdown-item" href="/admin/system">System settings</a>
+                            <a class="dropdown-item" href="{% url 'settings' %}">System settings</a>
                         {% endif %}
                     </div>
                 </div>

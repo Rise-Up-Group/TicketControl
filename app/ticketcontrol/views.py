@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -544,3 +545,13 @@ def ticket_status_update(request, id):
             return HttpResponse(status=409)
     return HttpResponse(get_token(request))
 
+def settings_view(request):
+    if request.user.is_superuser:
+        settings_file = open("settings/settings.json")
+        settings = json.load(settings_file)
+        if request.method == "POST":
+            pass
+        else:
+            return render(request, "settings.html", {"settings": settings})
+    else:
+        return HttpResponse(status=403)

@@ -1,0 +1,55 @@
+{% extends 'main.html' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+    <h1>Settings</h1>
+    <form action="{% url 'settings' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <h2>E-Mail</h2>
+            <label for="email-server.smtp-host">smtp-host:</label>
+            <input type="text" id="email-server.smtp-host" name="email-server.smtp-host"
+                   value="{{ settings.email_server.smtp_host }}"><br>
+            <label for="email-server.smtp-port">smtp-port</label>
+            <input type="number" min="0" id="email-server.smtp-port" name="email-server.smtp-port"
+                   value="{{ settings.email_server.smtp_port }}"><br>
+            <input type="checkbox" id="email-server.smtp-use-tls" name="email-server.smtp-use-tls"
+                   {% if settings.email_server.smtp_use_tls %}checked{% endif %}>
+            <label for="email-server.smtp-use-tls">use TLS</label>
+            <input type="checkbox" id="email-server.smtp-use-ssl" name="email-server.smtp-use-ssl"
+                   {% if settings.email_server.smtp_use_ssl %}checked{% endif %}>
+            <label for="email-server.smtp-use-ssl">use SSL</label><br>
+            <label for="email-server.smtp-user">E-Mail:</label>
+            <input type="email" id="email-server.smtp-user" name="email-server.smtp-user"
+                   value="{{ settings.email_server.smtp_user }}"><br>
+            <label for="email-server.smtp-password">Password:</label>
+            <input type="password" id="email-server.smtp-password" name="email-server.smtp-password"
+                   value=""><br>
+        </div>
+        <div class="form-group">
+            <h2>Content</h2>
+            <label for="content.frontpage">Frontpage:</label><br>
+            <textarea id="content.frontpage"
+                      name="content.frontpage">{{ settings.content.frontpage }}</textarea><br><br>
+            <label for="content.half-page">Half page:</label><br>
+            <textarea id="content.half-page"
+                      name="content.half-page">{{ settings.content.half_page }}</textarea><br><br>
+            <label for="content.imprint">Imprint:</label><br>
+            <textarea id="content.imprint" name="content.inprint">{{ settings.content.imprint }}</textarea><br><br>
+        </div>
+        <div class="form-group">
+            <h2>Register</h2>
+            <input type="checkbox" id="register.allow-custom-nickname" name="register.allow-custom-nickname"
+                   {% if settings.register.allow_custom_nickname %}checked{% endif %}>
+            <label for="register.allow-custom-nickname">Allow custom nickname</label><br>
+        </div>
+        <div class="form-group">
+            <h2>Legal</h2>
+            <label for="legal.contact-email">Contact E-Mail:</label>
+            <input type="email" id="legal.contact-email" name="legal.contact-email"
+                   value="{{ settings.legal.contact_email }}"><br>
+        </div>
+        <input type="submit" value="Save">
+    </form>
+{% endblock %}

@@ -56,6 +56,7 @@ urlpatterns = [
     path('group/create', create_group_view, name='create_group'),
     path('group/<int:id>/delete', delete_group_view, name='delete_group'),
     path('group/<int:id>', edit_group_view, name='edit_group'),
+    path('settings', settings_view, name='settings'),
     path('', dashboard_view, name='dashboard'),
     path('home/', home_view, name='home'),
 ]
