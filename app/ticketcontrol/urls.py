@@ -57,7 +57,6 @@ urlpatterns = [
     path('group/<int:id>/delete', delete_group_view, name='delete_group'),
     path('group/<int:id>', edit_group_view, name='edit_group'),
     path('', dashboard_view, name='dashboard'),
-    path('home/', home_view, name='home'),
 ]
 
 handler404 = "ticketcontrol.views.handler404"

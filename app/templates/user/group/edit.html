@@ -1,28 +1,56 @@
-{% extends "main.html" %}
+{% extends "half_page.html" %}
 
-{% block title %}Edit Group: {{ group.name }}{% endblock %}
+{% block title %}Gruppe bearbeiten{% endblock %}
 
-{% block content %}
-    <br>
-    <h1 class="text-center display-4">Edit Group</h1>
-    <hr>
-
-    <br>
-
-<form method="POST" action="{% url 'edit_group' id=group.id %}" autocomplete="off">
-    {% csrf_token %}
-    <input type="text" name="name" id="name" placeholder="Name" value="{{ group.name }}"{% if group.name == "admin" or group.name == "moderator" or group.name == "user" %} disabled{% endif %}><br><br>
-    <label for="permissions">Permissions:</label><br>
-    <select style="height: 50vh;" multiple="" name="permissions" id="permissions"{% if group.name == "admin" or not can_change %} disabled{% endif %}>
-        {% for permission in permissions %}
-            <option class="checkbox" value="{{ permission.perm.id }}"{% if permission.perm.id in group_permissions %} selected{% endif %}>{{ permission.perm.content_type.app_label }}.{{ permission.perm.content_type.model }}.{{ permission.perm.name }}</option>
-        {% endfor %}
-    </select><br><br>
-    {% if can_change %}
-    <input class="btn btn-primary" type="submit" name="submit" id="submit" value="Update"><br><br>
-    {% endif %}
-    {% if can_delete %}
-    <a class="btn btn-danger" href="{% url 'delete_group' id=group.id %}">Delete</a>
-    {% endif %}
-</form>
+{% block right %}
+    <h3 class="display-4">Gruppe bearbeiten</h3>
+    <form method="POST" action="{% url 'edit_group' id=group.id %}" autocomplete="off">
+        {% csrf_token %}
+        <div class="form-outline mb-4">
+            <input type="text" name="name" id="name" class="form-control" placeholder="Name" value="{{ group.name }}"
+                    {% if group.name == "admin" or group.name == "moderator" or group.name == "user" %}
+                   disabled{% endif %}>
+        </div>
+        <label for="permissions">Berechtigungen</label>
+        <div class="form-outline mb-4">
+            <select style="height: 40vh;" multiple="" name="permissions" id="permissions"
+                    {% if group.name == "admin" or not can_change %} disabled{% endif %}>
+                {% for permission in permissions %}
+                    <option class="checkbox" value="{{ permission.perm.id }}"
+                            {% if permission.perm.id in group_permissions %}
+                            selected{% endif %}>{{ permission.perm.content_type.app_label }}.{{ permission.perm.content_type.model }}.{{ permission.perm.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if can_change %}
+            <input class="btn btn-primary btn-block" type="submit" name="submit" id="submit" value="Update">
+        {% endif %}
+        {% if can_delete %}
+            <a class="btn btn-danger btn-block" data-toggle="modal" href="" data-target="#deleteGroup">Delete</a>
+        {% endif %}
+    </form>
+    <!-- Modal -->
+    <div class="modal fade" id="deleteGroup" tabindex="-1" role="dialog" aria-labelledby="deleteGroupLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteGroupLabel">Löschen bestätigen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="h5">Möchtest du wirklich die Gruppe {{ group.name }} löschen?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <form method="POST" action="{% url 'delete_group' id=group.id %}">
+                        {% csrf_token %}
+                        <input class="btn btn-danger" type="submit" value="Delete">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

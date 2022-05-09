@@ -1,24 +1,21 @@
-{% extends "main.html" %}
+{% extends "half_page.html" %}
 {% load static %}
 
 {% block title %}Activate User{% endblock %}
 
-{% block content %}
-    <br>
-    <h1 class="text-center display-4">Activate User</h1>
-    <hr>
-
-    <br>
+{% block right %}
+    <h3 class="display-4">Activate User</h3>
 
     {% if token %}
-    {{ content_user.username }}
-<form method="POST" action="{% url 'activate_user' %}">
-    {% csrf_token %}
-    <input type="hidden" name="user-id" id="user-id" value="{{ content_user.id }}">
-    <input type="hidden" name="token" id="token" placeholder="token" value="{{ token }}"><br><br>
-    <input type="submit" value="Activate">
-</form>
+        <h4 class="h5 mb-4">{{ content_user.username }}</h4>
+        <form method="POST" action="{% url 'activate_user' %}">
+            {% csrf_token %}
+            <input type="hidden" name="user-id" id="user-id" value="{{ content_user.id }}">
+            <input type="hidden" name="token" id="token" placeholder="token" value="{{ token }}">
+            <input type="submit" value="Activate" class="btn btn-primary btn-block mb-4">
+        </form>
     {% else %}
-    You should have an EMail with a verification link in your inbox.
+        You should have an E-Mail with a verification link in your inbox. <br>
     {% endif %}
+    Back to login? <a href="{% url 'login' %}">Login</a>
 {% endblock %}

@@ -1,32 +1,75 @@
-{% extends "main.html" %}
+{% extends "half_page.html" %}
 {% load static %}
 
 {% block title %}Create User{% endblock %}
 
-{% block content %}
-    <br>
-    <h1 class="text-center display-4">Create User</h1>
-    <hr>
+{% block left %}
+    <h1 class="display-3 fw-bold ls-tight">Neuer Nutzer</h1>
+    <h2 class="text-primary display-4" id="preview_username">M.Mustermann</h2>
+    <div class="col-md-6 mb-4 mx-auto bg-light rounded">
+        <!--<img class="rounded-circle" alt="100x100" src="" data-holder-rendered="true">-->
+        <p class="display-1" id="preview_initials">MM</p>
+    </div>
+    <p class="text-muted">
+        Nach dem erstellen eines Nutzers durch einen Administrator / Moderator wird keine E-Mail zur
+        bestätigung benötigt. Der User kann sich sofort mit den eingegebenen Nutzerdaten anmelden.
+    </p>
+{% endblock %}
 
-    <br>
-
-<form method="POST" action="{% url 'create_user' %}" autocomplete="new-password">
-    {% csrf_token %}
-    <input autocomplete="false" name="hidden" type="text" style="display:none;">
-
-    <input type="email" name="email" id="email" placeholder="eMail" autofocus><br><br>
-    <input type="text" name="firstname" id="firstname" placeholder="Firstname"><br><br>
-    <input type="text" name="lastname" id="lastname" placeholder="Lastname"><br><br>
-    <input type="text" name="username" id="username" placeholder="Nickname"><br><br>
-    <input type="password" name="password" id="password" placeholder="Password" minlength="8"><br><br>
-    <label for="groups">Groups:</label><br>
-    <select multiple="" name="groups" id="groups"{% if not can_change_permission %} disabled{% endif %}>
-        {% for group in groups %}
-            <option class="checkbox" value="{{ group.id }}">{{ group.name }}</option>
-        {% endfor %}
-    </select><br><br>
-    <input type="checkbox" name="is_active" id="is_active" checked>
-    <label for="is_active">Active</label><br><br>
-    <input type="submit" value="Submit">
-</form>
+{% block right %}
+    <form method="POST" action="{% url 'create_user' %}" autocomplete="new-password">
+        {% csrf_token %}
+        <input autocomplete="false" name="hidden" type="text" style="display:none;">
+        <div class="form-outline mb-2">
+            <label for="email">E-Mail</label>
+            <input type="email" id="email" name="email" class="form-control" autofocus
+                   required/>
+        </div>
+        <div class="form-outline mb-2">
+            <label for="firstname">Firstname</label>
+            <input type="firstname" id="firstname" name="firstname" class="form-control"
+                   oninput="update_username()" required/>
+        </div>
+        <div class="form-outline mb-2">
+            <label for="lastname">Lastname</label>
+            <input type="lastname" id="lastname" name="lastname" class="form-control"
+                   oninput="update_username()" required/>
+        </div>
+        <div class="form-outline mb-2">
+            <label for="password">Username</label>
+            <input type="username" id="username" name="username" class="form-control" required/>
+        </div>
+        <div class="form-outline mb-2">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required
+                   minlength="8"/>
+        </div>
+        <label for="groups">Groups</label>
+        <div class="form-outline mb-2">
+            {% if can_change_permission %}
+                <select style="width: 100%" multiple="" name="groups" id="groups"
+                        {% if not can_change_permission %}
+                        disabled{% endif %}>
+                    {% for group in groups %}
+                        <option class="checkbox"
+                                value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+        </div>
+        <input type="checkbox" name="is_active" id="is_active" checked>
+        <label for="is_active">Active</label><br><br>
+        <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
+    </form>
+    <script>
+        async function update_username() {
+            var firstname = document.getElementById("firstname").value.substring(0, 1);
+            var lastname = document.getElementById("lastname").value;
+            var initials = firstname + lastname.substring(0, 1)
+            var username = firstname + "." + lastname
+            document.getElementById("username").value = username;
+            document.getElementById("preview_username").innerHTML = username;
+            document.getElementById("preview_initials").innerHTML = initials.toUpperCase();
+        }
+    </script>
 {% endblock %}
