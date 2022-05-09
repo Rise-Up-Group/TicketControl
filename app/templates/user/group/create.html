@@ -4,7 +4,7 @@
 
 {% block right %}
     <h3 class="display-4">Gruppe erstellen</h3>
-    <form method="POST" action="{% url 'create_group' %}" autocomplete="new-password">
+    <form method="POST" action="{% url 'create_group' %}">
         {% csrf_token %}
         <div class="form-outline mb-4">
             <input type="text" id="name" name="name" class="form-control" placeholder="Name" value="{{ group.name }}"
