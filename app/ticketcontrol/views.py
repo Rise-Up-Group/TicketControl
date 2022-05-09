@@ -26,15 +26,13 @@ def render_error(request, title, message):
 
 
 def dashboard_view(request):
-    own_tickets = Ticket.objects.filter(owner=request.user.id)
-    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id)
-    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id)
-    context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
-    return render(request, "dashboard.html", context)
-
-
-def home_view(request):
-    return render(request, "home.html")
+    if request.user.is_authenticated:
+        own_tickets = Ticket.objects.filter(owner=request.user.id)
+        part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id)
+        context = {'tickets': {'own': own_tickets, 'part': part_tickets}}
+        return render(request, "dashboard.html", context)
+    else:
+        return render(request, "home.html")
 
 
 @login_required()

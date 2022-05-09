@@ -53,7 +53,6 @@ urlpatterns = [
     path('group/<int:id>', edit_group_view, name='edit_group'),
     path('djangoadmin/', admin.site.urls),
     path('', dashboard_view, name='dashboard'),
-    path('home/', home_view, name='home'),
 ]
 
 handler404 = "ticketcontrol.views.handler404"

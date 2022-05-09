@@ -56,12 +56,11 @@
                 </div>
 
                 <div class="card-body bg-light">
-                    {% if tickets.own|length > 0 or tickets.part|length > 0 %}
+                    {% if tickets.part|length > 0 %}
+                        <p class="font-weight-bold">Eigene Tickets</p>
+                    {% endif %}
+                    {% if tickets.own|length != 0 %}
                         <table class="table table-sm">
-                            {% if tickets.part|length > 0 %}
-                                <p class="font-weight-bold">Eigene Tickets</p>
-                            {% endif %}
-                            {% if tickets.own|length != 0 %}
                                 <tr>
                                     <th scope="row">Id</th>
                                     <th>Kategorie</th>
@@ -69,11 +68,6 @@
                                     <th>Moderator</th>
 
                                 </tr>
-                            {% else %}
-                                <p>Aktuell sind keine eigene Tickets vorhanden! <a class="btn btn-link" type="button"
-                                                                                   href="{% url 'create_ticket' %}">Ticket
-                                    erstellen?</a></p>
-                            {% endif %}
                             {% for ticket in tickets.own %}
                                 <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
                                     <th scope="row">#{{ ticket.id }}</th>
@@ -88,6 +82,12 @@
                                 </tr>
                             {% endfor %}
                         </table>
+                    {% else %}
+                        <p>
+                            Aktuell sind keine eigenen Tickets vorhanden!
+                            <a type="button" href="{% url 'create_ticket' %}">Ticket erstellen?</a>
+                        </p>
+                    {% endif %}
                         {% if tickets.part|length > 0 %}
                             <p class="font-weight-bold">Teilnahme an Tickets</p>
                             <table class="table table-sm">
@@ -109,7 +109,6 @@
                                 {% endfor %}
                             </table>
                         {% endif %}
-                    {% endif %}
                 </div>
             </div>
         </div>
