@@ -42,7 +42,7 @@ def mytickets_view(request):
     own_tickets = Ticket.objects.filter(owner=request.user.id)
     part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id)
     mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id)
-    context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets, 'closed': closed_tickets}}
+    context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "ticket/manage.html", context)
 
 
@@ -203,7 +203,7 @@ def create_user_view(request):
         if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(
                 username=request.POST['username']).exists():
             User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on")
+                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on", email_confirmed=True)
             return redirect("manage_users")
         else:
             return HttpResponse(status=409)
@@ -307,7 +307,7 @@ def delete_user_view(request, id):
 @permission_required("auth.view_group")
 def manage_groups_view(request):
     return render(request, "user/group/manage.html",
-                  {"groups": Group.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_user")})
+                  {"groups": Group.objects.all().order_by("id"), "can_create": request.user.has_perm("ticketcontrol.create_user")})
 
 
 @permission_required("auth.create_group")
@@ -325,7 +325,7 @@ def create_group_view(request):
                 group.permissions.add(permission)
         group.save()
         return redirect("manage_groups")
-    return render(request, "user/group/create.html", {"permissions": Permission.objects.all(), "groups": Group.objects.all()})
+    return render(request, "user/group/create.html", {"permissions": Permission.objects.all()})
 
 
 @permission_required("auth.view_group")
