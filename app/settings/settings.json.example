@@ -18,7 +18,11 @@
     "email_whitelist": []
   },
   "legal": {
-    "contact_email": "contact@riseupgroup.net",
     "privacy_and_policy": ""
+  },
+  "general": {
+    "contact_email": "contact@riseupgroup.net",
+    "allow_location": true,
+    "force_location": false
   }
 }

@@ -551,6 +551,10 @@ def settings_view(request):
         settings = json.load(settings_file)
         settings_file.close()
         if request.method == "POST":
+            general = settings['general']
+            general['contact_email'] = request.POST['general.contact-email']
+            general['allow_location'] = request.POST.get("general.allow-location", False) == "on"
+            general['force_location'] = request.POST.get("general.force-location", False) == "on"
             email_server = settings['email_server']
             email_server['smtp_host'] = request.POST['email-server.smtp-host']
             email_server['smtp_port'] = int(request.POST['email-server.smtp-port'])
@@ -573,7 +577,6 @@ def settings_view(request):
                 register['email_whitelist'].append(entry)
 
             legal = settings['legal']
-            legal['contact_email'] = request.POST['legal.contact-email']
             legal['privacy_and_policy'] = request.POST['legal.privacy-and-policy']
 
             settings_file = open("settings/settings.json", "w")

@@ -11,7 +11,12 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import json
 import os
+import shutil
 from pathlib import Path
+
+
+if not os.path.isfile("settings/settings.json"):
+    shutil.copy("settings/settings.json.example", "settings/settings.json")
 
 settings_file = open("settings/settings.json")
 settings = json.load(settings_file)

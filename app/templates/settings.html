@@ -7,6 +7,18 @@
     <form action="{% url 'settings' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
+            <h2>General</h2>
+            <label for="general.contact-email">Contact E-Mail:</label>
+            <input type="email" id="general.contact-email" name="general.contact-email"
+                   value="{{ settings.general.contact_email }}"><br>
+            <input type="checkbox" id="general.allow-location" name="general.allow-location"
+                {% if settings.general.allow_location %}checked{% endif %}>
+            <label for="general.allow-location">Allow location</label><br>
+            <input type="checkbox" id="general.force-location" name="general.force-location"
+                {% if settings.general.force_location %}checked{% endif %}>
+            <label for="general.force-location">Force location</label>
+        </div>
+        <div class="form-group">
             <h2>E-Mail</h2>
             <label for="email-server.smtp-host">smtp-host:</label>
             <input type="text" id="email-server.smtp-host" name="email-server.smtp-host"
@@ -58,13 +70,9 @@
         </div>
         <div class="form-group">
             <h2>Legal</h2>
-            <label for="legal.contact-email">Contact E-Mail:</label>
-            <input type="email" id="legal.contact-email" name="legal.contact-email"
-                   value="{{ settings.legal.contact_email }}"><br>
             <label for="legal.privacy-and-policy">Privacy and policy:</label><br>
             <textarea id="legal.privacy-and-policy"
                       name="legal.privacy-and-policy">{{ settings.legal.privacy_and_policy }}</textarea><br><br>
-
         </div>
         <input type="submit" value="Save">
     </form>
