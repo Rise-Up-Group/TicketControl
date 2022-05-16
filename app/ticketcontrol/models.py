@@ -176,6 +176,10 @@ class Comment(models.Model):
 
 
 class Ticket(models.Model):
+    class Meta:
+        permissions = (
+            ("hide_ticket", "Hide the Ticket to everyone (shown as delete in ui)"),
+        )
     class StatusChoices(models.TextChoices):
         UNASSIGNED = 'Unassigned'
         ASSIGNED = 'Assigned'
@@ -202,6 +206,10 @@ class Ticket(models.Model):
         self.status = status
         self.save()
 
+    def set_hidden(self, hidden):
+        self.hidden = hidden
+        self.save()
+
     status = models.CharField(max_length=15, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
     creationDate = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
@@ -210,6 +218,7 @@ class Ticket(models.Model):
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
     participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
     moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title + " (" + self.owner.username + ")"
