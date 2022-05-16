@@ -24,7 +24,8 @@
                             <button class="dropdown-item" type="submit" value="Submit">Wiederherstellen</button>
                         </form>
                     {% endif %}
-                    <a class="dropdown-item" href="#">Aus Datenbank löschen</a>
+                    <a class="dropdown-item" type="button" data-toggle="modal"
+                       data-target="#delete-ticket">Aus Datenbank löschen</a>
                     <div role="separator" class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
                         zuweisen</a>
@@ -279,6 +280,29 @@
             </div>
         </div>
     {% endif %}
+    <div class="modal fade" id="delete-ticket" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ticket #{{ ticket.id }} aus Datenbank löschen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="{% url 'delete_ticket' id=ticket.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>Ticket endgültig aus Datenbank löschen?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zurück</button>
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
     <script>
         async function search_and_update_usernames(typed_username) {

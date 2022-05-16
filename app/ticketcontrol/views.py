@@ -567,3 +567,28 @@ def ticket_unhide(request, id):
         except DatabaseError:
             return HttpResponse(status=409)
     return HttpResponse(get_token(request))
+
+@permission_required("ticketcontrol.unhide_ticket")
+def ticket_unhide(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_hidden(False)
+            return redirect("ticket_view", id=id)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
+
+@permission_required("ticketcontrol.delete_ticket")
+def ticket_delete(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.delete()
+            return redirect("dashboard")
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
