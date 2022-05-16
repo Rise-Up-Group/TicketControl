@@ -582,3 +582,43 @@ def settings_view(request):
         return render(request, "settings.html", {"settings": settings})
     else:
         return HttpResponse(status=403)
+
+
+@permission_required("ticketcontrol.add_category")
+def create_category_view(request):
+    if request.method == "POST":
+        Category.objects.create(name = request.POST['name'], color=request.POST['color'].strip("#"))
+        return redirect("manage_categories")
+    else:
+        return render(request, "category/create.html")
+
+@permission_required("ticketcontrol.view_category")
+def edit_category_view(request, id):
+    category = Category.objects.get(id=id)
+    if request.method == "POST":
+        if request.user.has_perm("ticketcontrol.edit_category"):
+            category.name = request.POST['name']
+            category.color = request.POST['color'].strip("#")
+            category.save()
+            return redirect("manage_categories")
+        else:
+            return HttpResponse(status=403)
+    return render(request, "category/edit.html", {"category": category,
+                                                  "can_change": request.user.has_perm("ticketcontrol.change_category"),
+                                                  "can_delete": request.user.has_perm("ticketcontrol.delete_category")})
+
+
+@permission_required("ticketcontrol.delete_category")
+def delete_category_view(request, id):
+    if request.method == "POST":
+        category = Category.objects.get(id=id)
+        category.delete()
+        return redirect("manage_categories")
+    else:
+        return HttpResponse(status=409)
+
+
+@permission_required("ticketcontrol.view_category")
+def manage_categories_view(request):
+    return render(request, "category/manage.html",
+                  {"categories": Category.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_category")})

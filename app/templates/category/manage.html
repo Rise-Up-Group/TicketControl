@@ -1,0 +1,33 @@
+{% extends "main.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+    <h1 class="text-center display-4 mb-4">Manage categories</h1>
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h5>Kategorie Liste</h5>
+        </div>
+        <div class="card-body bg-light">
+
+            <table class="table table-sm table-hover">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Farbe</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for category in categories %}
+                    <tr onclick="window.location='{% url 'edit_category' id=category.id %}'">
+                        <td>{{ category.name }}</td>
+                        <td style="background-color: #{{ category.color }};">#{{ category.color }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% if can_create %}<a class="btn btn-primary" href="{% url 'create_category' %}">Neue Kategorie anlegen</a>{% endif %}
+
+        </div>
+    </div>
+{% endblock %}

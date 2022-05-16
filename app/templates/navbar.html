@@ -29,7 +29,7 @@
                     <a class="dropdown-toggle nav-link" type="button" id="dropdownMenu2" data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false">Administration</a>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                        <a class="dropdown-item" href="/admin">General</a>
+                        <a class="dropdown-item" href="{% url 'manage_categories' %}">Categories</a>
                         {% if perms.ticketcontrol.change_user or perms.ticketcontrol.add_user %}
                             <a class="dropdown-item" href="/user/manage">Users</a>
                         {% endif %}

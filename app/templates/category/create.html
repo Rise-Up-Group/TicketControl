@@ -1,0 +1,19 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+    <form method="POST" action="{% url 'create_category' %}">
+        {% csrf_token %}
+        <div class="form-outline mb-2">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" class="form-control" required/>
+        </div>
+        <div class="form-outline mb-2">
+            <label for="color">Color</label>
+            <input type="color" id="color" name="color" class="form-control" placeholder="ffffffff" required/>
+        </div>
+        <input class="btn btn-primary btn-block mb-2" type="submit" name="submit" id="submit" value="Update">
+    </form>
+{% endblock %}
