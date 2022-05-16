@@ -7,6 +7,7 @@ from django.db import models
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+import os
 
 from .settings import EMAIL_HOST_USER
 
@@ -176,6 +177,12 @@ class Comment(models.Model):
 
 
 class Ticket(models.Model):
+    class Meta:
+        permissions = (
+            ("hide_ticket", "Hide the Ticket to everyone (shown as delete in the ui)"),
+            ("unhide_ticket", "Recover the Ticket (shown as recover ticket in the ui)"),
+        )
+
     class StatusChoices(models.TextChoices):
         UNASSIGNED = 'Unassigned'
         ASSIGNED = 'Assigned'
@@ -202,6 +209,26 @@ class Ticket(models.Model):
         self.status = status
         self.save()
 
+    def set_hidden(self, hidden):
+        self.hidden = hidden
+        self.save()
+
+    def delete(self):
+        comments = Comment.objects.filter(ticket=self.id)
+        for comment in comments:
+            attachments = Attachment.objects.filter(comment=comment.id)
+            for attachment in attachments:
+                os.remove("uploads/" + str(attachment.id))
+                attachment.delete()
+            comment.delete()
+
+        attachments = Attachment.objects.filter(ticket=self.id)
+        for attachment in attachments:
+            os.remove("uploads/" + str(attachment.id))
+            attachment.delete()
+
+        super().delete()
+
     status = models.CharField(max_length=15, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
     creationDate = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
@@ -210,6 +237,7 @@ class Ticket(models.Model):
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
     participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
     moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title + " (" + self.owner.username + ")"

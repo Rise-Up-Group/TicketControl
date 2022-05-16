@@ -30,8 +30,8 @@ def render_error(request, title, message):
 
 def dashboard_view(request):
     if request.user.is_authenticated:
-        own_tickets = Ticket.objects.filter(owner=request.user.id)
-        part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id)
+        own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
+        part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id)
         context = {'tickets': {'own': own_tickets, 'part': part_tickets}}
         return render(request, "dashboard.html", context)
     else:
@@ -40,9 +40,9 @@ def dashboard_view(request):
 
 @login_required()
 def mytickets_view(request):
-    own_tickets = Ticket.objects.filter(owner=request.user.id)
-    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id)
-    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id)
+    own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
+    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id, hidden=False)
+    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id, hidden=False)
     context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "ticket/manage.html", context)
 
@@ -54,6 +54,8 @@ def ticket_view(request, id):
     context = {}
     try:
         ticket = get_object_or_404(Ticket, pk=id)
+        if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
+            return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
         try:
             comments = get_list_or_404(Comment, ticket_id=ticket.id)
         except Http404:
@@ -540,3 +542,43 @@ def ticket_status_update(request, id):
             return HttpResponse(status=409)
     return HttpResponse(get_token(request))
 
+
+@permission_required("ticketcontrol.hide_ticket")
+def ticket_hide(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_hidden(True)
+            return redirect("dashboard")
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
+
+
+@permission_required("ticketcontrol.unhide_ticket")
+def ticket_unhide(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_hidden(False)
+            return redirect("ticket_view", id=id)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
+
+
+@permission_required("ticketcontrol.delete_ticket")
+def ticket_delete(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.delete()
+            return redirect("dashboard")
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
