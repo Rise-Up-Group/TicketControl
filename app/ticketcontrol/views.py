@@ -549,9 +549,36 @@ def settings_view(request):
     if request.user.is_superuser:
         settings_file = open("settings/settings.json")
         settings = json.load(settings_file)
+        settings_file.close()
         if request.method == "POST":
-            pass
-        else:
-            return render(request, "settings.html", {"settings": settings})
+            email_server = settings['email_server']
+            email_server['smtp_host'] = request.POST['email-server.smtp-host']
+            email_server['smtp_port'] = int(request.POST['email-server.smtp-port'])
+            email_server['smtp_use_tls'] = request.POST.get("email-server.smtp-use-tls", False) == "on"
+            email_server['smtp_use_ssl'] = request.POST.get("email-server.smtp-use-ssl", False) == "on"
+            email_server['smtp_user'] = request.POST['email-server.smtp-user']
+            if request.POST['email-server.smtp-password'] is not None and request.POST['email-server.smtp-password'] != "":
+                email_server['smtp_password'] = request.POST['email-server.smtp-password']
+
+            content = settings['content']
+            content['frontpage'] = request.POST['content.frontpage']
+            content['half_page'] = request.POST['content.half-page']
+            content['imprint'] = request.POST['content.imprint']
+
+            register = settings['register']
+            register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
+            register['email_whitelist_enable'] = request.POST.get("register.email-whitelist-enable", False) == "on"
+            register['email_whitelist'] = []
+            for entry in request.POST.getlist('register.email-whitelist'):
+                register['email_whitelist'].append(entry)
+
+            legal = settings['legal']
+            legal['contact_email'] = request.POST['legal.contact-email']
+            legal['privacy_and_policy'] = request.POST['legal.privacy-and-policy']
+
+            settings_file = open("settings/settings.json", "w")
+            json.dump(settings, settings_file)
+            settings_file.close()
+        return render(request, "settings.html", {"settings": settings})
     else:
         return HttpResponse(status=403)

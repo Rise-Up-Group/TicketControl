@@ -1,10 +1,10 @@
 {% extends 'main.html' %}
-
+{% load static %}
 {% block title %}Settings{% endblock %}
 
 {% block content %}
     <h1>Settings</h1>
-    <form action="{% url 'settings' %}">
+    <form action="{% url 'settings' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
             <h2>E-Mail</h2>
@@ -36,20 +36,37 @@
             <textarea id="content.half-page"
                       name="content.half-page">{{ settings.content.half_page }}</textarea><br><br>
             <label for="content.imprint">Imprint:</label><br>
-            <textarea id="content.imprint" name="content.inprint">{{ settings.content.imprint }}</textarea><br><br>
+            <textarea id="content.imprint" name="content.imprint">{{ settings.content.imprint }}</textarea><br><br>
         </div>
         <div class="form-group">
             <h2>Register</h2>
             <input type="checkbox" id="register.allow-custom-nickname" name="register.allow-custom-nickname"
                    {% if settings.register.allow_custom_nickname %}checked{% endif %}>
             <label for="register.allow-custom-nickname">Allow custom nickname</label><br>
+            <input type="checkbox" id="register.email-whitelist-enable" name="register.email-whitelist-enable"
+                   {% if settings.register.email_whitelist_enable %}checked{% endif %}>
+            <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label><br>
+            <div id="register.email_whitelist">
+                {% for entry in settings.register.email_whitelist %}
+                    <div>
+                        <input type="email" name="register.email-whitelist" value="{{ entry }}">
+                        <a class="btn btn-primary" onclick="removeEmailWhitelistEntry(this);">Löschen</a>
+                    </div>
+                {% endfor %}
+            </div>
+            <a class="btn btn-primary" onclick="addEmailWhitelistEntry();">Hinzufügen</a>
         </div>
         <div class="form-group">
             <h2>Legal</h2>
             <label for="legal.contact-email">Contact E-Mail:</label>
             <input type="email" id="legal.contact-email" name="legal.contact-email"
                    value="{{ settings.legal.contact_email }}"><br>
+            <label for="legal.privacy-and-policy">Privacy and policy:</label><br>
+            <textarea id="legal.privacy-and-policy"
+                      name="legal.privacy-and-policy">{{ settings.legal.privacy_and_policy }}</textarea><br><br>
+
         </div>
         <input type="submit" value="Save">
     </form>
+    <script src="{% static '/js/emailWhitelist.js' %}"></script>
 {% endblock %}
