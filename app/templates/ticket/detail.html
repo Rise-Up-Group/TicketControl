@@ -7,7 +7,7 @@
                 <span class="input-group-text">#{{ ticket.id }}</span>
                 <span class="input-group-text">{{ ticket.status }}</span>
             </div>
-            <input type="text" class="form-control" placeholder="{{ ticket.title }}">
+            <input id="title" type="text" class="form-control" placeholder="{{ ticket.title }}" value="{{ ticket.title }}" oninput="show_update_ticket_warning()">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">options
@@ -33,14 +33,20 @@
                 </div>
             </div>
         </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Standort / Raum</span>
+            </div>
+            <input id="location" type="text" class="form-control" placeholder="{{ ticket.location }}" value="{{ ticket.location }}"  oninput="show_update_ticket_warning()">
+        </div>
         <div class="mb-3 row">
             <div class="col-6">
                 <div class="input-group">
                     <div class="input-group-prepend">
-                        <label class="input-group-text" for="inputGroupSelect01">Kategorie:</label>
+                        <label class="input-group-text" for="category">Kategorie:</label>
                     </div>
-                    <select class="custom-select" id="inputGroupSelect01">
-                        <option selected>{{ ticket.category }}</option>
+                    <select class="custom-select" id="category" oninput="show_update_ticket_warning()">
+                        <option selected value="0">{{ ticket.category }}</option>
                         {% for foo in category %}
                             {% if not foo.name == ticket.category.name %}
                                 <option value="{{ forloop.counter }}">{{ foo.name }}</option>
@@ -62,23 +68,21 @@
                         {% endif %}
                     </span>
                 </p>
-
             </div>
             <div class="col-6">
                 <div class="dropdown" id="user-searchbar">
-                    <form autocomplete="off" onsubmit="return false;">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">@</div>
-                            </div>
-                            <input type="text" class="form-control" id="search-user" placeholder="Username"
-                                   list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);"
-                                   onchange="add_user(`participants`, this.value);">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">@</div>
                         </div>
-                        <datalist id="user-search-dropdown-menu">
-                            <!--Will be filled in with js-->
-                        </datalist>
-                    </form>
+                        <input type="text" class="form-control" id="search-user" placeholder="Username"
+                               list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);"
+                               onchange="add_user(`participants`, this.value);">
+                    </div>
+                    <datalist id="user-search-dropdown-menu">
+                        <!--Will be filled in with js-->
+                    </datalist>
+
                 </div>
                 <p class="text-muted">
                     Teilnehmer:
@@ -95,6 +99,29 @@
                     </span>
                 </p>
             </div>
+        </div>
+        <div id="update-ticket-warning" style="display: none">
+            <figure class="bg-light p-3 rounded  border-1"
+                    style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ed4245;">
+                <div class="row justify-content-between">
+                    <div class="col-auto">
+                        <p class="lead">
+                            Ticket Informationen bearbeitet! Speichern bestätigen
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <form action="{% url 'update_ticket_info' id=ticket.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="text" name="title" id="new_title" hidden>
+                            <input type="text" name="location" id="new_location" hidden>
+                            <input type="text" name="category" id="new_category" hidden>
+                            <button class="btn btn-success text-right" type="submit" value="Submit">
+                                Speichern
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </figure>
         </div>
         <figure class="bg-light p-3 rounded  border-1"
                 style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
@@ -352,6 +379,16 @@
                     }
                 }
             }
+        }
+
+        async function show_update_ticket_warning(){
+            document.getElementById("update-ticket-warning").style.display = "";
+            var title = document.getElementById("title").value;
+            var location = document.getElementById("location").value;
+            var category = document.getElementById("category").value
+            document.getElementById("new_title").value = title;
+            document.getElementById("new_location").value = location;
+            document.getElementById("new_category").value = category;
         }
     </script>
 {% endblock %}

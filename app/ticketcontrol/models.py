@@ -190,8 +190,8 @@ class Ticket(models.Model):
         OPEN = 'Open'
         WAITING = 'Waiting'
 
-    def add_ticket(title, description, owner, category):
-        ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned')
+    def add_ticket(title, description, owner, category, location):
+        ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned', location=location)
         ticket.save()
         return ticket
 
@@ -238,6 +238,7 @@ class Ticket(models.Model):
     participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
     moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
     hidden = models.BooleanField(default=False)
+    location = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.title + " (" + self.owner.username + ")"
