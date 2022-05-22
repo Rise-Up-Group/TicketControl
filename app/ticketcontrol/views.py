@@ -388,7 +388,7 @@ def ticket_new_view(request):
     if request.method == 'POST':
         user = User.objects.get(id=request.user.id)
         ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
-                                   Category.objects.get(id=request.POST["category"]))
+                                   Category.objects.get(id=request.POST["category"]), request.POST["location"])
         for attachment_id in request.POST.getlist("attachments"):
             attachment = Attachment.objects.get(id=attachment_id)
             if attachment.user.id == request.user.id:
@@ -578,6 +578,26 @@ def ticket_delete(request, id):
             ticket = Ticket.objects.get(id=id)
             ticket.delete()
             return redirect("dashboard")
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+
+def ticket_info_update(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner or request.user.has_perm("ticketcontrol.change_ticket"):
+                if request.POST['title'] != "" and not None:
+                    ticket.title = request.POST['title']
+                if request.POST['location'] != "" and not None:
+                    ticket.location = request.POST['location']
+                if not request.POST['category'] in (0, "", "0", None):
+                    ticket.category = Category.objects.get(id=request.POST['category'])
+                ticket.save()
+            else:
+                return HttpResponse(status=403)
+            return redirect("ticket_view", id=id)
         except ObjectDoesNotExist:
             return HttpResponse(status=404)
         except DatabaseError:
