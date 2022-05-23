@@ -1,0 +1,28 @@
+{
+  "email_server": {
+    "smtp_host": "smtp.ionos.de",
+    "smtp_port": 465,
+    "smtp_use_tls": true,
+    "smtp_use_ssl": false,
+    "smtp_user": "noreply@riseupgroup.net",
+    "smtp_password": ""
+  },
+  "content": {
+    "frontpage": "",
+    "half_page": "",
+    "imprint": ""
+  },
+  "register": {
+    "allow_custom_nickname": true,
+    "email_whitelist_enable": false,
+    "email_whitelist": []
+  },
+  "legal": {
+    "privacy_and_policy": ""
+  },
+  "general": {
+    "contact_email": "contact@riseupgroup.net",
+    "allow_location": true,
+    "force_location": false
+  }
+}

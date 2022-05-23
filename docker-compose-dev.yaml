@@ -18,12 +18,6 @@ services:
       - DB_NAME=ticketcontrol
       - DB_USER=root # user has to be root with this default config
       - DB_PASS=changeme
-      - EMAIL_HOST=smtp.ionos.de
-      - EMAIL_PORT=465
-      - EMAIL_TLS=True
-      - EMAIL_SSL=False
-      - EMAIL_ADDRESS=noreply@riseupgroup.net
-      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - SECRET_KEY=changeme
       - ALLOWED_HOSTS=*
       - DEBUG=1
@@ -35,6 +29,7 @@ services:
       - 8000:8000
     volumes:
       - ./app:/app # auto refresh server files
+      - ./app/settings:/app/settings
       - ./data/web:/vol/web
     depends_on: # make serve name as dns work & connect containers
       - db
