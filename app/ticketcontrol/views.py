@@ -419,6 +419,8 @@ def ticket_new_view(request):
 def ticket_comment_add(request, id):
     if request.method == 'POST':
         ticket = Ticket.objects.get(id=id)
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.chane_ticket"):
+            HttpResponse(status=403)
         user = User.objects.get(id=request.user.id)
         comment = ticket.add_comment(request.POST["comment"], user)
         for attachment_id in request.POST.getlist("attachments"):
