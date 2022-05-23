@@ -19,7 +19,6 @@ from django.conf import settings
 from django.views.static import serve
 
 from .models import *
-from .settings import EMAIL_HOST_USER
 
 logger = logging.getLogger(__name__)
 
@@ -548,14 +547,14 @@ def ticket_status_update(request, id):
 def settings_view(request):
     if request.user.is_superuser:
         settings_file = open("settings/settings.json")
-        settings = json.load(settings_file)
+        settings_json = json.load(settings_file)
         settings_file.close()
         if request.method == "POST":
-            general = settings['general']
+            general = settings_json['general']
             general['contact_email'] = request.POST['general.contact-email']
             general['allow_location'] = request.POST.get("general.allow-location", False) == "on"
             general['force_location'] = request.POST.get("general.force-location", False) == "on"
-            email_server = settings['email_server']
+            email_server = settings_json['email_server']
             email_server['smtp_host'] = request.POST['email-server.smtp-host']
             email_server['smtp_port'] = int(request.POST['email-server.smtp-port'])
             email_server['smtp_use_tls'] = request.POST.get("email-server.smtp-use-tls", False) == "on"
@@ -564,25 +563,29 @@ def settings_view(request):
             if request.POST['email-server.smtp-password'] is not None and request.POST['email-server.smtp-password'] != "":
                 email_server['smtp_password'] = request.POST['email-server.smtp-password']
 
-            content = settings['content']
+            content = settings_json['content']
             content['frontpage'] = request.POST['content.frontpage']
             content['half_page'] = request.POST['content.half-page']
             content['imprint'] = request.POST['content.imprint']
 
-            register = settings['register']
+            register = settings_json['register']
             register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
             register['email_whitelist_enable'] = request.POST.get("register.email-whitelist-enable", False) == "on"
             register['email_whitelist'] = []
             for entry in request.POST.getlist('register.email-whitelist'):
                 register['email_whitelist'].append(entry)
 
-            legal = settings['legal']
+            legal = settings_json['legal']
             legal['privacy_and_policy'] = request.POST['legal.privacy-and-policy']
 
             settings_file = open("settings/settings.json", "w")
-            json.dump(settings, settings_file)
+            json.dump(settings_json, settings_file)
             settings_file.close()
-        return render(request, "settings.html", {"settings": settings})
+
+            if request.POST['restart-server'] == "on":
+                os.system("/sbin/reboot")
+
+        return render(request, "settings.html", {"settings": settings_json})
     else:
         return HttpResponse(status=403)
 

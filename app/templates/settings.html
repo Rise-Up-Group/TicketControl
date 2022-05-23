@@ -74,6 +74,11 @@
             <textarea id="legal.privacy-and-policy"
                       name="legal.privacy-and-policy">{{ settings.legal.privacy_and_policy }}</textarea><br><br>
         </div>
+        <div class="alert-warning">
+            You have to restart the server manually to apply the configuration changes.<br>
+            <input type="checkbox" name="restart-server" id="restart-server">
+            <label for="restart-server">Restart server after saving changes</label>
+        </div>
         <input type="submit" value="Save">
     </form>
     <script src="{% static '/js/emailWhitelist.js' %}"></script>
