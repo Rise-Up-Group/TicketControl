@@ -298,7 +298,11 @@ def profile_view(request):
 
 def unrestricted_delete_user_view(request, id):
     if request.method == 'POST':
-        User.objects.get(id=id).delete()
+        user = User.objects.get(id=id)
+        if user.username not in ("ghost", "admin"):
+            user.delete()
+        else:
+            return HttpResponse(status=403)
         return redirect("manage_users")
 
 
