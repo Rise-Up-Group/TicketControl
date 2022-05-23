@@ -219,7 +219,7 @@ def create_user_view(request):
 @permission_required("ticketcontrol.view_user")
 def manage_users_view(request):
     return render(request, "user/manage.html",
-                  {"users": User.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_user"),
+                  {"users": User.objects.all().exclude(username="ghost"), "can_create": request.user.has_perm("ticketcontrol.create_user"),
                    "can_change": request.user.has_perm("ticketcontrol.change_user"),
                    "can_delete": request.user.has_perm("ticketcontrol.delete_user")})
 
@@ -254,6 +254,8 @@ def edit_user_view(request, id):
             if request.user.has_perm("ticketcontrol.change_user_permission"):
                 groups = request.POST.getlist("groups")
             user = User.objects.get(id=id)
+            if user.username == "ghost":
+                return HttpResponse(status=403)
             if user.username == request.POST['username'] or not User.objects.filter(
                     username=request.POST['username']).exists():
                 user.update_user(None, request.POST['firstname'], request.POST['lastname'],
@@ -277,6 +279,9 @@ def edit_user_view(request, id):
         groups = []
         for group in user.groups.all():
             groups.append(group.id)
+
+        if user.username == "ghost":
+            return HttpResponse(status=403)
         return render(request, "user/edit.html",
                       {"content_user": user, "userGroups": groups, "groups": Group.objects.all(),
                        "can_change_permission": request.user.has_perm(
