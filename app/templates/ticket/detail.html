@@ -157,7 +157,7 @@
                 </div>
             {% endif %}
             <p class="blockquote-footer mb-0 font-italic">
-                {{ ticket.creationDate }}
+                {{ ticket.owner.username }} | {{ ticket.owner.first_name }} {{ ticket.owner.last_name }} | {{ ticket.creationDate }}
             </p>
             {% if perms.ticketcontrol.change_ticket or ticket.owner_id == user.id %}
                 <button onclick="makeEditable(this);">Bearbeiten</button>
@@ -169,8 +169,7 @@
                     style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ff9f00;">
                 <form method="post" action="{% url 'edit_comment' id=comment.id %}">
                 {% csrf_token %}
-                <p class="lead">{{ comment.user.first_name }} {{ comment.user.last_name }}
-                    | {{ comment.user.username }}</p>
+                <p class="lead">{{ comment.user.username }} | {{ comment.user.first_name }} {{ comment.user.last_name }} </p>
                 <hr>
                 <p data-input type="textarea" name="content">{{ comment.content }}</p>
                 {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}

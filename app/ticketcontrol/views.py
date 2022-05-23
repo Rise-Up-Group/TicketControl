@@ -293,7 +293,7 @@ def profile_view(request):
 
 def unrestricted_delete_user_view(request, id):
     if request.method == 'POST':
-        User.delete_user(id)
+        User.objects.get(id=id).delete()
         return redirect("manage_users")
 
 
@@ -714,3 +714,4 @@ def ticket_edit(request, id):
             return HttpResponse(status=403)
     else:
         return HttpResponse(status=400)
+
