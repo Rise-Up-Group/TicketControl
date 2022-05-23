@@ -688,3 +688,30 @@ def ticket_info_update(request, id):
             return HttpResponse(status=404)
         except DatabaseError:
             return HttpResponse(status=409)
+
+
+def edit_comment(request, id):
+    if request.method == "POST":
+        comment = Comment.objects.get(id=id)
+        if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == comment.user.id:
+            comment.content = request.POST['content']
+            comment.save()
+            return redirect('ticket_view', id=comment.ticket_id)
+        else:
+            return HttpResponse(status=403)
+    else:
+        return HttpResponse(status=400)
+
+
+def ticket_edit(request, id):
+    if request.method == "POST":
+        ticket = Ticket.objects.get(id=id)
+        if request.user.has_perm("ticketcontrol.change_ticket") or request.user.id == ticket.owner.id:
+            ticket.description = request.POST['description']
+            ticket.save()
+            return redirect('ticket_view', id=id)
+        else:
+            return HttpResponse(status=403)
+    else:
+        return HttpResponse(status=400)
+
