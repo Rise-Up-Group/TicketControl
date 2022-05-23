@@ -29,10 +29,14 @@ urlpatterns = [
     path('ticket/<int:id>', ticket_view, name="ticket_view"),
     path('ticket/<int:id>/comment/add', ticket_comment_add, name="add_comment_to_ticket"),
     path('ticket/<int:id>/status/update', ticket_status_update, name="update_status_ticket"),
+    path('ticket/<int:id>/hide', ticket_hide, name="hide_ticket"),
+    path('ticket/<int:id>/unhide', ticket_unhide, name="unhide_ticket"),
+    path('ticket/<int:id>/delete', ticket_delete, name="delete_ticket"),
     path('ticket/<int:id>/participants/add/<str:username>', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/participants/add/', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/moderators/add/<str:username>', ticket_moderator_add, name="ticket_add_moderator"),
     path('ticket/<int:id>/moderators/add/', ticket_moderator_add, name="ticket_add_moderator"),
+    path('ticket/<int:id>/info/update/', ticket_info_update, name="update_ticket_info"),
     path('ticket/new', ticket_new_view, name='create_ticket'),
     path('attachment/<int:id>', attachment_access_control, name='attachment'),
     path('attachment/<int:id>/name/<str:name>', attachment_access_control, name='attachment'),
@@ -62,7 +66,6 @@ urlpatterns = [
     path('category/create', create_category_view, name="create_category"),
     path('settings', settings_view, name='settings'),
     path('', dashboard_view, name='dashboard'),
-    path('home/', home_view, name='home'),
 ]
 
 handler404 = "ticketcontrol.views.handler404"

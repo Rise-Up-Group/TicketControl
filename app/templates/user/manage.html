@@ -3,33 +3,41 @@
 {% block title %}Manage Users{% endblock %}
 
 {% block content %}
-    <br>
-    <h1 class="text-center display-4">Manage users</h1>
-    <hr>
+    <h1 class="text-center display-4 mb-4">Manage users</h1>
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h5>User Liste</h5>
+        </div>
+        <div class="card-body bg-light">
 
-    <br>{% if can_create %}<a class="btn btn-primary" href="{% url 'create_user' %}">Create</a><br><br>{% endif %}
+            <table class="table table-sm table-hover">
+                <thead>
+                <tr>
+                    <th scope="row">Id</th>
+                    <th>Username</th>
+                    <th>E-Mail</th>
+                    <th>Vorname</th>
+                    <th>Nachname</th>
+                    <th>Verifiziert</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr onclick="window.location='{% url 'user_details' id=user.id %}'">
+                        <th>#{{ user.id }}</th>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>{% if can_change or can_delete %}
+                        <td>{% if user.email_confirmed %}Ja{% else %}Nein{% endif %}</td>
+                        <td><a href="{% url 'edit_user' id=user.id %}">Edit</a></td>{% endif %}</tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% if can_create %}<a class="btn btn-primary" href="{% url 'create_user' %}">Neuen Nutzer Anlegen</a>{% endif %}
 
-    <table>
-        <thead>
-        <tr>
-            <td>id</td>
-            <td>name</td>
-            <td>E-Mail</td>
-            <td>firstname</td>
-            <td>lastname</td>
-        </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr onclick="window.location='{% url 'user_details' id=user.id %}'">
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.first_name }}</td>
-                <td>{{ user.last_name }}</td>{% if can_change or can_delete %}
-                <td><a href="{% url 'edit_user' id=user.id %}">Edit</a></td>{% endif %}</tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    </div>
 
 {% endblock %}

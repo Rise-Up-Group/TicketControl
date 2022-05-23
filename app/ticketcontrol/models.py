@@ -7,6 +7,7 @@ from django.db import models
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+import os
 
 from .settings import EMAIL_HOST_USER
 
@@ -14,21 +15,22 @@ from .settings import EMAIL_HOST_USER
 class AccountActivationToken(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
         return (
-            text_type(user.pk) + text_type(timestamp) +
-            text_type(user.email_confirmed) + text_type(user.email)
+                text_type(user.pk) + text_type(timestamp) +
+                text_type(user.email_confirmed) + text_type(user.email)
         )
 
 
 class PasswordResetToken(PasswordResetTokenGenerator):
     def _make_hash_value(self, user, timestamp):
         return (
-            text_type(user.pk) + text_type(timestamp) +
-            text_type(user.reset_password) + text_type(user.password)
+                text_type(user.pk) + text_type(timestamp) +
+                text_type(user.reset_password) + text_type(user.password)
         )
 
 
 account_activation_token = AccountActivationToken()
 password_reset_token = PasswordResetToken()
+
 
 class User(BaseUser):
     class Meta:
@@ -36,11 +38,13 @@ class User(BaseUser):
             ("change_user_permission", "Change the permissions of other users"),
             ("admin_general", "Allow access to the Admin Panel"),
         )
+
     new_email = models.EmailField(blank=True)
     email_confirmed = models.BooleanField(default=False)
     reset_password = models.BooleanField(default=False)
 
-    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False, is_superuser=None):
+    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False,
+                 is_superuser=None):
         # TODO: preview in javascrip and show to user
         # TODO: nickname has to be unique (possibly with db)
         if username == "":
@@ -68,7 +72,8 @@ class User(BaseUser):
         user.save()
         return user
 
-    def update_user(self, email=None, first_name=None, last_name=None, username=None, password=None, groups=None, is_active=None, email_confirmed=None):
+    def update_user(self, email=None, first_name=None, last_name=None, username=None, password=None, groups=None,
+                    is_active=None, email_confirmed=None):
         if email is not None and self.email != email:
             self.new_email = email
         if first_name is not None:
@@ -111,7 +116,7 @@ class User(BaseUser):
         User.objects.get(id=id).delete()
 
     def send_emailverification_mail(self, request, new_user=True):
-        message = render_to_string("user/activate_mail.html", {
+        message = render_to_string("email/activate_mail.html", {
             'user': self,
             'domain': get_current_site(request).domain,
             'token': account_activation_token.make_token(self),
@@ -119,7 +124,7 @@ class User(BaseUser):
         if new_user:
             subject = "Welcome to Ticketcontrol"
         else:
-            subject="[Ticketcontrol] Confirm your EMail address"
+            subject = "[Ticketcontrol] Confirm your EMail address"
         send_mail(
             subject=subject,
             message="",
@@ -130,7 +135,7 @@ class User(BaseUser):
         )
 
     def send_passwordreset_mail(self, request):
-        message = render_to_string("user/passwordreset_mail.html", {
+        message = render_to_string("email/passwordreset_mail.html", {
             'user': self,
             'domain': get_current_site(request).domain,
             'token': password_reset_token.make_token(self),
@@ -147,6 +152,7 @@ class User(BaseUser):
 
 class Permission(models.Model):
     perm = models.OneToOneField(BasePermission, on_delete=models.DO_NOTHING)
+
     def __str__(self):
         return self.perm.name
 
@@ -171,6 +177,12 @@ class Comment(models.Model):
 
 
 class Ticket(models.Model):
+    class Meta:
+        permissions = (
+            ("hide_ticket", "Hide the Ticket to everyone (shown as delete in the ui)"),
+            ("unhide_ticket", "Recover the Ticket (shown as recover ticket in the ui)"),
+        )
+
     class StatusChoices(models.TextChoices):
         UNASSIGNED = 'Unassigned'
         ASSIGNED = 'Assigned'
@@ -178,8 +190,8 @@ class Ticket(models.Model):
         OPEN = 'Open'
         WAITING = 'Waiting'
 
-    def add_ticket(title, description, owner, category):
-        ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned')
+    def add_ticket(title, description, owner, category, location):
+        ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned', location=location)
         ticket.save()
         return ticket
 
@@ -197,6 +209,26 @@ class Ticket(models.Model):
         self.status = status
         self.save()
 
+    def set_hidden(self, hidden):
+        self.hidden = hidden
+        self.save()
+
+    def delete(self):
+        comments = Comment.objects.filter(ticket=self.id)
+        for comment in comments:
+            attachments = Attachment.objects.filter(comment=comment.id)
+            for attachment in attachments:
+                os.remove("uploads/" + str(attachment.id))
+                attachment.delete()
+            comment.delete()
+
+        attachments = Attachment.objects.filter(ticket=self.id)
+        for attachment in attachments:
+            os.remove("uploads/" + str(attachment.id))
+            attachment.delete()
+
+        super().delete()
+
     status = models.CharField(max_length=15, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
     creationDate = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
@@ -205,6 +237,8 @@ class Ticket(models.Model):
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
     participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
     moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
+    hidden = models.BooleanField(default=False)
+    location = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.title + " (" + self.owner.username + ")"

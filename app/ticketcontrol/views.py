@@ -29,19 +29,21 @@ def render_error(request, title, message):
 
 
 def dashboard_view(request):
-    tickets = Ticket.objects.filter(owner=request.user.id)
-    context = {'tickets': tickets}
-    return render(request, "dashboard.html", context)
+    if request.user.is_authenticated:
+        own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
+        part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id)
+        context = {'tickets': {'own': own_tickets, 'part': part_tickets}}
+        return render(request, "dashboard.html", context)
+    else:
+        return render(request, "home.html")
 
 
-def home_view(request):
-    return render(request, "home.html")
-
-
-##TODO: fix
 @login_required()
 def mytickets_view(request):
-    context = {"tickets": Ticket.objects.filter(owner=request.user.id)}
+    own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
+    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id, hidden=False)
+    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id, hidden=False)
+    context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "ticket/manage.html", context)
 
 
@@ -52,6 +54,8 @@ def ticket_view(request, id):
     context = {}
     try:
         ticket = get_object_or_404(Ticket, pk=id)
+        if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
+            return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
         try:
             comments = get_list_or_404(Comment, ticket_id=ticket.id)
         except Http404:
@@ -244,35 +248,31 @@ def edit_user_view(request, id):
     if request.user.has_perm("ticketcontrol.change_user") or request.user.id == id:
         if request.method == 'POST':
             password = request.POST['password']
-            passwordRetype = request.POST['password_retype']
-            if password == "" or password == passwordRetype:
-                if password != "" and len(password) < 8:
-                    return HttpResponse(status=411)
-                groups = None
-                if request.user.has_perm("ticketcontrol.change_user_permission"):
-                    groups = request.POST.getlist("groups")
-                user = User.objects.get(id=id)
-                if not User.objects.filter(username=request.POST['username']).exists():
-                    user.update_user(None, request.POST['firstname'], request.POST['lastname'],
-                                     request.POST['username'], password, groups,
-                                     request.POST.get("is_active", False) == "on")
-                    if user.email != request.POST['email']:
-                        if not User.objects.filter(email=request.POST['email']).exists():
-                            if request.user.has_perm("ticketcontrol.change_user"):
-                                user.email = request.POST['email']
-                                user.save()
-                            else:
-                                user.update_user(email=request.POST['email'])
-                                user.send_emailverification_mail(request)
-                                return render(request, "user/activate.html")
+            if password != "" and len(password) < 8:
+                return HttpResponse(status=411)
+            groups = None
+            if request.user.has_perm("ticketcontrol.change_user_permission"):
+                groups = request.POST.getlist("groups")
+            user = User.objects.get(id=id)
+            if user.username == request.POST['username'] or not User.objects.filter(
+                    username=request.POST['username']).exists():
+                user.update_user(None, request.POST['firstname'], request.POST['lastname'],
+                                 request.POST['username'], password, groups,
+                                 request.POST.get("is_active", False) == "on")
+                if user.email != request.POST['email']:
+                    if not User.objects.filter(email=request.POST['email']).exists():
+                        if request.user.has_perm("ticketcontrol.change_user"):
+                            user.email = request.POST['email']
+                            user.save()
                         else:
-                            return HttpResponse(status=409)
-                        return redirect("user_details", id=id)
-                else:
-                    return HttpResponse(status=409)
+                            user.update_user(email=request.POST['email'])
+                            user.send_emailverification_mail(request)
+                            return render(request, "user/activate.html")
+                    else:
+                        return HttpResponse(status=409)
+                    return redirect("edit_user", id=id)
             else:
-                # Should not happen anyway
-                return render_error(request, "Passwords do not match", "")
+                return HttpResponse(status=409)
         user = get_object_or_404(User, pk=id)
         groups = []
         for group in user.groups.all():
@@ -295,7 +295,6 @@ def unrestricted_delete_user_view(request, id):
     if request.method == 'POST':
         User.delete_user(id)
         return redirect("manage_users")
-    return render(request, "user/delete.html", {"content_user": get_object_or_404(User, pk=id)})
 
 
 @permission_required("ticketcontrol.delete_user")
@@ -313,7 +312,7 @@ def delete_user_view(request, id):
 @permission_required("auth.view_group")
 def manage_groups_view(request):
     return render(request, "user/group/manage.html",
-                  {"groups": Group.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_user")})
+                  {"groups": Group.objects.all().order_by("id"), "can_create": request.user.has_perm("ticketcontrol.create_user")})
 
 
 @permission_required("auth.create_group")
@@ -382,7 +381,6 @@ def delete_group_view(request, id):
     if request.method == 'POST':
         group.delete()
         return redirect("manage_groups")
-    return render(request, "user/group/delete.html", {"group": group})
 
 
 @login_required()
@@ -390,7 +388,7 @@ def ticket_new_view(request):
     if request.method == 'POST':
         user = User.objects.get(id=request.user.id)
         ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
-                                   Category.objects.get(id=request.POST["category"]))
+                                   Category.objects.get(id=request.POST["category"]), request.POST["location"])
         for attachment_id in request.POST.getlist("attachments"):
             attachment = Attachment.objects.get(id=attachment_id)
             if attachment.user.id == request.user.id:
@@ -544,6 +542,7 @@ def ticket_status_update(request, id):
             return HttpResponse(status=409)
     return HttpResponse(get_token(request))
 
+
 def settings_view(request):
     if request.user.is_superuser:
         settings_file = open("settings/settings.json")
@@ -628,3 +627,65 @@ def delete_category_view(request, id):
 def manage_categories_view(request):
     return render(request, "category/manage.html",
                   {"categories": Category.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_category")})
+
+
+@permission_required("ticketcontrol.hide_ticket")
+def ticket_hide(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_hidden(True)
+            return redirect("dashboard")
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
+
+
+@permission_required("ticketcontrol.unhide_ticket")
+def ticket_unhide(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_hidden(False)
+            return redirect("ticket_view", id=id)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+    return HttpResponse(get_token(request))
+
+
+@permission_required("ticketcontrol.delete_ticket")
+def ticket_delete(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.delete()
+            return redirect("dashboard")
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+
+def ticket_info_update(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner or request.user.has_perm("ticketcontrol.change_ticket"):
+                if request.POST['title'] != "" and not None:
+                    ticket.title = request.POST['title']
+                if request.POST['location'] != "" and not None:
+                    ticket.location = request.POST['location']
+                if not request.POST['category'] in (0, "", "0", None):
+                    ticket.category = Category.objects.get(id=request.POST['category'])
+                ticket.save()
+            else:
+                return HttpResponse(status=403)
+            return redirect("ticket_view", id=id)
+        except ObjectDoesNotExist:
+            return HttpResponse(status=404)
+        except DatabaseError:
+            return HttpResponse(status=409)
+

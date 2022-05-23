@@ -1,29 +1,33 @@
-{% extends "main.html" %}
-
-{% block title %}Manage Groups{% endblock %}
-
-{% block content %}
-    <br>
-    <h1 class="text-center display-4">Manage Groups</h1>
-    <hr>
-
-    <br>{% if can_create %}<a class="btn btn-primary" href="{% url 'create_group' %}">Create</a><br><br>{% endif %}
-
-    <table>
-        <thead>
+{% extends "half_page.html" %}
+{% block left %}
+    <h1 class="my-5 display-3 fw-bold ls-tight">
+        TicketControl<br>
+        <span class="text-primary display-4">by RiseUp Group</span>
+    </h1>
+    <p class="text-muted">
+        Gruppen sind zur verwaltung von Berechtigung mehreren Usern zuständig. Sie erlauben oder verbieten bestimmten
+        Gruppen von Usern Aktionen in TicketControl auszuüben.
+    </p>
+{% endblock %}
+{% block right %}
+    <h1 class="text-center display-4">Gruppen</h1>
+    <table class="table table-sm">
+        <thead class="text-left">
         <tr>
-            <td><strong>id</strong></td>
-            <td><strong>name</strong></td>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Aktion</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody class="text-left">
         {% for group in groups %}
             <tr onclick="window.location='{% url 'edit_group' id=group.id %}'">
-                <td>{{ group.id }}</td>
+                <th>#{{ group.id }}</th>
                 <td>{{ group.name }}</td>
+                <td><a href="{% url 'edit_group' id=group.id %}">Anzeigen</a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
+    {% if can_create %}<a class="btn btn-primary btn-block" href="{% url 'create_group' %}">Neue Gruppe erstellen</a>{% endif %}
 {% endblock %}
