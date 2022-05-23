@@ -582,7 +582,7 @@ def settings_view(request):
             json.dump(settings_json, settings_file)
             settings_file.close()
 
-            if request.POST['restart-server'] == "on":
+            if request.POST.get('restart-server', False) == "on":
                 os.system("/sbin/reboot")
 
         return render(request, "settings.html", {"settings": settings_json})
