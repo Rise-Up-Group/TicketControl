@@ -32,11 +32,11 @@
                         <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                             <a class="dropdown-item" href="{% url 'manage_categories' %}">Categories</a>
                             {% if perms.ticketcontrol.change_user or perms.ticketcontrol.add_user %}
-                                <a class="dropdown-item" href="/user/manage">Users</a>
+                                <a class="dropdown-item" href="{% url 'manage_users' %}">Users</a>
                             {% endif %}
                             {% if user.is_superuser %}
-                                <a class="dropdown-item" href="/group/manage">Groups</a>
-                                <a class="dropdown-item" href="/admin/system">System settings</a>
+                                <a class="dropdown-item" href="{% url 'manage_groups' %}">Groups</a>
+                                <a class="dropdown-item" href="{% url 'settings' %}">System settings</a>
                             {% endif %}
                         </div>
                     </div>
