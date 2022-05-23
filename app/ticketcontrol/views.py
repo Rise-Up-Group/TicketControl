@@ -56,6 +56,8 @@ def ticket_view(request, id):
         ticket = get_object_or_404(Ticket, pk=id)
         if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
             return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.chane_ticket"):
+            return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
         try:
             comments = get_list_or_404(Comment, ticket_id=ticket.id)
         except Http404:
