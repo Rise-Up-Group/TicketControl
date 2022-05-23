@@ -125,9 +125,11 @@
         </div>
         <figure class="bg-light p-3 rounded  border-1"
                 style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
+            <form method="post" action="{% url 'edit_ticket' id=ticket.id %}">
+            {% csrf_token %}
             <p class="lead">Beschreibung</p>
             <hr>
-            <p>{{ ticket.description }}</p>
+            <p data-input type="textarea" name="description">{{ ticket.description }}</p>
             {% if ticket.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
                 Attachments:<br>
                 <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
@@ -157,14 +159,20 @@
             <p class="blockquote-footer mb-0 font-italic">
                 {{ ticket.creationDate }}
             </p>
+            {% if perms.ticketcontrol.change_ticket or ticket.owner_id == user.id %}
+                <button onclick="makeEditable(this);">Bearbeiten</button>
+            {% endif %}
+            </form>
         </figure>
         {% for comment in comments %}
             <figure class="bg-light p-3 rounded"
                     style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ff9f00;">
+                <form method="post" action="{% url 'edit_comment' id=comment.id %}">
+                {% csrf_token %}
                 <p class="lead">{{ comment.user.first_name }} {{ comment.user.last_name }}
                     | {{ comment.user.username }}</p>
                 <hr>
-                <p>{{ comment.content }}</p>
+                <p data-input type="textarea" name="content">{{ comment.content }}</p>
                 {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
                     Attachments:<br>
                     <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
@@ -195,6 +203,10 @@
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ comment.creationDate }}
                 </p>
+                {% if perms.ticketcontrol.edit_comment or comment.user_id == user.id %}
+                    <button onclick="makeEditable(this);">Bearbeiten</button>
+                {% endif %}
+                </form>
             </figure>
         {% endfor %}
         <figure class="bg-light p-3 rounded"
@@ -331,6 +343,7 @@
         </div>
     </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
+    <script src="{% static '/js/edit.js' %}"></script>
     <script>
         async function search_and_update_usernames(typed_username) {
             const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json();
