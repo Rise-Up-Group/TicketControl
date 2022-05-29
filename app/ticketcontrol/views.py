@@ -56,6 +56,8 @@ def ticket_view(request, id):
         ticket = get_object_or_404(Ticket, pk=id)
         if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
             return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.view_ticket"):
+            return render_error(request, "404 - Not Found", "Ticket " + id + " Not Found")
         try:
             comments = get_list_or_404(Comment, ticket_id=ticket.id)
         except Http404:
@@ -417,6 +419,8 @@ def ticket_new_view(request):
 def ticket_comment_add(request, id):
     if request.method == 'POST':
         ticket = Ticket.objects.get(id=id)
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.chane_ticket"):
+            HttpResponse(status=403)
         user = User.objects.get(id=request.user.id)
         comment = ticket.add_comment(request.POST["comment"], user)
         for attachment_id in request.POST.getlist("attachments"):
@@ -682,7 +686,7 @@ def ticket_info_update(request, id):
     if request.method == "POST":
         try:
             ticket = Ticket.objects.get(id=id)
-            if request.user.id == ticket.owner or request.user.has_perm("ticketcontrol.change_ticket"):
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
                 if request.POST['title'] != "" and not None:
                     ticket.title = request.POST['title']
                 if request.POST['location'] != "" and not None:
@@ -715,7 +719,7 @@ def edit_comment(request, id):
 def ticket_edit(request, id):
     if request.method == "POST":
         ticket = Ticket.objects.get(id=id)
-        if request.user.has_perm("ticketcontrol.change_ticket") or request.user.id == ticket.owner.id:
+        if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == ticket.owner.id:
             ticket.description = request.POST['description']
             ticket.save()
             return redirect('ticket_view', id=id)

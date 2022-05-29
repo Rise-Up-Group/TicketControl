@@ -198,8 +198,9 @@ class Ticket(models.Model):
         permissions = (
             ("hide_ticket", "Hide the Ticket to everyone (shown as delete in the ui)"),
             ("unhide_ticket", "Recover the Ticket (shown as recover ticket in the ui)"),
+            ("change_ticket_status", "Change Ticket status"),
+            ("assign_ticket", "Assign Ticket to users"),
         )
-
     class StatusChoices(models.TextChoices):
         UNASSIGNED = 'Unassigned'
         ASSIGNED = 'Assigned'
