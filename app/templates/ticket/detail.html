@@ -22,17 +22,17 @@
                         <a class="dropdown-item" type="button" data-toggle="modal" data-target="#close-ticket">Ticket
                             Schließen</a>
                     {% endif %}
-                    {% if perms.ticketcontrol.hide_ticket or perms.ticketcontrol.unhide_ticket %}
-                        {% if not ticket.hidden %}
+                    {% if not ticket.hidden %}
+                        {% if perms.ticketcontrol.hide_ticket %}
                             <a class="dropdown-item" type="button" data-toggle="modal"
                                data-target="#hide-ticket">Löschen</a>
-                        {% else %}
-                            {% if perms.ticketcontrol.unhide_ticket %}
-                                <form action="{% url 'unhide_ticket' id=ticket.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <button class="dropdown-item" type="submit" value="Submit">Wiederherstellen</button>
-                                </form>
-                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        {% if perms.ticketcontrol.unhide_ticket %}
+                            <form action="{% url 'unhide_ticket' id=ticket.id %}" method="POST">
+                                {% csrf_token %}
+                                <button class="dropdown-item" type="submit" value="Submit">Wiederherstellen</button>
+                            </form>
                         {% endif %}
                     {% endif %}
                     {% if perms.ticketcontrol.delete_ticket %}
