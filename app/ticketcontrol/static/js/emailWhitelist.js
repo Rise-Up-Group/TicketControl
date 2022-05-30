@@ -1,5 +1,5 @@
 function removeEmailWhitelistEntry(button) {
-    button.parentNode.remove();
+    button.parentNode.parentNode.remove();
 }
 
 function addEmailWhitelistEntry() {
