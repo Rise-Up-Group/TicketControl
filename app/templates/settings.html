@@ -99,7 +99,8 @@
                     <div class="row gx-lg-5 align-items-center">
                         <div class="col-lg-6 mb-5 mb-lg-0">
                             <h2 class="text-primary display-4">Registrierung</h2>
-                            <p class="text-muted">Bei jedem Eintrag der E-Mail whitelist kann entweder die Domain beginnend mit einem <code>@</code> oder eine RexEx-pattern angegeben werden</p>
+                            <p class="text-muted">Bei jedem Eintrag der E-Mail whitelist kann entweder die Domain
+                                beginnend mit einem <code>@</code> oder eine RexEx-pattern angegeben werden</p>
                         </div>
                         <div class="col-lg-6 mb-5 mb-lg-0">
                             <div class="card">
@@ -120,7 +121,9 @@
                                         <div id="register.email_whitelist" class="mb-4">
                                             {% for entry in settings.register.email_whitelist %}
                                                 <div class="input-group mb-3">
-                                                    <input type="email" class="form-control" name="register.email-whitelist" value="{{ entry }}" placeholder="@example.com">
+                                                    <input type="email" class="form-control"
+                                                           name="register.email-whitelist" value="{{ entry }}"
+                                                           placeholder="@example.com">
                                                     <div class="input-group-append text-white">
                                                         <a class="btn btn-danger"
                                                            type="button"
