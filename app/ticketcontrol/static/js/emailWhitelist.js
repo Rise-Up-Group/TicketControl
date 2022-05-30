@@ -8,6 +8,7 @@ function addEmailWhitelistEntry() {
     let buttonDiv = document.createElement("div");
     input.name = "register.email-whitelist";
     input.type = "text";
+    input.placeholder = "@example.com";
     input.classList.add("form-control");
     buttonDiv.classList.add("input-group-append");
     buttonDiv.classList.add("text-white");
