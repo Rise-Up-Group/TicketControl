@@ -36,7 +36,7 @@
                             {% endif %}
                             {% if user.is_superuser %}
                                 <a class="dropdown-item" href="/group/manage">Groups</a>
-                                <a class="dropdown-item" href="/admin/system">System settings</a>
+                                <a class="dropdown-item" href="{% url 'settings' %}">System settings</a>
                             {% endif %}
                         </div>
                     </div>

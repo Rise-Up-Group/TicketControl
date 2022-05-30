@@ -13,7 +13,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
-# from settings import general
 
 from django.views.static import serve
 
@@ -33,6 +32,7 @@ def render_error(request, status, message=""):
         409: "Conflict",
         410: "Gone",
         411: "Length Required",
+        498: "Token Expired / Invalid",
         500: "Internal Server Error"
     }
     title = str(status) + " - " + title_list.get(status, "")
