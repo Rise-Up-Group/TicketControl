@@ -141,11 +141,13 @@ def register_view(request):
                     email_authorized = True
                 else:
                     for whitelist_entry in settings.REGISTER['email_whitelist']:
+                        if whitelist_entry.startswith("@"):
+                            whitelist_entry = ".*"+whitelist_entry
                         if re.fullmatch(whitelist_entry, email) is not None:
                             email_authorized = True
                             break
                 if email_authorized:
-                    user = User.add_user(email, request.POST['firstname'], request.POST['lastname'],
+                    user = User.add_user(None, request.POST['firstname'], request.POST['lastname'],
                                          request.POST['username'], password, groups=None, is_active=True,
                                          email_confirmed=False)
                     user.new_email = request.POST['email']

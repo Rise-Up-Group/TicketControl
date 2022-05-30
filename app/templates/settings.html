@@ -61,10 +61,11 @@
             <input type="checkbox" id="register.email-whitelist-enable" name="register.email-whitelist-enable"
                    {% if settings.register.email_whitelist_enable %}checked{% endif %}>
             <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label><br>
+            <p class="text-muted">Bei jedem Eintrag der E-Mail whitelist kann entweder die Domain beginnend mit einem <code>@</code> oder eine RexEx-pattern angegeben werden</p>
             <div id="register.email_whitelist">
                 {% for entry in settings.register.email_whitelist %}
                     <div>
-                        <input type="email" name="register.email-whitelist" value="{{ entry }}">
+                        <input type="email" name="register.email-whitelist" placeholder="@example.com" value="{{ entry }}">
                         <a class="btn btn-primary" onclick="removeEmailWhitelistEntry(this);">Löschen</a>
                     </div>
                 {% endfor %}

@@ -7,6 +7,7 @@ function addEmailWhitelistEntry() {
     let input = document.createElement("input");
     input.name = "register.email-whitelist";
     input.type = "email";
+    input.placeholder = "@example.com";
     div.appendChild(input);
     div.innerHTML += " ";
     let button = document.createElement("a");
