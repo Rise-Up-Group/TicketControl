@@ -63,9 +63,9 @@
                     </div>
                     <select class="custom-select" id="category" oninput="show_update_ticket_warning()">
                         <option selected value="0">{{ ticket.category }}</option>
-                        {% for foo in category %}
-                            {% if not foo.name == ticket.category.name %}
-                                <option value="{{ forloop.counter }}">{{ foo.name }}</option>
+                        {% for category in categories %}
+                            {% if not category.id == ticket.category.id %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
                             {% endif %}
                         {% endfor %}
                     </select>
