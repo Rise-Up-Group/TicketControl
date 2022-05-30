@@ -22,6 +22,11 @@ settings_file = open("settings/settings.json")
 settings = json.load(settings_file)
 settings_file.close()
 
+CONTENT = settings['content']
+REGISTER = settings['register']
+LEGAL = settings['legal']
+GENERAL = settings['general']
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

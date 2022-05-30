@@ -1,10 +1,16 @@
 {% extends "main.html" %}
 
+{% block title %}{{ title }}{% endblock %}
+
 {% block content %}
     <br>
-    <h1 class="text-center display-4">{{ title }}</h1>
+    {% if not meme_mode %}
+        <h1 class="text-center display-4">{{ title }}</h1>
+    {% else %}
+        <div style="text-align: center;">
+            <img src="https://http.cat/{{ status }}">
+        </div>
+    {% endif %}
     <hr>
     <h5 class="text-center">{{ message }}</h5>
-
-    <br>
 {% endblock %}

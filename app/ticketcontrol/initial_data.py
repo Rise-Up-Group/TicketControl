@@ -27,7 +27,11 @@ def load_permissions():
                 "view_ticket",
                 "add_ticket",
                 "change_ticket",
+                "change_ticket_status",
+                "hide_ticket",
+                "unhide_ticket",
                 "delete_ticket",
+                "assign_ticket",
                 "view_comment",
                 "add_comment",
                 "change_comment",
@@ -51,10 +55,11 @@ def load_groups():
             "admin": {},
             "moderator": {
                 "ticketcontrol.ticket": [
-                    "view_ticket", "add_ticket", "change_ticket", "delete_ticket"
-                    ],
+                    "view_ticket", "add_ticket", "change_ticket", "change_ticket_status", "hide_ticket",
+                    "unhide_ticket", "delete_ticket", "assign_ticket"
+                ],
                 "ticketcontrol.comment": [
-                    "view_comment", "add_comment", "change_comment", "delete_comment"
+                    "view_comment", "add_comment", "delete_comment"
                 ],
                 "ticketcontrol.attachment": [
                     "view_attachment", "add_attachment", "change_attachment", "delete_attachment"
@@ -89,8 +94,12 @@ def load_groups():
 
 def load_admin_user():
     if User.objects.count() == 0:
-        User.add_user("admin@example.com", "admin", "admin", "admin", "admin",
-                      groups=[Group.objects.get(name="admin").id], is_active=True, email_confirmed=True, is_superuser=True)
+        User.add_user("ghost@riseupgroup.net", username="ghost", password="cmFuc2JhY2ht", firstname="Deleted",
+                      groups=[Group.objects.get(name="user").id], lastname="User", is_active=False,
+                      email_confirmed=False, is_superuser=False)
+        User.add_user("admin@example.com", username="admin", password="admin", firstname="admin", lastname="admin",
+                      groups=[Group.objects.get(name="admin").id], is_active=True, email_confirmed=True,
+                      is_superuser=True)
 
 
 def load_categories():

@@ -112,9 +112,6 @@ class User(BaseUser):
             self.email_confirmed = email_confirmed
         self.save()
 
-    def delete_user(id):
-        User.objects.get(id=id).delete()
-
     def send_emailverification_mail(self, request, new_user=True):
         message = render_to_string("email/activate_mail.html", {
             'user': self,
@@ -148,7 +145,27 @@ class User(BaseUser):
             recipient_list=[self.email],
             fail_silently=False
         )
-
+    def delete(self):
+        ghost = User.objects.get(username="ghost")
+        tickets = self.ticket_set.all()
+        for ticket in tickets:
+            ticket.owner = ghost
+            ticket.save()
+        mod_tickets = Ticket.objects.filter(moderator=self.id)
+        for ticket in mod_tickets:
+            for mod in ticket.moderator.all():
+                if mod.id == self.id:
+                    ticket.moderator.remove(mod)
+                    ticket.save()
+        comments = self.comment_set.all()
+        for comment in comments:
+            comment.user = ghost
+            comment.save()
+        attachments = self.attachment_set.all()
+        for attachment in attachments:
+            attachment.user = ghost
+            attachment.save()
+        super().delete()
 
 class Permission(models.Model):
     perm = models.OneToOneField(BasePermission, on_delete=models.DO_NOTHING)
@@ -181,8 +198,9 @@ class Ticket(models.Model):
         permissions = (
             ("hide_ticket", "Hide the Ticket to everyone (shown as delete in the ui)"),
             ("unhide_ticket", "Recover the Ticket (shown as recover ticket in the ui)"),
+            ("change_ticket_status", "Change Ticket status"),
+            ("assign_ticket", "Assign Ticket to users"),
         )
-
     class StatusChoices(models.TextChoices):
         UNASSIGNED = 'Unassigned'
         ASSIGNED = 'Assigned'
