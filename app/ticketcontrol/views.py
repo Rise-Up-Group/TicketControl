@@ -1,6 +1,8 @@
 import json
 import logging
 import os
+import re
+from smtplib import SMTPRecipientsRefused
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, permission_required
@@ -131,15 +133,30 @@ def register_view(request):
         if password == confirmPassword:
             if len(password) < 8:
                 return render_error(request, 411, "Password must be at least 8 characters long")
-            if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(
+            email = request.POST['email']
+            if not User.objects.filter(email=email).exists() and not User.objects.filter(
                     username=request.POST['username']).exists():
-                user = User.add_user("", request.POST['firstname'], request.POST['lastname'],
-                                     request.POST['username'], password, groups=None, is_active=True,
-                                     email_confirmed=False)
-                user.new_email = request.POST['email']
-                user.save()
-                User.send_emailverification_mail(user, request)
-                return render(request, "user/activate.html")
+                email_authorized = False
+                if not settings.REGISTER['email_whitelist_enable']:
+                    email_authorized = True
+                else:
+                    for whitelist_entry in settings.REGISTER['email_whitelist']:
+                        if re.fullmatch(whitelist_entry, email) is not None:
+                            email_authorized = True
+                            break
+                if email_authorized:
+                    user = User.add_user(email, request.POST['firstname'], request.POST['lastname'],
+                                         request.POST['username'], password, groups=None, is_active=True,
+                                         email_confirmed=False)
+                    user.new_email = request.POST['email']
+                    user.save()
+                    try:
+                        User.send_emailverification_mail(user, request)
+                    except SMTPRecipientsRefused:
+                        return render_error(request, 500, "Unable to send verification email")
+                    return render(request, "user/activate.html")
+                else:
+                    return render_error(request, 406, "Your E-Mail address is not white-listed")
             else:
                 return render_error(request, 409, "Username or email already exists")
         else:
