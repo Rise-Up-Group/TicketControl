@@ -698,7 +698,6 @@ def settings_view(request):
             content = settings_json['content']
             content['frontpage'] = request.POST['content.frontpage']
             content['half_page'] = request.POST['content.half-page']
-            content['imprint'] = request.POST['content.imprint']
 
             register = settings_json['register']
             register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
@@ -709,6 +708,7 @@ def settings_view(request):
 
             legal = settings_json['legal']
             legal['privacy_and_policy'] = request.POST['legal.privacy-and-policy']
+            legal['imprint'] = request.POST['legal.imprint']
 
             try:
                 settings_file = open("settings/settings.json", "w+")
