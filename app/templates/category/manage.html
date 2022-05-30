@@ -1,33 +1,39 @@
-{% extends "main.html" %}
+{% extends "half_page.html" %}
 
 {% block title %}Manage Users{% endblock %}
 
-{% block content %}
-    <h1 class="text-center display-4 mb-4">Manage categories</h1>
-    <div class="card">
-        <div class="card-header bg-secondary text-white">
-            <h5>Kategorie Liste</h5>
-        </div>
-        <div class="card-body bg-light">
+{% block left %}
+    <h1 class="my-5 display-3 fw-bold ls-tight">
+        TicketControl
+        <br/>
+        <span class="text-primary display-4">by RiseUp Group</span>
+    </h1>
+    <p class="text-muted">
+        Kategorien erleichtern die Suche und Zuweisung der einzelnen Tickets. Ein Moderator kann im Moderator Panel auf
+        einen Aufgabenbereich, wie z.B. IT-Support, Filtern und schneller und einfacher arbeiten. Kategorien ermöglichen
+        u.A. die Zusammenarbeit mehrerer Abteilungen in einem Ticketsystem.
+    </p>
+{% endblock %}
 
-            <table class="table table-sm table-hover">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Farbe</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for category in categories %}
-                    <tr onclick="window.location='{% url 'edit_category' id=category.id %}'">
-                        <td>{{ category.name }}</td>
-                        <td style="background-color: #{{ category.color }};">#{{ category.color }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            {% if can_create %}<a class="btn btn-primary" href="{% url 'create_category' %}">Neue Kategorie anlegen</a>{% endif %}
+{% block right %}
+    <h1 class="text-center display-4 mb-4">Kategorien</h1>
+    <table class="table table-sm table-hover mb-4">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Farbe</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for category in categories %}
+            <tr onclick="window.location='{% url 'edit_category' id=category.id %}'">
+                <td>{{ category.name }}</td>
+                <td style="background-color: #{{ category.color }};">#{{ category.color }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if can_create %}<a class="btn btn-primary" href="{% url 'create_category' %}">Neue Kategorie anlegen</a>
+    {% endif %}
 
-        </div>
-    </div>
 {% endblock %}
