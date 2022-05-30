@@ -1,19 +1,33 @@
-{% extends "main.html" %}
-{% load static %}
+{% extends "half_page.html" %}
 
-{% block title %}Create User{% endblock %}
+{% block title %}Manage Users{% endblock %}
 
-{% block content %}
+{% block left %}
+    <h1 class="my-5 display-3 fw-bold ls-tight">
+        TicketControl
+        <br/>
+        <span class="text-primary display-4">by RiseUp Group</span>
+    </h1>
+    <p class="text-muted">
+        Kategorien erleichtern die Suche und Zuweisung der einzelnen Tickets. Ein Moderator kann im Moderator Panel auf
+        einen Aufgabenbereich, wie z.B. IT-Support, Filtern und schneller und einfacher arbeiten. Kategorien ermöglichen
+        u.A. die Zusammenarbeit mehrerer Abteilungen in einem Ticketsystem.
+    </p>
+{% endblock %}
+
+{% block right %}
+    <h1 class="text-center display-4 mb-4">Kategorie <span class="text-primary">erstellen</span></h1>
+
     <form method="POST" action="{% url 'create_category' %}">
         {% csrf_token %}
         <div class="form-outline mb-2">
             <label for="name">Name</label>
             <input type="text" id="name" name="name" class="form-control" required/>
         </div>
-        <div class="form-outline mb-2">
+        <div class="form-outline mb-4">
             <label for="color">Color</label>
             <input type="color" id="color" name="color" class="form-control" placeholder="ffffffff" required/>
         </div>
-        <input class="btn btn-primary btn-block mb-2" type="submit" name="submit" id="submit" value="Update">
+        <input class="btn btn-primary btn-block mb-2" type="submit" name="submit" id="submit" value="Erstellen">
     </form>
 {% endblock %}

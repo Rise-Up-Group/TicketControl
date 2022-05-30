@@ -1,85 +1,218 @@
 {% extends 'main.html' %}
 {% load static %}
 {% block title %}Settings{% endblock %}
-
 {% block content %}
-    <h1>Settings</h1>
-    <form action="{% url 'settings' %}" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <h2>General</h2>
-            <label for="general.contact-email">Contact E-Mail:</label>
-            <input type="email" id="general.contact-email" name="general.contact-email"
-                   value="{{ settings.general.contact_email }}"><br>
-            <input type="checkbox" id="general.allow-location" name="general.allow-location"
-                {% if settings.general.allow_location %}checked{% endif %}>
-            <label for="general.allow-location">Allow location</label><br>
-            <input type="checkbox" id="general.force-location" name="general.force-location"
-                {% if settings.general.force_location %}checked{% endif %}>
-            <label for="general.force-location">Force location</label>
-        </div>
-        <div class="form-group">
-            <h2>E-Mail</h2>
-            <label for="email-server.smtp-host">smtp-host:</label>
-            <input type="text" id="email-server.smtp-host" name="email-server.smtp-host"
-                   value="{{ settings.email_server.smtp_host }}"><br>
-            <label for="email-server.smtp-port">smtp-port</label>
-            <input type="number" min="0" id="email-server.smtp-port" name="email-server.smtp-port"
-                   value="{{ settings.email_server.smtp_port }}"><br>
-            <input type="checkbox" id="email-server.smtp-use-tls" name="email-server.smtp-use-tls"
-                   {% if settings.email_server.smtp_use_tls %}checked{% endif %}>
-            <label for="email-server.smtp-use-tls">use TLS</label>
-            <input type="checkbox" id="email-server.smtp-use-ssl" name="email-server.smtp-use-ssl"
-                   {% if settings.email_server.smtp_use_ssl %}checked{% endif %}>
-            <label for="email-server.smtp-use-ssl">use SSL</label><br>
-            <label for="email-server.smtp-user">E-Mail:</label>
-            <input type="email" id="email-server.smtp-user" name="email-server.smtp-user"
-                   value="{{ settings.email_server.smtp_user }}"><br>
-            <label for="email-server.smtp-password">Password:</label>
-            <input type="password" id="email-server.smtp-password" name="email-server.smtp-password"
-                   value=""><br>
-        </div>
-        <div class="form-group">
-            <h2>Content</h2>
-            <label for="content.frontpage">Frontpage:</label><br>
-            <textarea id="content.frontpage"
-                      name="content.frontpage">{{ settings.content.frontpage }}</textarea><br><br>
-            <label for="content.half-page">Half page:</label><br>
-            <textarea id="content.half-page"
-                      name="content.half-page">{{ settings.content.half_page }}</textarea><br><br>
-            <label for="content.imprint">Imprint:</label><br>
-            <textarea id="content.imprint" name="content.imprint">{{ settings.content.imprint }}</textarea><br><br>
-        </div>
-        <div class="form-group">
-            <h2>Register</h2>
-            <input type="checkbox" id="register.allow-custom-nickname" name="register.allow-custom-nickname"
-                   {% if settings.register.allow_custom_nickname %}checked{% endif %}>
-            <label for="register.allow-custom-nickname">Allow custom nickname</label><br>
-            <input type="checkbox" id="register.email-whitelist-enable" name="register.email-whitelist-enable"
-                   {% if settings.register.email_whitelist_enable %}checked{% endif %}>
-            <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label><br>
-            <div id="register.email_whitelist">
-                {% for entry in settings.register.email_whitelist %}
-                    <div>
-                        <input type="email" name="register.email-whitelist" value="{{ entry }}">
-                        <a class="btn btn-primary" onclick="removeEmailWhitelistEntry(this);">Löschen</a>
+    <h1 class="text-center display-4">Einstellungen</h1>
+    <hr>
+    <div class="container bg-transparent text-dark rounded mt-3">
+        <form action="{% url 'settings' %}" method="post">
+            {% csrf_token %}
+            <div class="px-4 py-5 px-md-5 text-center text-lg-start">
+                <div class="container mb-4">
+                    <div class="row gx-lg-5 align-items-center">
+                        <div class="col-lg-6 mb-5 mb-lg-0">
+                            <h2 class="text-primary display-4">Allgemein</h2>
+                            <p class="text-muted">
+                                Die Kontakt E-Mail wird z.B. im Hilfe Bereich angezeigt.
+                                Der Standort ist eine Hilfe Tickets, welche an einen Raum gebunden sind zu finden
+                                (der Standort kann an/aus und erzwungen werden)
+                            </p>
+                        </div>
+                        <div class="col-lg-6 mb-5 mb-lg-0">
+                            <div class="card">
+                                <div class="card-body py-5 px-md-5">
+                                    <div class="form-outline mb-4">
+                                        <label for="general.contact-email">Kontakt E-Mail</label>
+                                        <input type="email" id="general.contact-email" name="general.contact-email"
+                                               value="{{ settings.general.contact_email }}" class="form-control"/>
+                                    </div>
+                                    <input type="checkbox" id="general.allow-location" name="general.allow-location"
+                                           {% if settings.general.allow_location %}checked{% endif %}>
+                                    <label for="general.allow-location">Allow location</label><br>
+                                    <input type="checkbox" id="general.force-location" name="general.force-location"
+                                           {% if settings.general.force_location %}checked{% endif %}>
+                                    <label for="general.force-location">Force location</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                {% endfor %}
+                </div>
+                <div class="container mb-4">
+                    <div class="row gx-lg-5 align-items-center">
+                        <div class="col-lg-6 mb-5 mb-lg-0">
+                            <div class="card">
+                                <div class="card-body py-5 px-md-5">
+                                    <div class="form-outline mb-2">
+                                        <label for="email-server.smtp-host">SMTP Host</label>
+                                        <input type="text" id="email-server.smtp-host" class="form-control"
+                                               name="email-server.smtp-host"
+                                               value="{{ settings.email_server.smtp_host }}">
+                                    </div>
+                                    <div class="form-outline mb-2">
+                                        <label for="email-server.smtp-port">SMTP Port</label>
+                                        <input type="number" min="0" id="email-server.smtp-port" class="form-control"
+                                               name="email-server.smtp-port"
+                                               value="{{ settings.email_server.smtp_port }}">
+                                    </div>
+                                    <div class="form-outline mb-2">
+                                        <label for="email-server.smtp-user">E-Mail</label>
+                                        <input type="email" id="email-server.smtp-user" name="email-server.smtp-user"
+                                               class="form-control" value="{{ settings.email_server.smtp_user }}">
+                                    </div>
+                                    <div class="form-outline mb-2">
+                                        <label for="email-server.smtp-password">Passwort</label>
+                                        <input type="password" id="email-server.smtp-password"
+                                               name="email-server.smtp-password" class="form-control" value="">
+                                    </div>
+                                    <div class="form-outline mb-2">
+                                        <input type="checkbox" id="email-server.smtp-use-tls"
+                                               name="email-server.smtp-use-tls"
+                                               {% if settings.email_server.smtp_use_tls %}checked{% endif %}>
+                                        <label for="email-server.smtp-use-tls">TLS verwenden</label>
+                                    </div>
+                                    <div class="form-outline">
+                                        <input type="checkbox" id="email-server.smtp-use-ssl"
+                                               name="email-server.smtp-use-ssl"
+                                               {% if settings.email_server.smtp_use_ssl %}checked{% endif %}>
+                                        <label for="email-server.smtp-use-ssl">SSL verwenden</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-5 mb-lg-0">
+                            <h2 class="text-primary display-4">E-Mail Server</h2>
+                            <p class="text-muted">
+                                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
+                                has been the industry's standard dummy text ever since the 1500s, when an unknown
+                                printer took a galley of type and scrambled it to make a type specimen book. It has
+                                survived not only five centuries, but also the leap into electronic typesetting,
+                                remaining essentially unchanged.
+                                <!--TicketControl verschickt an Benutzer, Moderatoren und Administratoren Informationen zu
+                                Tickets. Zur authentifizierung werden E-Mails verschickt. Der Administrator wird
+                                ebenfalls per E-Mail benachrichtigt, wenn kritische Fehler auftreten oder Updates
+                                ausstehen.-->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container mb-4">
+                    <div class="row gx-lg-5 align-items-center">
+                        <div class="col-lg-6 mb-5 mb-lg-0">
+                            <h2 class="text-primary display-4">Registrierung</h2>
+                            <p class="text-muted">
+                                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
+                                has been the industry's standard dummy text ever since the 1500s, when an unknown
+                                printer took a galley of type and scrambled it to make a type specimen book.
+                            </p>
+                        </div>
+                        <div class="col-lg-6 mb-5 mb-lg-0">
+                            <div class="card">
+                                <div class="card-body py-5 px-md-5">
+                                    <div class="form-outline mb-4">
+                                        <div class="mb-4">
+                                            <input type="checkbox" id="register.allow-custom-nickname"
+                                                   name="register.allow-custom-nickname"
+                                                   {% if settings.register.allow_custom_nickname %}checked{% endif %}>
+                                            <label for="register.allow-custom-nickname">Allow custom
+                                                nickname</label><br>
+                                            <input type="checkbox" id="register.email-whitelist-enable"
+                                                   name="register.email-whitelist-enable"
+                                                   {% if settings.register.email_whitelist_enable %}checked{% endif %}>
+                                            <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label>
+                                        </div>
+                                        <p>E-Mail Whitelist</p>
+                                        <div id="register.email_whitelist" class="mb-4">
+                                            {% for entry in settings.register.email_whitelist %}
+                                                <div class="input-group mb-3">
+                                                    <input type="email" class="form-control"
+                                                           name="register.email-whitelist" value="{{ entry }}">
+                                                    <div class="input-group-append text-white">
+                                                        <a class="btn btn-danger"
+                                                           type="button"
+                                                           data-toggle="dropdown" aria-haspopup="true"
+                                                           aria-expanded="false"
+                                                           onclick="removeEmailWhitelistEntry(this);">Löschen</a>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <a class="btn btn-primary btn-block text-white"
+                                           onclick="addEmailWhitelistEntry();">Domain/E-Mail hinzufügen</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-primary display-4 text-center">Startseite</h2>
+                    <p class="text-muted text-center">Die Startseite kann angepasst werden. Wird sie gelöscht (ist leer)
+                        wird
+                        automatische eine standard Seite vom System angezeigt.<br>
+                        <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
+                    <div class="form-group">
+                <textarea class="form-control" id="content.frontpage" name="content.frontpage"
+                          rows="15">{{ settings.content.frontpage }}</textarea>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-primary display-4 text-center">Halbe Seite</h2>
+                    <p class="text-muted text-center">Die halbe Seite kann angepasst werden. Oft kann es sein, dass eine
+                        Seite in zwei Teile aufgeteilt ist. Wenn dort ein Standard Text steht, kann dieser hier
+                        überschrieben werden. (Nicht jeder Text kann überschreiben werden). U.a. wird dieser auch in den
+                        HTML E-Mails mitgeschickt.<br>
+                        <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
+                    <div class="form-group">
+                <textarea class="form-control" id="content.half-page"
+                          name="content.half-page" rows="15">{{ settings.content.half_page }}</textarea>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-primary display-4 text-center">Impressum</h2>
+                    <p class="text-muted text-center">
+                        <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
+                    <div class="form-group">
+                <textarea class="form-control" id="content.imprint"
+                          name="content.imprint" rows="15">{{ settings.content.imprint }}</textarea>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h2 class="text-primary display-4 text-center">Datenschutzrichtlinien</h2>
+                    <p class="text-muted text-center">
+                        <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
+                    <div class="form-group">
+                <textarea class="form-control" id="legal.privacy-and-policy"
+                          name="legal.privacy-and-policy" rows="15">{{ settings.legal.privacy_and_policy }}</textarea>
+                    </div>
+                </div>
+                <div class="px-4 py-5 px-md-5 text-center text-lg-start">
+                    <div class="container mb-4">
+                        <div class="row gx-lg-5 align-items-center">
+                            <div class="col-lg-6 mb-5 mb-lg-0">
+                                <h2 class="text-danger display-4">Warnung</h2>
+                                <p class="text-muted">
+                                    Nach dem speichern muss der Server (der Container) neu gestartet werden. Zum neu
+                                    starten kann der Hacken bei Server neu starten gesetzt werden. Wenn TicketControl
+                                    außerhalb von Docker installiert ist, wird der ganze Host neugestartet.
+                                </p>
+                            </div>
+                            <div class="col-lg-6 mb-5 mb-lg-0">
+                                <div class="card">
+                                    <div class="card-body py-5 px-md-5">
+                                        <div class="form-outline">
+                                            <input type="checkbox" name="restart-server" id="restart-server">
+                                            <label for="restart-server">Server neu Starten</label>
+                                        </div>
+                                        <input type="submit" class="btn btn-primary btn-block" value="Speichern">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <a class="btn btn-primary" onclick="addEmailWhitelistEntry();">Hinzufügen</a>
-        </div>
-        <div class="form-group">
-            <h2>Legal</h2>
-            <label for="legal.privacy-and-policy">Privacy and policy:</label><br>
-            <textarea id="legal.privacy-and-policy"
-                      name="legal.privacy-and-policy">{{ settings.legal.privacy_and_policy }}</textarea><br><br>
-        </div>
-        <div class="alert-warning">
-            You have to restart the server manually to apply the configuration changes.<br>
-            <input type="checkbox" name="restart-server" id="restart-server">
-            <label for="restart-server">Restart server after saving changes</label>
-        </div>
-        <input type="submit" value="Save">
-    </form>
-    <script src="{% static '/js/emailWhitelist.js' %}"></script>
+        </form>
+        <script src="{% static '/js/emailWhitelist.js' %}"></script>
+    </div>
 {% endblock %}

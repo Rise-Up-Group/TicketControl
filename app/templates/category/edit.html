@@ -1,10 +1,24 @@
-{% extends "main.html" %}
+{% extends "half_page.html" %}
 
 {% load static %}
 
 {% block title %}Edit Category: {{ category.name }}{% endblock %}
 
-{% block content %}
+{% block left %}
+    <h1 class="my-5 display-3 fw-bold ls-tight">
+        TicketControl
+        <br/>
+        <span class="text-primary display-4">by RiseUp Group</span>
+    </h1>
+    <p class="text-muted">
+        Kategorien erleichtern die Suche und Zuweisung der einzelnen Tickets. Ein Moderator kann im Moderator Panel auf
+        einen Aufgabenbereich, wie z.B. IT-Support, Filtern und schneller und einfacher arbeiten. Kategorien ermöglichen
+        u.A. die Zusammenarbeit mehrerer Abteilungen in einem Ticketsystem.
+    </p>
+{% endblock %}
+
+{% block right %}
+    <h3 class="display-4 mb-4">Kategorie</h3>
     <form method="POST" action="{% url 'edit_category' id=category.id %}">
         {% csrf_token %}
         <div class="form-outline mb-2">
@@ -12,10 +26,10 @@
             <input type="text" id="name" name="name" class="form-control"
                    value="{{ category.name }}" required {% if not can_change %}disabled{% endif %}/>
         </div>
-        <div class="form-outline mb-2">
+        <div class="form-outline mb-4">
             <label for="color">Color</label>
-            <input type="color" id="color" name="color" class="form-control" placeholder="ffffffff"
-                   value="{{ category.color }}" required {% if not can_change %}disabled{% endif %}/>
+            <input type="color" id="color" name="color" class="form-control" placeholder="{{ category.color }}"
+                   value="#{{ category.color }}" required {% if not can_change %}disabled{% endif %}/>
         </div>
         {% if can_change %}
             <input class="btn btn-primary btn-block mb-2" type="submit" name="submit" id="submit"
@@ -26,30 +40,30 @@
                href="" data-toggle="modal" data-target="#deleteCategory">Delete</a>
         {% endif %}
     </form>
-{% if can_delete %}
-    <!-- Modal -->
-    <div class="modal fade" id="deleteCategory" tabindex="-1" role="dialog" aria-labelledby="deleteCategoryLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteCategoryLabel">Löschen bestätigen</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="h5">Möchtest du wirklich die Kategorie {{ category.name }} löschen?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <form method="POST" action="{% url 'delete_category' id=category.id %}">
-                        {% csrf_token %}
-                        <input class="btn btn-danger" type="submit" value="Delete">
-                    </form>
+    {% if can_delete %}
+        <!-- Modal -->
+        <div class="modal fade" id="deleteCategory" tabindex="-1" role="dialog" aria-labelledby="deleteCategoryLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteCategoryLabel">Löschen bestätigen</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="h5">Möchtest du wirklich die Kategorie {{ category.name }} löschen?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form method="POST" action="{% url 'delete_category' id=category.id %}">
+                            {% csrf_token %}
+                            <input class="btn btn-danger" type="submit" value="Delete">
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     {% endif %}
 {% endblock %}
