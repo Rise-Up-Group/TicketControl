@@ -21,7 +21,7 @@ function addEmailWhitelistEntry() {
     button.classList.add("btn-danger");
     button.setAttribute("onclick", "removeEmailWhitelistEntry(this)");
     buttonDiv.appendChild(button);
-    div.appendChild(buttonDiv)
+    div.appendChild(buttonDiv);
     let emailWhitelist = document.getElementById("register.email_whitelist");
     emailWhitelist.appendChild(div);
     emailWhitelist.lastChild.firstChild.focus();
