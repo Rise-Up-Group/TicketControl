@@ -1,10 +1,10 @@
 {% extends "half_page.html" %}
 {% load static %}
 
-{% block title %}Activate User{% endblock %}
+{% block title %}{% if action == "activate" %}Activate User{% else %}Verify E-Mail{% endif %}{% endblock %}
 
 {% block right %}
-    <h3 class="display-4">Activate User</h3>
+    <h3 class="display-4">{% if action == "activate" %}Activate User{% else %}Verify E-Mail{% endif %}</h3>
 
     {% if token %}
         <h4 class="h5 mb-4">{{ content_user.username }}</h4>
@@ -12,7 +12,7 @@
             {% csrf_token %}
             <input type="hidden" name="user-id" id="user-id" value="{{ content_user.id }}">
             <input type="hidden" name="token" id="token" placeholder="token" value="{{ token }}">
-            <input type="submit" value="Activate" class="btn btn-primary btn-block mb-4">
+            <input type="submit" value="{% if action == "activate" %}Activate{% else %}Verify{% endif %}" class="btn btn-primary btn-block mb-4">
         </form>
     {% else %}
         You should have an E-Mail with a verification link in your inbox. <br>
