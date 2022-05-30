@@ -17,6 +17,9 @@
             <input type="checkbox" id="general.force-location" name="general.force-location"
                 {% if settings.general.force_location %}checked{% endif %}>
             <label for="general.force-location">Force location</label>
+            <input type="checkbox" id="general.meme-mode" name="general.meme-mode"
+                {% if settings.general.meme_mode %}checked{% endif %}>
+            <label for="general.meme-mode">Meme mode (<a href="https://http.cat/">http error codes</a>)</label>
         </div>
         <div class="form-group">
             <h2>E-Mail</h2>
