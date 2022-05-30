@@ -27,7 +27,11 @@ def load_permissions():
                 "view_ticket",
                 "add_ticket",
                 "change_ticket",
+                "change_ticket_status",
+                "hide_ticket",
+                "unhide_ticket",
                 "delete_ticket",
+                "assign_ticket",
                 "view_comment",
                 "add_comment",
                 "change_comment",
@@ -51,10 +55,11 @@ def load_groups():
             "admin": {},
             "moderator": {
                 "ticketcontrol.ticket": [
-                    "view_ticket", "add_ticket", "change_ticket", "delete_ticket"
+                    "view_ticket", "add_ticket", "change_ticket", "change_ticket_status", "hide_ticket",
+                    "unhide_ticket", "delete_ticket", "assign_ticket"
                 ],
                 "ticketcontrol.comment": [
-                    "view_comment", "add_comment", "change_comment", "delete_comment"
+                    "view_comment", "add_comment", "delete_comment"
                 ],
                 "ticketcontrol.attachment": [
                     "view_attachment", "add_attachment", "change_attachment", "delete_attachment"

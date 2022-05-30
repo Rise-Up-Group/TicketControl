@@ -68,6 +68,8 @@ def ticket_view(request, id):
         ticket = Ticket.objects.get(pk=id)
         if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
             return render_error(request, 404, "Ticket does not exist")
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.view_ticket"):
+            return render_error(request, 404, "Ticket does not exist")
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
         categories = Category.objects.all()
@@ -467,6 +469,9 @@ def ticket_comment_add(request, id):
             return render_error(request, 404, "Ticket does not exist")
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.view_ticket"):
+            return render_error(request, 404, "Ticket does not exist")
+        
         comment = ticket.add_comment(request.POST["comment"], user)
         for attachment_id in request.POST.getlist("attachments"):
             try:
@@ -490,7 +495,7 @@ def ticket_participant_add(request, id, username=None):
             if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
                 ticket.participating.add(User.objects.get(username=username))
                 return HttpResponse(status=200)
-            return render_error(request, 403, "You don't have the permission to add a participant to this ticket")
+            return render_error(request, 404, "Ticket does not exist")
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
         except User.DoesNotExist:
@@ -779,7 +784,7 @@ def ticket_info_update(request, id):
     if request.method == "POST":
         try:
             ticket = Ticket.objects.get(id=id)
-            if request.user.id == ticket.owner or request.user.has_perm("ticketcontrol.change_ticket"):
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
                 if request.POST['title'] != "" and not None:
                     ticket.title = request.POST['title']
                 if request.POST['location'] != "" and not None:
@@ -820,7 +825,7 @@ def ticket_edit(request, id):
             ticket = Ticket.objects.get(id=id)
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
-        if request.user.has_perm("ticketcontrol.change_ticket") or request.user.id == ticket.owner.id:
+        if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == ticket.owner.id:
             ticket.description = request.POST['description']
             ticket.save()
             return redirect('ticket_view', id=id)
