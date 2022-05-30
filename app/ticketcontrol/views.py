@@ -329,7 +329,7 @@ def edit_user_view(request, id):
                             if email_authorized:
                                 user.update_user(email=email)
                                 user.send_emailverification_mail(request)
-                                return render(request, "user/activate.html", {'action': 'update'})
+                                return render(request, "user/activate.html")
                             else:
                                 return render_error(request, 406, "Your E-Mail address is not white-listed")
                     else:
