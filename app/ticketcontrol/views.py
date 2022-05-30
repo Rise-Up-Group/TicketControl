@@ -156,7 +156,7 @@ def register_view(request):
                         User.send_emailverification_mail(user, request)
                     except SMTPRecipientsRefused:
                         return render_error(request, 500, "Unable to send verification email")
-                    return render(request, "user/activate.html")
+                    return render(request, "user/activate.html", {'action': 'activate'})
                 else:
                     return render_error(request, 406, "Your E-Mail address is not white-listed")
             else:
@@ -309,15 +309,29 @@ def edit_user_view(request, id):
                 user.update_user(None, request.POST['firstname'], request.POST['lastname'],
                                  request.POST['username'], password, groups,
                                  request.POST.get("is_active", False) == "on")
-                if user.email != request.POST['email']:
-                    if not User.objects.filter(email=request.POST['email']).exists():
+                email = request.POST['email']
+                if user.email != email:
+                    if not User.objects.filter(email=email).exists():
                         if request.user.has_perm("ticketcontrol.change_user"):
-                            user.email = request.POST['email']
+                            user.email = email
                             user.save()
                         else:
-                            user.update_user(email=request.POST['email'])
-                            user.send_emailverification_mail(request)
-                            return render(request, "user/activate.html")
+                            email_authorized = False
+                            if not settings.REGISTER['email_whitelist_enable']:
+                                email_authorized = True
+                            else:
+                                for whitelist_entry in settings.REGISTER['email_whitelist']:
+                                    if whitelist_entry.startswith("@"):
+                                        whitelist_entry = ".*" + whitelist_entry
+                                    if re.fullmatch(whitelist_entry, email) is not None:
+                                        email_authorized = True
+                                        break
+                            if email_authorized:
+                                user.update_user(email=email)
+                                user.send_emailverification_mail(request)
+                                return render(request, "user/activate.html", {'action': 'update'})
+                            else:
+                                return render_error(request, 406, "Your E-Mail address is not white-listed")
                     else:
                         return render_error(request, 409, "E-Mail already exists")
                     return redirect("edit_user", id=id)
