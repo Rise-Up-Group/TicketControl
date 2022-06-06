@@ -153,9 +153,9 @@ class User(BaseUser):
             ticket.save()
         mod_tickets = Ticket.objects.filter(moderator=self.id)
         for ticket in mod_tickets:
-            for mod in ticket.moderator.all():
+            for mod in ticket.moderators.all():
                 if mod.id == self.id:
-                    ticket.moderator.remove(mod)
+                    ticket.moderators.remove(mod)
                     ticket.save()
         comments = self.comment_set.all()
         for comment in comments:
@@ -254,7 +254,7 @@ class Ticket(models.Model):
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="owner")
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
     participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
-    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
+    moderators = models.ManyToManyField("User", related_name="moderators", blank=True)
     hidden = models.BooleanField(default=False)
     location = models.CharField(max_length=255, null=True, blank=True)
 

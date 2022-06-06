@@ -132,7 +132,7 @@ def ticket_view(request, id):
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
         categories = Category.objects.all()
-        context = {"ticket": ticket, "moderators": ticket.moderator.all(),
+        context = {"ticket": ticket, "moderators": ticket.moderators.all(),
                    "participants": ticket.participating.all(), "comments": comments, "categories": categories}
         return render(request, "ticket/detail.html", context)
     except Ticket.DoesNotExist:
@@ -602,7 +602,7 @@ def ticket_moderator_add(request, id, username=None):
             return render_error(request, 406, "Username is required")
         try:
             ticket = Ticket.objects.get(id=id)
-            ticket.moderator.add(User.objects.get(username=username))
+            ticket.moderators.add(User.objects.get(username=username))
             if ticket.status == "Unassigned":
                 ticket.set_status("Assigned")
                 ticket.save()
@@ -637,7 +637,7 @@ def attachment_access_control(request, id, name=None):
             if request.user.id == participant.id:
                 authorized = True
         if not authorized:
-            for moderator in attachment.ticket.moderator.all():
+            for moderator in attachment.ticket.moderators.all():
                 if request.user.id == moderator.id:
                     authorized = True
     if authorized:
