@@ -25,7 +25,8 @@ app_name = "ticketcontrol"
 urlpatterns = [
     # path('admin/', admin_view),
     # Ticket
-    path('ticket/my', mytickets_view),
+    path('ticket/my', mytickets_view, name='my_tickets'),
+    path('ticket/manage', manage_tickets_view, name='manage_tickets'),
     path('ticket/<int:id>', ticket_view, name="ticket_view"),
     path('ticket/<int:id>/comment/add', ticket_comment_add, name="add_comment_to_ticket"),
     path('ticket/<int:id>/status/update', ticket_status_update, name="update_status_ticket"),

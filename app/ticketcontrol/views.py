@@ -15,6 +15,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Q
 
 from django.views.static import serve
 
@@ -59,7 +60,63 @@ def mytickets_view(request):
     part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id, hidden=False)
     mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id, hidden=False)
     context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
-    return render(request, "ticket/manage.html", context)
+    return render(request, "ticket/my.html", context)
+
+
+def handle_filter(GET, objects, name):
+    if name in GET and GET[name] and GET[name] != "0":
+        filter = {}
+        if not (name+"_type" in GET and GET[name+"_type"]) \
+                or GET[name+"_type"] == "is":
+            filter[name] = GET[name]
+            print("is")
+            return objects.filter(**filter)
+        elif GET[name+"_type"] == "is_not":
+            filter[name] = GET[name]
+            return objects.exclude(**filter)
+        elif GET[name+"_type"] == "contain":
+            filter[name+"__contains"] = GET[name]
+            return objects.filter(**filter)
+        elif GET[name+"_type"] == "contain_not":
+            filter[name+"__contains"] = GET[name]
+            return objects.exclude(**filter)
+    return objects
+
+def handle_user_filter(GET, objects, name):
+    if name in GET and GET[name]:
+        for username in GET[name].split(","):
+            filter = {}
+            filter[name] = User.objects.get(username=username.strip()).id
+            objects = objects.filter(**filter)
+    return objects
+
+@login_required()
+def manage_tickets_view(request):
+    try:
+        tickets = Ticket.objects.all()
+        tickets = handle_filter(request.GET, tickets, "status")
+        tickets = handle_filter(request.GET, tickets, "category")
+        tickets = handle_filter(request.GET, tickets, "title")
+        tickets = handle_filter(request.GET, tickets, "location")
+        tickets = handle_user_filter(request.GET, tickets, "owner")
+        tickets = handle_user_filter(request.GET, tickets, "participating")
+        tickets = handle_user_filter(request.GET, tickets, "moderators")
+
+        if not request.user.has_perm("ticketcontrol.view_ticket"):
+            tickets.filter(Q(owner=request.user.id, hidden=False) | Q(participating=request.user.id, hidden=False) | Q(moderator=request.user.id))
+
+        context = {
+            "tickets": tickets,
+            "GET": request.GET,
+            "types": ["is", "is_not", "contain", "contain_not"],
+            "categories": Category.objects.all(),
+            "status_choices": Ticket.StatusChoices
+        }
+        if "category" in request.GET and request.GET["category"]:
+            context["category_id"] = int(request.GET["category"])
+        return render(request, "ticket/manage.html", context)
+    except Category.DoesNotExist:
+        return render_error(request, 404, "Category does not exist")
 
 
 @login_required()
