@@ -57,8 +57,8 @@ def dashboard_view(request):
 @login_required()
 def mytickets_view(request):
     own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
-    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id, hidden=False)
-    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id, hidden=False)
+    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id, hidden=True)
+    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id, hidden=True)
     context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "ticket/my.html", context)
 
@@ -93,7 +93,10 @@ def handle_user_filter(GET, objects, name):
 @login_required()
 def manage_tickets_view(request):
     try:
-        tickets = Ticket.objects.all()
+        tickets = Ticket.objects.filter(Q(owner=request.user.id) |
+                                        Q(participating=request.user.id) |
+                                        Q(moderators=request.user.id))
+
         tickets = handle_filter(request.GET, tickets, "status")
         tickets = handle_filter(request.GET, tickets, "category")
         tickets = handle_filter(request.GET, tickets, "title")
