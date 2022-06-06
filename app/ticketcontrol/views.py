@@ -98,6 +98,10 @@ def manage_tickets_view(request):
         tickets = handle_filter(request.GET, tickets, "category")
         tickets = handle_filter(request.GET, tickets, "title")
         tickets = handle_filter(request.GET, tickets, "location")
+        if request.user.has_perm("ticketcontrol.unhide_ticket"):
+            tickets = handle_filter(request.GET, tickets, "hidden")
+        else:
+            tickets = tickets.filter(hidden=False)
         tickets = handle_user_filter(request.GET, tickets, "owner")
         tickets = handle_user_filter(request.GET, tickets, "participating")
         tickets = handle_user_filter(request.GET, tickets, "moderators")
