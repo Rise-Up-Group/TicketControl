@@ -64,16 +64,19 @@
                             <input type="text" name="location" id="filter-location" value="{{ GET.location }}">
                         </div>
                         <br>
-                        {% if perms.ticketcontrol.unhide_ticket%}
+                        {% if perms.ticketcontrol.unhide_ticket %}
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <label class="input-group-text">Versteckt:</label>
                                 </div>
-                                <input type="radio" id="filter-hidden-none" name="hidden" value="0" {% if GET.hidden == "0" %}checked{% endif %}>
+                                <input type="radio" id="filter-hidden-none" name="hidden" value="0"
+                                       {% if GET.hidden == "0" %}checked{% endif %}>
                                 <label for="filter-hidden-none">None</label>
-                                <input type="radio" id="filter-hidden-false" name="hidden" value="True" {% if GET.hidden == "True" %}checked{% endif %}>
+                                <input type="radio" id="filter-hidden-false" name="hidden" value="True"
+                                       {% if GET.hidden == "True" %}checked{% endif %}>
                                 <label for="filter-hidden-false">Versteckt</label>
-                                <input type="radio" id="filter-hidden-true" name="hidden" value="False" {% if GET.hidden == "False" %}checked{% endif %}>
+                                <input type="radio" id="filter-hidden-true" name="hidden" value="False"
+                                       {% if GET.hidden == "False" %}checked{% endif %}>
                                 <label for="filter-hidden-true">Sichtbar</label>
                             </div>
                             <br>
