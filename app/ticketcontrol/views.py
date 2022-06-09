@@ -98,7 +98,7 @@ def manage_tickets_view(request):
     try:
         tickets = Ticket.objects.filter(Q(owner=request.user.id) |
                                         Q(participating=request.user.id) |
-                                        Q(moderators=request.user.id))
+                                        Q(moderators=request.user.id)).distinct()
 
         tickets = handle_filter(request.GET, tickets, "status")
         tickets = handle_filter(request.GET, tickets, "category")
