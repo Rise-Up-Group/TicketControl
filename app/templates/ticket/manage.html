@@ -1,4 +1,5 @@
 {% extends "main.html" %}
+{% load static %}
 
 {% block content %}
     <br>
@@ -81,27 +82,42 @@
                             </div>
                             <br>
                         {% endif %}
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text" for="filter-owner">Besitzer:</label>
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-owner">Besitzer:</label>
+                                </div>
+                                <input type="text" name="owner" id="filter-owner" value="{{ GET.owner }}"
+                                       placeholder="username"
+                                       list="filter-owner-data-list"
+                                       oninput="search_and_update_usernames(this.value, 'filter-owner-data-list', false);">
                             </div>
-                            <input type="text" name="owner" id="filter-owner" value="{{ GET.owner }}">
+                            <datalist id="filter-owner-data-list"></datalist>
                         </div>
                         <br>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text" for="filter-participating">Teilnehmer:</label>
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-participating">Teilnehmer:</label>
+                                </div>
+                                <input type="text" name="participating" id="filter-participating"
+                                       value="{{ GET.participating }}" placeholder="username, username"
+                                       list="filter-participating-data-list"
+                                       oninput="search_and_update_usernames(this.value, 'filter-participating-data-list');">
                             </div>
-                            <input type="text" name="participating" id="filter-participating"
-                                   value="{{ GET.participating }}" placeholder="username, username">
+                            <datalist id="filter-participating-data-list"></datalist>
                         </div>
                         <br>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text" for="filter-moderators">Moderatoren:</label>
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-moderators">Moderatoren:</label>
+                                </div>
+                                <input type="text" name="moderators" id="filter-moderators" value="{{ GET.moderators }}"
+                                       placeholder="username, username" list="filter-moderators-data-list"
+                                       oninput="search_and_update_usernames(this.value, 'filter-moderators-data-list');">
                             </div>
-                            <input type="text" name="moderators" id="filter-moderators"
-                                   value="{{ GET.moderators }}" placeholder="username, username">
+                            <datalist id="filter-moderators-data-list"></datalist>
                         </div>
                         <br>
                         <input class="btn btn-primary" type="submit" value="Filtern">
@@ -159,4 +175,5 @@
             </div>
         </div>
     </div>
+    <script src="{% static '/js/userSearch.js' %}"></script>
 {% endblock %}

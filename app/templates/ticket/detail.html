@@ -92,7 +92,8 @@
                             <div class="input-group-text">@</div>
                         </div>
                         <input type="text" class="form-control" id="search-user" placeholder="Username"
-                               list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);"
+                               list="user-search-dropdown-menu"
+                               oninput="search_and_update_usernames(this.value, 'user-search-dropdown-menu', false);"
                                onchange="add_user(`participants`, this.value);">
                     </div>
                     <datalist id="user-search-dropdown-menu">
@@ -361,15 +362,8 @@
     </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
     <script src="{% static '/js/edit.js' %}"></script>
+    <script src="{% static '/js/userSearch.js' %}"></script>
     <script>
-        async function search_and_update_usernames(typed_username) {
-            const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json();
-            const dropdown = $("#user-search-dropdown-menu");
-            dropdown.children().remove();
-            for (user of users) {
-                dropdown.append($(`<option>${user.username}</option>`));
-            }
-        }
 
         async function add_user(mode, username) {
             if (username !== "") {
