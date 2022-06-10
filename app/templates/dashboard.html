@@ -10,10 +10,10 @@
     <div class="row">
         <div class="col-md-4">
             <div class="card mb-4">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header text-inverted">
                     <h5>Meine Profil</h5>
                 </div>
-                <div class="card-body bg-light">
+                <div class="card-body">
                     <table class="table table-sm">
                         <tbody class="text-left">
                         <tr>
@@ -51,23 +51,25 @@
         </div>
         <div class="col-md-8">
             <div class="card mb-4">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header text-inverted">
                     <h5>Meine Tickets</h5>
                 </div>
 
-                <div class="card-body bg-light">
+                <div class="card-body">
                     {% if tickets.part|length > 0 %}
                         <p class="font-weight-bold">Eigene Tickets</p>
                     {% endif %}
                     {% if tickets.own|length != 0 %}
-                        <table class="table table-sm">
+                        <table class="table table-sm table-hover">
+                            <thead>
                                 <tr>
                                     <th scope="row">Id</th>
                                     <th>Kategorie</th>
                                     <th>Titel</th>
                                     <th>Moderator</th>
-
                                 </tr>
+                            </thead>
+                            <tbody>
                             {% for ticket in tickets.own %}
                                 <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
                                     <th scope="row">#{{ ticket.id }}</th>
@@ -81,6 +83,7 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+                            </tbody>
                         </table>
                     {% else %}
                         <p>
@@ -88,27 +91,31 @@
                             <a type="button" href="{% url 'create_ticket' %}">Ticket erstellen?</a>
                         </p>
                     {% endif %}
-                        {% if tickets.part|length > 0 %}
-                            <p class="font-weight-bold">Teilnahme an Tickets</p>
-                            <table class="table table-sm">
-                                <tr>
-                                    <th scope="row">Id</th>
-                                    <th>Kategorie</th>
-                                    <th>Titel</th>
-                                    <th>Besitzer</th>
+                    {% if tickets.part|length > 0 %}
+                        <p class="font-weight-bold">Teilnahme an Tickets</p>
+                        <table class="table table-sm table-hover">
+                            <thead>
+                            <tr>
+                                <th scope="row">Id</th>
+                                <th>Kategorie</th>
+                                <th>Titel</th>
+                                <th>Besitzer</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for ticket in tickets.part %}
+                                <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
+                                    <th scope="row">#{{ ticket.id }}</th>
+                                    <td>{{ ticket.category }}</td>
+                                    <td>{{ ticket.title }}</td>
+                                    <td>
+                                        <a href="{% url 'user_details' id=ticket.owner.id %}">{{ ticket.owner.username }}</a>
+                                    </td>
                                 </tr>
-                                {% for ticket in tickets.part %}
-                                    <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
-                                        <th scope="row">#{{ ticket.id }}</th>
-                                        <td>{{ ticket.category }}</td>
-                                        <td>{{ ticket.title }}</td>
-                                        <td>
-                                            <a href="{% url 'user_details' id=ticket.owner.id %}">{{ ticket.owner.username }}</a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        {% endif %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -1,0 +1,176 @@
+@media (prefers-color-scheme: light) {
+    :root {
+        --color-background: white;
+        --color-background-hover: #e8e9ea;
+        --color-text: black;
+        --color-hover: #212529;
+        --color-muted: #6c757d;
+        --color-muted-hover: #5a6268;
+        --color-inverted: white;
+        --color-danger: #dc3545;
+        --color-danger-hover: #a71d2a;
+        --color-border: rgba(0,0,0,.125);
+        --color-border-light: #dee2e6;
+        --color-nav-item: rgba(255,255,255,.5);
+        --color-nav-item-hover: rgba(255,255,255,.75);
+        --color-nav-item-active: white;
+        --color-card-header: #6c757d;
+        --color-card-body: #f8f9fa;
+        --color-input-background: white;
+        --color-input-border: #ced4da;
+        --color-input-group-text-background: #e9ecef;
+        --color-input-group-text-border: #ced4da;
+        --color-btn-outline-secondary-shadow: rgba(108,117,125,.5);
+    }
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-background: #151515;
+        --color-background-hover: #121212;
+        --color-text: lightgrey;
+        --color-hover: white;
+        --color-muted: #6c757d;
+        --color-muted-hover: #5a6268;
+        --color-inverted: black;
+        --color-danger: #dc3545;
+        --color-danger-hover: #a71d2a;
+        --color-border: #505050;
+        --color-border-light: #dee2e6;
+        --color-nav-item: rgba(255,255,255,.5);
+        --color-nav-item-hover: rgba(255,255,255,.75);
+        --color-nav-item-active: white;
+        --color-card-header: white;
+        --color-card-body: #202020;
+        --color-input-background: #080808;
+        --color-input-border: #404040;
+        --color-input-group-text-background: #202020;
+        --color-input-group-text-border: #404040;
+        --color-btn-outline-secondary-shadow: rgba(108,117,125,.5);
+    }
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+hr {
+   border-top-color: var(--color-border);
+}
+
+/* -------------------- text -------------------- */
+.text-muted {
+    color: var(--color-muted) !important;
+}
+.text-inverted {
+    color: var(--color-inverted);
+}
+.text-danger {
+    color: var(--color-danger)!important;
+}
+.text-danger:focus, .text-danger:hover, a.text-danger:focus, a.text-danger:hover {
+    color: var(--color-danger-hover)!important;
+}
+.blockquote-footer {
+    color: var(--color-muted);
+}
+
+/* -------------------- navbar -------------------- */
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--color-nav-item);
+}
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--color-nav-item-hover);
+}
+.navbar-dark .navbar-nav .show > .nav-link {
+     color: var(--color-nav-item-hover);
+}
+.navbar-dark .navbar-nav .active > .nav-link {
+    color: var(--color-nav-item-active)
+}
+.dropdown-menu {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+.dropdown-item {
+    color: var(--color-text);
+}
+.dropdown-item:hover, .dropdown-item:active {
+    background-color: var(--color-background-hover);
+    color: var(--color-text);
+}
+
+/* -------------------- card, modal, figure -------------------- */
+.card {
+    background-color: var(--color-background);
+    border-color: var(--color-border);
+}
+.card-header {
+    background-color: var(--color-card-header);
+}
+.card-body {
+    background-color: var(--color-card-body)
+}
+
+.modal-content {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+figure {
+    border: .05rem solid var(--color-border);
+    border-left-width: .25rem;
+}
+
+/* -------------------- table -------------------- */
+.table {
+    color: var(--color-text);
+}
+.table thead th, .table thead td {
+    border-bottom-color: var(--color-border-light);
+}
+.table td, .table th {
+    border-top-color: var(--color-border-light);
+}
+.table-hover tbody tr:hover {
+  color: var(--color-hover);
+  background-color: var(--color-background-hover);
+}
+
+/* -------------------- forms -------------------- */
+.input-group-text {
+    background-color: var(--color-input-group-text-background)!important;
+    color: var(--color-text)!important;
+    border-color: var(--color-input-group-text-border)!important;
+}
+input[type="text"], input[type="number"], input[type="color"], input[type="email"], input[type="password"], input[type="firstname"], input[type="lastname"], input[type="username"], textarea, select, option, .input {
+    background-color: var(--color-input-background)!important;
+    color: var(--color-text)!important;
+    border-color: var(--color-input-border)!important;
+}
+.btn-secondary {
+    color: var(--color-inverted);
+    background-color: var(--color-muted);
+    border-color: var(--color-muted);
+}
+.btn-secondary:hover {
+    color: var(--color-inverted);
+    background-color: var(--color-muted-hover);
+    border-color: var(--color-muted-hover);
+}
+.btn-outline-secondary {
+  color: var(--color-muted);
+  border-color: var(--color-muted);
+}
+.btn-outline-secondary:active, .btn-outline-secondary:hover, .show > .btn-outline-secondary.dropdown-toggle {
+    color: var(--color-inverted);
+    background-color: var(--color-muted);
+    border-color: var(--color-muted);
+}
+.btn-outline-secondary:focus {
+  box-shadow: 0 0 0 .2rem var(--color-btn-outline-secondary-shadow) !important;
+}
+label {
+    color: var(--color-text);
+}

@@ -7,7 +7,7 @@
 {% block left %}
     <h1 class="display-2 fw-bold ls-tight">Nutzer</h1>
     <!--<h2 class="text-primary display-3" id="preview_username">{{ content_user.username }}</h2>-->
-    <div class="col-md-6 mb-4 mx-auto bg-light rounded">
+    <div class="col-md-6 mb-4 mx-auto rounded">
         <!--<img class="rounded-circle" alt="100x100" src="" data-holder-rendered="true">-->
         <p class="display-1" id="preview_initials">
             {{ content_user.first_name|make_list|first }}{{ content_user.last_name|make_list|first }}</p>
@@ -18,21 +18,21 @@
     <input autocomplete="false" name="hidden" type="text" style="display:none;">
     <div class="form-outline mb-2">
         <label>Firstname</label>
-        <input class="form-control" value="{{ content_user.first_name }}"
+        <input type="firstname" class="form-control" value="{{ content_user.first_name }}"
                disabled/>
     </div>
     <div class="form-outline mb-2">
         <label>Lastname</label>
-        <input class="form-control" value="{{ content_user.last_name }}"
+        <input type="lastname" class="form-control" value="{{ content_user.last_name }}"
                disabled/>
     </div>
     <div class="form-outline mb-2">
         <label>Username</label>
-        <input class="form-control" value="{{ content_user.username }}" disabled/>
+        <input type="username" class="form-control" value="{{ content_user.username }}" disabled/>
     </div>
     <div class="form-outline mb-4">
         <label>Date</label>
-        <input class="form-control" value="{{ content_user.date_joined|date }}" disabled/>
+        <input type="text" class="form-control" value="{{ content_user.date_joined|date }}" disabled/>
     </div>
     {% if can_change %}
         <a class="btn btn-primary btn-block mb-2" href="{% url 'edit_user' id=content_user.id %}">Edit</a>
