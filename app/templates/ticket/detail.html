@@ -174,7 +174,7 @@
                     | {{ ticket.creationDate }}
                 </p>
                 {% if perms.ticketcontrol.change_comment or ticket.owner_id == user.id %}
-                    <button onclick="makeEditable(this);">Bearbeiten</button>
+                    <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
                 {% endif %}
             </form>
         </figure>
@@ -216,7 +216,7 @@
                         {{ comment.creationDate }}
                     </p>
                     {% if perms.ticketcontrol.change_comment or comment.user_id == user.id %}
-                        <button onclick="makeEditable(this);">Bearbeiten</button>
+                        <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
                     {% endif %}
                 </form>
             </figure>
