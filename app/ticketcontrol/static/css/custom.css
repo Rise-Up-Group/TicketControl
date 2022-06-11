@@ -83,8 +83,13 @@ input[type="text"] {
     cursor: pointer;
 }
 
+select {
+    max-width: 100%;
+}
+
 option.checkbox:before {
     content: "☐ "
+
 }
 
 option.checkbox:checked:before {

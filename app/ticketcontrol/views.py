@@ -73,7 +73,6 @@ def handle_filter(GET, objects, name):
         if not (name + "_type" in GET and GET[name + "_type"]) \
                 or GET[name + "_type"] == "is":
             filter[name] = GET[name]
-            print("is")
             return objects.filter(**filter)
         elif GET[name + "_type"] == "is_not":
             filter[name] = GET[name]
@@ -871,7 +870,6 @@ def ticket_close(request, id):
         try:
             ticket = Ticket.objects.get(id=id)
             if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket_status"):
-                print(Ticket.StatusChoices.CLOSED)
                 ticket.set_status(str(Ticket.StatusChoices.CLOSED))
             else:
                 return redirect("login")

@@ -196,8 +196,8 @@ class Comment(models.Model):
 class Ticket(models.Model):
     class Meta:
         permissions = (
-            ("hide_ticket", "Hide the Ticket to everyone (shown as delete in the ui)"),
-            ("unhide_ticket", "Recover the Ticket (shown as recover ticket in the ui)"),
+            ("hide_ticket", "Hide the Ticket to everyone"),
+            ("unhide_ticket", "Recover the Ticket"),
             ("change_ticket_status", "Change Ticket status"),
             ("assign_ticket", "Assign Ticket to users"),
         )
