@@ -151,7 +151,7 @@ class User(BaseUser):
         for ticket in tickets:
             ticket.owner = ghost
             ticket.save()
-        mod_tickets = Ticket.objects.filter(moderator=self.id)
+        mod_tickets = Ticket.objects.filter(moderators=self.id)
         for ticket in mod_tickets:
             for mod in ticket.moderators.all():
                 if mod.id == self.id:

@@ -108,18 +108,22 @@
                                     <label class="input-group-text">Versteckt:</label>
                                 </div>
                                 <input type="radio" id="filter-hidden-none" name="hidden" value="0"
+                                       onclick="updateHiddenRadiobuttons()" style="display: none;"
                                        {% if GET.hidden != "1" and GET.hidden != "2" %}checked{% endif %}>
-                                <label for="filter-hidden-none">None</label>
                                 <input type="radio" id="filter-hidden-false" name="hidden" value="True"
+                                       onclick="updateHiddenRadiobuttons()" style="display: none;"
                                        {% if GET.hidden == "True" %}checked{% endif %}>
-                                <label for="filter-hidden-false">Versteckt</label>
                                 <input type="radio" id="filter-hidden-true" name="hidden" value="False"
+                                       onclick="updateHiddenRadiobuttons()" style="display: none;"
                                        {% if GET.hidden == "False" %}checked{% endif %}>
-                                <label for="filter-hidden-true">Sichtbar</label>
+                                <div class="input-group-append">
+                                <label class="btn" for="filter-hidden-none">None</label>
+                                <label class="btn" for="filter-hidden-false">Versteckt</label>
+                                <label class="btn" for="filter-hidden-true">Sichtbar</label>
+                                </div>
                             </div>
                             <br>
                         {% endif %}
-                        <br>
                         <input class="btn btn-primary" type="submit" value="Filtern">
                     </form>
                 </div>
@@ -206,4 +210,19 @@
         </div>
     </div>
     <script src="{% static '/js/userSearch.js' %}"></script>
+    <script>
+    function updateHiddenRadiobuttons() {
+        document.querySelectorAll('input[type="radio"][name="hidden"]').forEach(radio => {
+            let label = document.querySelector('label[for="' + radio.id + '"]');
+            if (radio.checked) {
+                label.classList.remove("btn-outline-secondary");
+                label.classList.add("btn-primary");
+            } else {
+                label.classList.remove("btn-primary");
+                label.classList.add("btn-outline-secondary");
+            }
+        })
+    }
+    window.onload = updateHiddenRadiobuttons;
+    </script>
 {% endblock %}
