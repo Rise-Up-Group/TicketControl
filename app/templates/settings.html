@@ -122,25 +122,23 @@
             </div>
             <div class="mb-4">
                 <h2 class="text-primary display-4 text-center">Startseite</h2>
-                <p class="text-muted text-center">Die Startseite kann angepasst werden. Wird sie gelöscht (ist leer)
-                    wird
-                    automatische eine standard Seite vom System angezeigt.<br>
+                <p class="text-muted text-center">Ist die Startseite leer,
+                    wird eine Standardseite vom System angezeigt.<br>
                     <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
                 <div class="form-group">
                 <textarea class="form-control" id="content.frontpage" name="content.frontpage"
-                          rows="15">{{ settings.content.frontpage }}</textarea>
+                          rows="5">{{ settings.content.frontpage }}</textarea>
                 </div>
             </div>
             <div class="mb-4">
                 <h2 class="text-primary display-4 text-center">Halbe Seite</h2>
-                <p class="text-muted text-center">Die halbe Seite kann angepasst werden. Oft kann es sein, dass eine
-                    Seite in zwei Teile aufgeteilt ist. Wenn dort ein Standard Text steht, kann dieser hier
-                    überschrieben werden. (Nicht jeder Text kann überschreiben werden). U.a. wird dieser auch in den
-                    HTML E-Mails mitgeschickt.<br>
+                <p class="text-muted text-center">Bei der halben Seite kann nur der Standardtext angepasst werden.
+                    Dies wirkt sich nicht auf die Seiten aus, auf denen speziefische Informationen stehen.
+                    U.a. wird dieser text auch in den E-Mails mitgeschickt.<br>
                     <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
                 <div class="form-group">
-                <textarea class="form-control" id="content.half-page"
-                          name="content.half-page" rows="15">{{ settings.content.half_page }}</textarea>
+                <textarea class="form-control" id="content.half-page" name="content.half-page"
+                          rows="5">{{ settings.content.half_page }}</textarea>
                 </div>
             </div>
             <div class="mb-4">
@@ -148,8 +146,8 @@
                 <p class="text-muted text-center">
                     <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
                 <div class="form-group">
-                <textarea class="form-control" id="content.imprint"
-                          name="content.imprint" rows="15">{{ settings.content.imprint }}</textarea>
+                <textarea class="form-control" id="content.imprint" name="content.imprint"
+                          rows="5">{{ settings.content.imprint }}</textarea>
                 </div>
             </div>
             <div class="mb-4">
@@ -157,9 +155,8 @@
                 <p class="text-muted text-center">
                     <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
                 <div class="form-group">
-                <textarea class="form-control" id="content.privacy-and-policy"
-                          name="content.privacy-and-policy"
-                          rows="15">{{ settings.content.privacy_and_policy }}</textarea>
+                <textarea class="form-control" id="content.privacy-and-policy" name="content.privacy-and-policy"
+                          rows="5">{{ settings.content.privacy_and_policy }}</textarea>
                 </div>
             </div>
             <div class="px-4 py-5 px-md-5 text-center text-lg-start">
@@ -200,6 +197,17 @@
                 whitelist.style.display = "None";
             }
         }
-        window.onload = showEmailWhitelist;
+        window.addEventListener("load", showEmailWhitelist);
+
+        function add_textarea_open_listeners() {
+            document.querySelectorAll("textarea").forEach(textarea => {
+                textarea.addEventListener("focus", event => {
+                    event.target.rows = 25;
+                    event.target.parentNode.parentNode.scrollIntoView();
+                });
+                textarea.addEventListener("focusout", event => {event.target.rows = 5;});
+            })
+        }
+        window.addEventListener("load", add_textarea_open_listeners);
     </script>
 {% endblock %}
