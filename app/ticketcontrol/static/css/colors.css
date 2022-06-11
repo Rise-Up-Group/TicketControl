@@ -137,8 +137,9 @@ figure {
     border-top-color: var(--color-border-light);
 }
 .table-hover tbody tr:hover {
-  color: var(--color-hover);
-  background-color: var(--color-background-hover);
+    color: var(--color-hover);
+    background-color: var(--color-background-hover);
+    cursor: pointer;
 }
 
 /* -------------------- forms -------------------- */
