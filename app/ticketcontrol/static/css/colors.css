@@ -14,6 +14,7 @@
         --color-nav-item: rgba(255,255,255,.5);
         --color-nav-item-hover: rgba(255,255,255,.75);
         --color-nav-item-active: white;
+        --color-card-header-text: var(--color-inverted);
         --color-card-header: #6c757d;
         --color-card-body: #f8f9fa;
         --color-input-background: white;
@@ -26,7 +27,7 @@
 @media (prefers-color-scheme: dark) {
     :root {
         --color-background: #151515;
-        --color-background-hover: #121212;
+        --color-background-hover: #282828;
         --color-text: lightgrey;
         --color-hover: white;
         --color-muted: #6c757d;
@@ -39,8 +40,9 @@
         --color-nav-item: rgba(255,255,255,.5);
         --color-nav-item-hover: rgba(255,255,255,.75);
         --color-nav-item-active: white;
-        --color-card-header: white;
-        --color-card-body: #202020;
+        --color-card-header-text: var(--color-text);
+        --color-card-header: #282828;
+        --color-card-body: #1c1c1c;
         --color-input-background: #080808;
         --color-input-border: #404040;
         --color-input-group-text-background: #202020;
@@ -107,6 +109,7 @@ hr {
 }
 .card-header {
     background-color: var(--color-card-header);
+    color: var(--color-card-header-text);
 }
 .card-body {
     background-color: var(--color-card-body)
