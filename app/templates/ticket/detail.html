@@ -1,19 +1,20 @@
 {% extends "main.html" %}
 {% load static %}
 {% block content %}
-    <div class="container bg-transparent text-dark rounded mt-3">
+    <div class="container bg-transparent rounded mt-3">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <span class="input-group-text">#{{ ticket.id }}</span>
                 <span class="input-group-text">{{ ticket.status }}</span>
             </div>
             <input id="title" type="text" class="form-control" placeholder="{{ ticket.title }}"
-                   value="{{ ticket.title }}" oninput="show_update_ticket_warning()">
-            <div class="input-group-append">
+                   value="{{ ticket.title }}"
+                   oninput="show_update_ticket_warning()">
+            <div class="input-group-append" id="ticket-options">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">options
                 </button>
-                <div class="dropdown-menu">
+                <div class="dropdown-menu" id="ticket-options-dropdown">
                     {% if perms.ticketcontrol.change_status %}
                         <a class="dropdown-item" type="button" data-toggle="modal" data-target="#change-status">Status
                             ändern</a>
@@ -93,7 +94,8 @@
                             <div class="input-group-text">@</div>
                         </div>
                         <input type="text" class="form-control" id="search-user" placeholder="Username"
-                               list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);"
+                               list="user-search-dropdown-menu"
+                               oninput="search_and_update_usernames(this.value, 'user-search-dropdown-menu', false);"
                                onchange="add_user(`participants`, this.value);">
                     </div>
                     <datalist id="user-search-dropdown-menu">
@@ -118,8 +120,7 @@
             </div>
         </div>
         <div id="update-ticket-warning" style="display: none">
-            <figure class="bg-light p-3 rounded  border-1"
-                    style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ed4245;">
+            <figure class="p-3 rounded  border-1" style="border-left-color: #ed4245;">
                 <div class="row justify-content-between">
                     <div class="col-auto">
                         <p class="lead">
@@ -140,8 +141,7 @@
                 </div>
             </figure>
         </div>
-        <figure class="bg-light p-3 rounded  border-1"
-                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
+        <figure class="p-3 rounded  border-1" style="border-left-color: #5865D2;">
             <form method="post" action="{% url 'edit_ticket' id=ticket.id %}">
                 {% csrf_token %}
                 <p class="lead">Beschreibung</p>
@@ -149,8 +149,7 @@
                 <p data-input type="textarea" name="description">{{ ticket.description }}</p>
                 {% if ticket.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
                     Attachments:<br>
-                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
-                         id="file-drop-box-ticket">
+                    <div class="input file-drop-box text-center" id="file-drop-box-ticket">
                         <div class="file-drop-list">
                             {% for attachment in ticket.attachment_set.all %}
                                 <div>
@@ -178,13 +177,12 @@
                     | {{ ticket.creationDate }}
                 </p>
                 {% if perms.ticketcontrol.change_comment or ticket.owner_id == user.id %}
-                    <button onclick="makeEditable(this);">Bearbeiten</button>
+                    <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
                 {% endif %}
             </form>
         </figure>
         {% for comment in comments %}
-            <figure class="bg-light p-3 rounded"
-                    style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ff9f00;">
+            <figure class="p-3 rounded" style="border-left-color: #D09000">
                 <form method="post" action="{% url 'edit_comment' id=comment.id %}">
                     {% csrf_token %}
                     <p class="lead">{{ comment.user.username }}
@@ -193,8 +191,7 @@
                     <p data-input type="textarea" name="content">{{ comment.content }}</p>
                     {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
                         Attachments:<br>
-                        <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
-                             id="file-drop-box-comment-{{ comment.id }}">
+                        <div class="input file-drop-box text-center" id="file-drop-box-comment-{{ comment.id }}">
                             <div class="file-drop-list">
                                 {% for attachment in comment.attachment_set.all %}
                                     <div>
@@ -222,13 +219,12 @@
                         {{ comment.creationDate }}
                     </p>
                     {% if perms.ticketcontrol.change_comment or comment.user_id == user.id %}
-                        <button onclick="makeEditable(this);">Bearbeiten</button>
+                        <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
                     {% endif %}
                 </form>
             </figure>
         {% endfor %}
-        <figure class="bg-light p-3 rounded"
-                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #00ff00;">
+        <figure class="p-3 rounded" style="border-left-color: #00A000;">
             <p class="lead">Kommentar hinzufügen:</p>
             <hr>
             <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST">
@@ -237,8 +233,7 @@
                                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
                                           name="comment"></textarea>
                 </div>
-                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
-                     id="file-drop-box-new-comment">
+                <div class="input file-drop-box text-center" id="file-drop-box-new-comment">
                     <div class="file-drop-list"></div>
                     <div class="file-drop-area">
                         <input class="file-input" type="file" name="attachments-input"
@@ -247,7 +242,7 @@
                     </div>
                 </div>
                 <br>
-                <div class="text-white">
+                <div>
                     <div class="row justify-content-between">
                         <div class="col-auto">
                             <p class="blockquote-footer mb-0 font-italic">
@@ -360,43 +355,47 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="close-ticket" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ticket #{{ ticket.id }} schließen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="{% url 'close_ticket' id=ticket.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>Ticket schließen?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zurück</button>
+                        <button type="submit" class="btn btn-danger">Schließen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
     <script src="{% static '/js/edit.js' %}"></script>
+    <script src="{% static '/js/userSearch.js' %}"></script>
     <script>
-        async function search_and_update_usernames(typed_username) {
-            const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json();
-            const dropdown = $("#user-search-dropdown-menu");
-            dropdown.children().remove();
-            for (user of users) {
-                dropdown.append($(`<option>${user.username}</option>`));
-            }
-        }
-
-        var participantToken, moderatorToken;
-
-        async function get_token() {
-            let tokenResponse = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}`);
-            participantToken = new FormData();
-            participantToken.append("csrfmiddlewaretoken", await tokenResponse.text());
-            tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`);
-            moderatorToken = new FormData();
-            moderatorToken.append("csrfmiddlewaretoken", await tokenResponse.text());
-        }
-
-        get_token();
 
         async function add_user(mode, username) {
             if (username !== "") {
                 let response;
+                let token = document.querySelector('[name=csrfmiddlewaretoken]').value;
                 if (mode === "participants") {
                     response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {
                         method: "POST",
-                        body: participantToken
+                        headers: {'X-CSRFToken': token}
                     });
                 } else if (mode === "moderators") {
                     response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {
                         method: "POST",
-                        body: moderatorToken
+                        headers: {'X-CSRFToken': token}
                     });
                 }
                 if (response.ok) {
@@ -423,5 +422,13 @@
                 document.getElementById("new_location").value = location;
             }
         }
+
+        async function checkOptionsDropdown() {
+            if (document.getElementById("ticket-options-dropdown").childElementCount === 0) {
+                document.getElementById("ticket-options").remove();
+            }
+        }
+
+        window.onload = checkOptionsDropdown;
     </script>
 {% endblock %}

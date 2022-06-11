@@ -1,91 +1,238 @@
 {% extends "main.html" %}
+{% load static %}
 
 {% block content %}
     <br>
-    <div class="card mb-4">
-        <div class="card-header bg-secondary text-white">
-            <h5>Meine Tickets</h5>
+    <div class="row">
+        <div class="col-xl-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="filter-status">Status:</label>
+                            </div>
+                            <select class="custom-select form-control" id="filter-status" name="status">
+                                <option value="0">Nicht filtern</option>
+                                {% for status in status_choices %}
+                                    <option value="{{ status }}"{% if status == GET.status %}
+                                            selected{% endif %}>{{ status }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="filter-category">Kategorie:</label>
+                            </div>
+                            <select class="custom-select form-control" id="filter-category" name="category">
+                                <option value="0">Nicht filtern</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}"{% if category.id == category_id %}
+                                            selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="filter_title">Titel:</label>
+                            </div>
+                            <select class="custom-select form-control" id="filter-title-type" name="title_type"
+                                    style="width: auto; flex-grow: 0;">
+                                {% for type in types %}
+                                    <option value="{{ type }}"{% if GET.title_type == type %}
+                                            selected{% endif %}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                            <input class="form-control" type="text" name="title" id="filter-title"
+                                   value="{{ GET.title }}">
+                        </div>
+                        <br>
+                        {% if allow_location %}
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-location">Standort:</label>
+                                </div>
+                                <select class="custom-select form-control" id="filter-title-type" name="location_type"
+                                        style="width: auto; flex-grow: 0;">
+                                    {% for type in types %}
+                                        <option value="{{ type }}"{% if GET.location_type == type %}
+                                                selected{% endif %}>{{ type }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input class="form-control" type="text" name="location" id="filter-location"
+                                       value="{{ GET.location }}">
+                            </div>
+                            <br>
+                        {% endif %}
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-owner">Besitzer:</label>
+                                </div>
+                                <input class="form-control" type="text" name="owner" id="filter-owner"
+                                       value="{{ GET.owner }}" placeholder="username" list="filter-owner-data-list"
+                                       oninput="search_and_update_usernames(this.value, 'filter-owner-data-list', false);">
+                            </div>
+                            <datalist id="filter-owner-data-list"></datalist>
+                        </div>
+                        <br>
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-participating">Teilnehmer:</label>
+                                </div>
+                                <input class="form-control" type="text" name="participating" id="filter-participating"
+                                       value="{{ GET.participating }}" placeholder="username, username"
+                                       list="filter-participating-data-list"
+                                       oninput="search_and_update_usernames(this.value, 'filter-participating-data-list');">
+                            </div>
+                            <datalist id="filter-participating-data-list"></datalist>
+                        </div>
+                        <br>
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-moderators">Moderatoren:</label>
+                                </div>
+                                <input class="form-control" type="text" name="moderators" id="filter-moderators"
+                                       value="{{ GET.moderators }}" placeholder="username, username"
+                                       list="filter-moderators-data-list"
+                                       oninput="search_and_update_usernames(this.value, 'filter-moderators-data-list');">
+                            </div>
+                            <datalist id="filter-moderators-data-list"></datalist>
+                        </div>
+                        <br>
+                        {% if perms.ticketcontrol.unhide_ticket %}
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text">Versteckt:</label>
+                                </div>
+                                <input type="radio" id="filter-hidden-none" name="hidden" value="0"
+                                       onclick="updateHiddenRadiobuttons()" style="display: none;"
+                                       {% if GET.hidden != "1" and GET.hidden != "2" %}checked{% endif %}>
+                                <input type="radio" id="filter-hidden-false" name="hidden" value="True"
+                                       onclick="updateHiddenRadiobuttons()" style="display: none;"
+                                       {% if GET.hidden == "True" %}checked{% endif %}>
+                                <input type="radio" id="filter-hidden-true" name="hidden" value="False"
+                                       onclick="updateHiddenRadiobuttons()" style="display: none;"
+                                       {% if GET.hidden == "False" %}checked{% endif %}>
+                                <div class="input-group-append">
+                                    <label class="btn" for="filter-hidden-none">Nicht filtern</label>
+                                    <label class="btn" for="filter-hidden-false">Versteckt</label>
+                                    <label class="btn" for="filter-hidden-true">Sichtbar</label>
+                                </div>
+                            </div>
+                            <br>
+                        {% endif %}
+                        <input class="btn btn-primary" type="submit" value="Filtern">
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="card-body bg-light">
-            {% if tickets.own|length > 0 %}
-                <table class="table table-sm table-hover">
-                    <thead>
-                    <tr>
-                        <th scope="row">Id</th>
-                        <th>Kategorie</th>
-                        <th>Titel</th>
-                        <th>Participants</th>
-                        <th>Modarator</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for ticket in tickets.own %}
-
-                        <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
-                            <th>#{{ ticket.id }}</th>
-                            <td>{{ ticket.category }}</td>
-                            <td>{{ ticket.title }}</td>
-                            <td>
-                                {% for participant in ticket.participating.all %}
-                                    <a href="{% url 'user_details' id=participant.id %}">{{ participant.username }}</a>
-                                    {% if not forloop.last %},{% endif %}
-                                {% endfor %}
-                            </td>
-                            <td>
-                                {% for moderator in ticket.moderator.all %}
-                                    <a href="{% url 'user_details' id=moderator.id %}">{{ moderator.username }}</a>
-                                    {% if not forloop.last %},{% endif %}
-                                {% endfor %}
-                            </td>
+        <div class="col-xl-9">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Tickets</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="row">Id</th>
+                            {% if GET.status == "0" %}
+                                <th>Status</th>
+                            {% endif %}
+                            {% if GET.category == "0" %}
+                                <th>Kategorie</th>
+                            {% endif %}
+                            {% if not GET.title or GET.title_type != "is" %}
+                                <th>Titel</th>
+                            {% endif %}
+                            {% if allow_location %}
+                                {% if not GET.location or GET.location_type != "is" %}
+                                    <th>Standort</th>
+                                {% endif %}
+                            {% endif %}
+                            {% if not GET.owner %}
+                                <th>Owner</th>
+                            {% endif %}
+                            <th>Participants</th>
+                            <th>Modarators</th>
+                            {% if perms.ticketcontrol.unhide_ticket %}
+                                {% if not GET.hidden or GET.hidden == "0" %}
+                                    <th>Hidden</th>
+                                {% endif %}
+                            {% endif %}
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button"
-                                                                    href="{% url 'create_ticket' %}">Ticket
-                    erstellen?</a></p>
-            {% endif %}
+                        </thead>
+                        <tbody>
+                        {% for ticket in tickets %}
+                            <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
+                                <th>#{{ ticket.id }}</th>
+                                {% if GET.status == "0" %}
+                                    <td>{{ ticket.status }}</td>
+                                {% endif %}
+                                {% if GET.category == "0" %}
+                                    <td>{{ ticket.category }}</td>
+                                {% endif %}
+                                {% if not GET.title or GET.title_type != "is" %}
+                                    <td>{{ ticket.title }}</td>
+                                {% endif %}
+                                {% if allow_location %}
+                                    {% if not GET.location or GET.location_type != "is" %}
+                                        <td>{{ ticket.location }}</td>
+                                    {% endif %}
+                                {% endif %}
+                                {% if not GET.owner %}
+                                    <td>
+                                        <a href="{% url 'user_details' id=ticket.owner.id %}">{{ ticket.owner.username }}</a>
+                                    </td>
+                                {% endif %}
+                                <td>
+                                    {% for participant in ticket.participating.all %}
+                                        <a href="{% url 'user_details' id=participant.id %}">{{ participant.username }}</a>
+                                        {% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for moderator in ticket.moderators.all %}
+                                        <a href="{% url 'user_details' id=moderator.id %}">{{ moderator.username }}</a>
+                                        {% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                </td>
+                                {% if perms.ticketcontrol.unhide_ticket %}
+                                    {% if not GET.hidden or GET.hidden == "0" %}
+                                        <td>{{ ticket.hidden }}</td>
+                                    {% endif %}
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-    {% if tickets.part|length > 0 %}
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white">
-                <h5>Teilnahme an Tickets</h5>
-            </div>
-            <div class="card-body bg-light">
+    <script src="{% static '/js/userSearch.js' %}"></script>
+    <script>
+        function updateHiddenRadiobuttons() {
+            document.querySelectorAll('input[type="radio"][name="hidden"]').forEach(radio => {
+                let label = document.querySelector('label[for="' + radio.id + '"]');
+                if (radio.checked) {
+                    label.classList.remove("btn-outline-secondary");
+                    label.classList.add("btn-primary");
+                } else {
+                    label.classList.remove("btn-primary");
+                    label.classList.add("btn-outline-secondary");
+                }
+            })
+        }
 
-                <table class="table table-sm table-hover">
-                    <thead>
-                    <tr>
-                        <th scope="row">Id</th>
-                        <th>Kategorie</th>
-                        <th>Titel</th>
-                        <th>Participants</th>
-                        <th>Besitzer</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for ticket in tickets.part %}
-
-                        <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
-                            <th>#{{ ticket.id }}</th>
-                            <td>{{ ticket.category }}</td>
-                            <td>{{ ticket.title }}</td>
-                            <td>
-                                {% for participant in ticket.participating.all %}
-                                    <a href="{% url 'user_details' id=participant.id %}">{{ participant.username }}</a>
-                                    {% if not forloop.last %},{% endif %}
-                                {% endfor %}
-                            </td>
-                            <td>
-                                <a href="{% url 'user_details' id=ticket.owner.id %}">{{ ticket.owner.username }}</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    {% endif %}
+        window.onload = updateHiddenRadiobuttons;
+    </script>
 {% endblock %}

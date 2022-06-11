@@ -2,7 +2,7 @@
 .file-drop-box {
     display: flex;
     max-width: 100%;
-    border: 1px dashed rgba(255, 255, 255, 0.4);
+    border: .05rem solid var(--color-border);
     border-radius: 3px;
     transition: 0.2s
 }
@@ -31,7 +31,20 @@
 
 }
 
+.card-body {
+    overflow: auto;
+}
 
+input[type="text"] {
+    min-width: 8em;
+}
+.input-group-append {
+    flex-wrap: wrap;
+}
+
+.btn {
+    margin: 0;
+}
 .choose-file-button {
     flex-shrink: 0;
     background-color: rgba(255, 255, 255, 0.04);
@@ -66,8 +79,17 @@
     margin-top: 100px
 }
 
+.nav-link {
+    cursor: pointer;
+}
+
+select {
+    max-width: 100%;
+}
+
 option.checkbox:before {
     content: "☐ "
+
 }
 
 option.checkbox:checked:before {

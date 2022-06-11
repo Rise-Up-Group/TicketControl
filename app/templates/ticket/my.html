@@ -1,0 +1,91 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <br>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Meine Tickets <a style="float: right" class="btn btn-primary" type="button" href="{% url 'create_ticket' %}">Ticket erstellen</a></h5>
+        </div>
+        <div class="card-body">
+            {% if tickets.own|length > 0 %}
+                <table class="table table-sm table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="row">Id</th>
+                        <th>Kategorie</th>
+                        <th>Titel</th>
+                        <th>Participants</th>
+                        <th>Modarator</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ticket in tickets.own %}
+
+                        <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
+                            <th>#{{ ticket.id }}</th>
+                            <td>{{ ticket.category }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>
+                                {% for participant in ticket.participating.all %}
+                                    <a href="{% url 'user_details' id=participant.id %}">{{ participant.username }}</a>
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for moderator in ticket.moderators.all %}
+                                    <a href="{% url 'user_details' id=moderator.id %}">{{ moderator.username }}</a>
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button"
+                                                                    href="{% url 'create_ticket' %}">Ticket
+                    erstellen?</a></p>
+            {% endif %}
+        </div>
+    </div>
+    {% if tickets.part|length > 0 %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Teilnahme an Tickets</h5>
+            </div>
+            <div class="card-body">
+
+                <table class="table table-sm table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="row">Id</th>
+                        <th>Kategorie</th>
+                        <th>Titel</th>
+                        <th>Participants</th>
+                        <th>Besitzer</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ticket in tickets.part %}
+
+                        <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
+                            <th>#{{ ticket.id }}</th>
+                            <td>{{ ticket.category }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>
+                                {% for participant in ticket.participating.all %}
+                                    <a href="{% url 'user_details' id=participant.id %}">{{ participant.username }}</a>
+                                    {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a href="{% url 'user_details' id=ticket.owner.id %}">{{ ticket.owner.username }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -16,5 +16,7 @@ function makeEditable(button) {
     let submit = document.createElement("input");
     submit.setAttribute("type", "submit");
     submit.setAttribute("value", "Save");
+    submit.classList.add("btn");
+    submit.classList.add("btn-primary");
     form.replaceChild(submit, button);
 }

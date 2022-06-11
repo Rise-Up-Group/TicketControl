@@ -1,14 +1,14 @@
 {% extends "main.html" %}
 {% load static %}
 {% block content %}
-    <div class="container bg-transparent text-dark rounded mt-3">
+    <div class="container bg-transparent rounded mt-3">
         <form method="POST" action="{% url 'create_ticket' %}">
             {% csrf_token %}
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Titel:</span>
                 </div>
-                <input type="text" class="form-control" name="title" placeholder="Titel eingeben..." required>
+                <input type="text" class="form-control" name="title" placeholder="Titel eingeben..." autofocus required>
             </div>
             {% if allow_location %}
                 <div class="input-group mb-3">
@@ -31,16 +31,15 @@
             </div>
             <br>
             <div class="bg-transparent">
-                <figure class="bg-light p-3 rounded"
-                        style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
+                <figure class="p-3 rounded"
+                        style="border: .05rem solid var(--color-border); border-left: .25rem solid #5865f2;">
                     <p class="lead">Beschreibung hinzufügen:</p>
                     <hr>
                     <div class="form-group">
                         <textarea class="form-control" id="exampleFormControlTextarea1" rows="15"
                                   name="description" required></textarea>
                     </div>
-                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
-                         id="file-drop-box-ticket">
+                    <div class="input file-drop-box text-center" id="file-drop-box-ticket">
                         <div class="file-drop-list"></div>
                         <div class="file-drop-area">
                             <input class="file-input" type="file" name="attachments-input"
@@ -49,7 +48,7 @@
                         </div>
                     </div>
                     <br>
-                    <div class="text-white">
+                    <div>
                         <div class="row justify-content-between">
                             <div class="col-auto">
                                 <p class="blockquote-footer mb-0 font-italic">
@@ -79,7 +78,7 @@
                 <div class="modal-body">
                     <p>Bitte bestätigen Sie, dass ungespeicherte Veränderungen verloren gehen werden!</p>
                 </div>
-                <div class="modal-footer text-white">
+                <div class="modal-footer">
                     <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
                     <a type="button" class="btn btn-danger" href="{% url 'dashboard' %}">Löschen</a>
                 </div>
@@ -95,7 +94,7 @@
                 <div class="modal-body">
                     <p>Anhang wirklich löschen?</p>
                 </div>
-                <div class="modal-footer text-white">
+                <div class="modal-footer">
                     {% csrf_token %}
                     <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
                     <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model"
