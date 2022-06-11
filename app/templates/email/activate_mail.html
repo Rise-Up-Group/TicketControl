@@ -42,7 +42,8 @@
                         </a>
                         <p class="text-muted">
                             Sie erhalten diese E-Mail, weil Sie kürzlich ein Konto erstellt oder Ihre E-Mail-Adresse
-                            geändert haben. Wenn Sie dies nicht getan haben, kontaktieren Sie uns bitte.
+                            geändert haben. Wenn Sie dies nicht getan haben, kontaktieren Sie uns bitte
+                            (<a href="mailto:{{ contact_email }}?subject=Unauthorized registration of user {{ user.username }}#{{ user.id }}">{{ contact_email }}</a>).
                         </p>
                     </div>
                 </div>

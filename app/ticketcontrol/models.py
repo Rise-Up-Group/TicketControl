@@ -118,7 +118,8 @@ class User(BaseUser):
             'user': self,
             'domain': get_current_site(request).domain,
             'token': account_activation_token.make_token(self),
-            "half_page": settings.CONTENT["half_page"]
+            'half_page': settings.CONTENT["half_page"],
+            'contact_email': settings.GENERAL["contact_email"]
         })
         if new_user:
             subject = "Welcome to Ticketcontrol"
@@ -138,7 +139,8 @@ class User(BaseUser):
             'user': self,
             'domain': get_current_site(request).domain,
             'token': password_reset_token.make_token(self),
-            "half_page": settings.CONTENT["half_page"]
+            'half_page': settings.CONTENT["half_page"],
+            'contact_email': settings.GENERAL["contact_email"]
         })
         send_mail(
             subject="[Ticketcontrol] Reset your password",
