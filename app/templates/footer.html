@@ -1,0 +1,22 @@
+<footer>
+    <a href="{% url 'imprint' %}">Impressum</a>
+    <a href="{% url 'privacy_and_policy' %}">Datenschutzrichtlinen</a>
+</footer>
+<script>
+    async function align_footer() {
+        let nav = document.querySelector("nav");
+        let main = document.querySelector("main");
+        let footer = document.querySelector("footer");
+        if ((nav.offsetHeight + parseInt(getComputedStyle(nav).marginTop) + parseInt(getComputedStyle(nav).marginBottom) +
+            main.offsetHeight + parseInt(getComputedStyle(main).marginTop) + parseInt(getComputedStyle(main).marginBottom) +
+            footer.offsetHeight + parseInt(getComputedStyle(footer).marginTop)) < window.innerHeight) {
+            footer.style.position = "fixed";
+            footer.style.bottom = "0";
+        } else {
+            footer.style.position = "static";
+            footer.style.bottom = "";
+        }
+    }
+    window.addEventListener("resize", align_footer);
+    window.addEventListener("load", align_footer);
+</script>
