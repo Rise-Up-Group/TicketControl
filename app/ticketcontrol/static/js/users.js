@@ -1,21 +1,25 @@
-async function check_username(autocorrect=true) {
+async function check_username(autocorrect=true, old_username="") {
     let input = document.getElementById("username");
     let username = input.value;
-    let res = await fetch("/user/check_username/"+username, {methd: "GET"});
-    if (res.status === 200) {
-        input.style.backgroundColor = null;
-    } else {
-        if (res.status === 409) {
-            if (autocorrect) {
-                input.style.backgroundColor = null;
-                username = await res.text();
-                input.value = username;
+    if (username !== old_username) {
+        let res = await fetch("/user/check_username/" + username, {methd: "GET"});
+        if (res.status === 200) {
+            input.style.backgroundColor = null;
+        } else {
+            if (res.status === 409) {
+                if (autocorrect) {
+                    input.style.backgroundColor = null;
+                    username = await res.text();
+                    input.value = username;
+                } else {
+                    input.style.setProperty("background-color", "var(--color-danger)", "important");
+                }
             } else {
                 input.style.backgroundColor = "red";
             }
-        } else {
-            input.style.backgroundColor = "red";
         }
+    } else {
+        input.style.backgroundColor = null;
     }
 }
 
