@@ -4,7 +4,7 @@
 {% block content %}
     <h1 class="text-center display-4">Einstellungen</h1>
     <hr>
-    <div class="container bg-transparent text-dark rounded mt-3">
+    <div class="container bg-transparent rounded mt-3">
         <form action="{% url 'settings' %}" method="post">
             {% csrf_token %}
             <div class="px-4 py-5 px-md-5 text-center text-lg-start">
@@ -38,35 +38,40 @@
                                             <input type="checkbox" id="register.allow-custom-username"
                                                    name="register.allow-custom-username"
                                                    {% if settings.register.allow_custom_username %}checked{% endif %}>
-                                            <label for="register.allow-custom-username">Allow custom username</label><br>
+                                            <label for="register.allow-custom-username">Allow custom
+                                                username</label><br>
                                             <input type="checkbox" id="register.email-whitelist-enable"
-                                                   name="register.email-whitelist-enable"
+                                                   name="register.email-whitelist-enable" onclick="showEmailWhitelist()"
                                                    {% if settings.register.email_whitelist_enable %}checked{% endif %}>
                                             <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label>
                                         </div>
-                                        <p>E-Mail Whitelist</p>
-                                        <p class="text-muted">Bei jedem Eintrag der E-Mail whitelist kann entweder die
-                                            Domain
-                                            beginnend mit einem <code>@</code> oder eine RexEx-pattern angegeben werden
-                                        </p>
-                                        <div id="register.email_whitelist" class="mb-4">
-                                            {% for entry in settings.register.email_whitelist %}
-                                                <div class="input-group mb-3">
-                                                    <input type="text" class="form-control"
-                                                           name="register.email-whitelist" value="{{ entry }}"
-                                                           placeholder="@example.com">
-                                                    <div class="input-group-append text-white">
-                                                        <a class="btn btn-danger"
-                                                           type="button"
-                                                           data-toggle="dropdown" aria-haspopup="true"
-                                                           aria-expanded="false"
-                                                           onclick="removeEmailWhitelistEntry(this);">Löschen</a>
+                                        <div id="email-whitelist">
+                                            <p>E-Mail Whitelist</p>
+                                            <p class="text-muted">Bei jedem Eintrag der E-Mail whitelist kann entweder
+                                                die
+                                                Domain
+                                                beginnend mit einem <code>@</code> oder eine RexEx-pattern angegeben
+                                                werden
+                                            </p>
+                                            <div id="register.email_whitelist" class="mb-4">
+                                                {% for entry in settings.register.email_whitelist %}
+                                                    <div class="input-group mb-3">
+                                                        <input type="text" class="form-control"
+                                                               name="register.email-whitelist" value="{{ entry }}"
+                                                               placeholder="@example.com">
+                                                        <div class="input-group-append text-white">
+                                                            <a class="btn btn-danger"
+                                                               type="button"
+                                                               data-toggle="dropdown" aria-haspopup="true"
+                                                               aria-expanded="false"
+                                                               onclick="removeEmailWhitelistEntry(this);">Löschen</a>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            {% endfor %}
+                                                {% endfor %}
+                                            </div>
+                                            <a class="btn btn-primary btn-block text-white"
+                                               onclick="addEmailWhitelistEntry();">Domain/E-Mail hinzufügen</a>
                                         </div>
-                                        <a class="btn btn-primary btn-block text-white"
-                                           onclick="addEmailWhitelistEntry();">Domain/E-Mail hinzufügen</a>
                                     </div>
                                 </div>
                             </div>
@@ -153,7 +158,8 @@
                     <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
                 <div class="form-group">
                 <textarea class="form-control" id="content.privacy-and-policy"
-                          name="content.privacy-and-policy" rows="15">{{ settings.content.privacy_and_policy }}</textarea>
+                          name="content.privacy-and-policy"
+                          rows="15">{{ settings.content.privacy_and_policy }}</textarea>
                 </div>
             </div>
             <div class="px-4 py-5 px-md-5 text-center text-lg-start">
@@ -181,9 +187,19 @@
                     </div>
                 </div>
             </div>
-
+        </form>
     </div>
-    </form>
     <script src="{% static '/js/emailWhitelist.js' %}"></script>
-    </div>
+    <script>
+        function showEmailWhitelist() {
+            let checkbox = document.getElementById("register.email-whitelist-enable");
+            let whitelist = document.getElementById("email-whitelist");
+            if (checkbox.checked) {
+                whitelist.style.display = "block";
+            } else {
+                whitelist.style.display = "None";
+            }
+        }
+        window.onload = showEmailWhitelist;
+    </script>
 {% endblock %}
