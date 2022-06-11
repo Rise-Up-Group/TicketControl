@@ -3,10 +3,10 @@
 {% block content %}
     <br>
     <div class="card mb-4">
-        <div class="card-header bg-secondary text-white">
-            <h5>Meine Tickets</h5>
+        <div class="card-header">
+            <h5>Meine Tickets <a style="float: right" class="btn btn-primary" type="button" href="{% url 'create_ticket' %}">Ticket erstellen</a></h5>
         </div>
-        <div class="card-body bg-light">
+        <div class="card-body">
             {% if tickets.own|length > 0 %}
                 <table class="table table-sm table-hover">
                     <thead>
@@ -50,10 +50,10 @@
     </div>
     {% if tickets.part|length > 0 %}
         <div class="card mb-4">
-            <div class="card-header bg-secondary text-white">
+            <div class="card-header">
                 <h5>Teilnahme an Tickets</h5>
             </div>
-            <div class="card-body bg-light">
+            <div class="card-body">
 
                 <table class="table table-sm table-hover">
                     <thead>
