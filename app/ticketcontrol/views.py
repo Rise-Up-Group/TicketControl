@@ -52,7 +52,7 @@ def dashboard_view(request):
         context = {'tickets': {'own': own_tickets, 'part': part_tickets}}
         return render(request, "dashboard.html", context)
     else:
-        return render(request, "home.html")
+        return render(request, "home.html", {"content": settings.CONTENT['frontpage']})
 
 
 @login_required()
@@ -147,8 +147,10 @@ def ticket_view(request, id):
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
         categories = Category.objects.all()
-        context = {"ticket": ticket, "moderators": ticket.moderators.all(),
-                   "participants": ticket.participating.all(), "comments": comments, "categories": categories}
+        context = {"ticket": ticket, "moderators": ticket.moderator.all(),
+                   "participants": ticket.participating.all(), "comments": comments, "categories": categories,
+                   "allow_location": settings.GENERAL["allow_location"],
+                   "force_location": settings.GENERAL["force_location"]}
         return render(request, "ticket/detail.html", context)
     except Ticket.DoesNotExist:
         return render_error(request, 404, "Ticket does not exist")
@@ -195,7 +197,7 @@ def login_view(request):
             error = "Wrong username or password"
     if request.user.is_authenticated:
         return redirect("dashboard")
-    return render(request, "user/login.html", {"error": error, "next": next})
+    return render(request, "user/login.html", {"error": error, "next": next, "half_page": settings.CONTENT["half_page"]})
 
 
 def register_view(request):
@@ -206,8 +208,17 @@ def register_view(request):
             if len(password) < 8:
                 return render_error(request, 411, "Password must be at least 8 characters long")
             email = request.POST['email']
-            if not User.objects.filter(email=email).exists() and not User.objects.filter(
-                    username=request.POST['username']).exists():
+            firstname = request.POST['firstname']
+            lastname = request.POST['lastname']
+            if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
+                username = request.POST['username']
+            else:
+                username = firstname[0:1] + "." + lastname
+            res = check_username(username)
+            if res["status"] == 409:
+                username = res["username"]
+
+            if not User.objects.filter(email=email).exists() and not res["status"] == 406:
                 email_authorized = False
                 if not settings.REGISTER['email_whitelist_enable']:
                     email_authorized = True
@@ -219,8 +230,7 @@ def register_view(request):
                             email_authorized = True
                             break
                 if email_authorized:
-                    user = User.add_user(None, request.POST['firstname'], request.POST['lastname'],
-                                         request.POST['username'], password, groups=None, is_active=True,
+                    user = User.add_user(None, firstname, lastname, username, password, groups=None, is_active=True,
                                          email_confirmed=False)
                     user.new_email = request.POST['email']
                     user.save()
@@ -228,7 +238,7 @@ def register_view(request):
                         User.send_emailverification_mail(user, request)
                     except SMTPRecipientsRefused:
                         return render_error(request, 500, "Unable to send verification email")
-                    return render(request, "user/activate.html", {'action': 'activate'})
+                    return render(request, "user/activate.html", {'action': 'activate', "half_page": settings.CONTENT["half_page"]})
                 else:
                     return render_error(request, 406, "Your E-Mail address is not white-listed")
             else:
@@ -236,7 +246,25 @@ def register_view(request):
         else:
             # Should not happen anyway
             return render_error(request, 409, "Passwords do not match")
-    return render(request, "user/register.html")
+    return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"],
+                                                  "allow_custom_username": settings.REGISTER["allow_custom_username"]})
+
+def check_username(username):
+    if User.objects.filter(username=username).exists():
+        i = 1
+        while User.objects.filter(username=username+str(i)).exists() and i < 200:
+            i += 1
+        if User.objects.filter(username=username+str(i)).exists():
+            return {"status": 406}
+        return {"status": 409, "username": username+str(i)}
+    return {"status": 200}
+
+def check_username_view(request, username):
+    res = check_username(username)
+    content = ""
+    if res["status"] == 409:
+        content = res["username"]
+    return HttpResponse(status=res["status"], content=content)
 
 
 def activate_user_view(request):
@@ -264,7 +292,7 @@ def activate_user_view(request):
         user = User.objects.get(id=request.GET['user-id'])
     except User.DoesNotExist:
         return render_error(request, 404, "User does not exist")
-    return render(request, "user/activate.html", {"content_user": user, "token": request.GET['token']})
+    return render(request, "user/activate.html", {"content_user": user, "token": request.GET['token'], "half_page": settings.CONTENT["half_page"]})
 
 
 def user_passwordreset_view(request):
@@ -288,7 +316,7 @@ def user_passwordreset_view(request):
     except User.DoesNotExist:
         return render_error(request, 404, "User does not exist")
     return render(request, "user/passwordreset.html",
-                  {"content_user": user, "token": request.GET['token']})
+                  {"content_user": user, "token": request.GET['token'], "half_page": settings.CONTENT["half_page"]})
 
 
 def user_passwordreset_request_view(request):
@@ -303,8 +331,8 @@ def user_passwordreset_request_view(request):
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
         user.send_passwordreset_mail(request)
-        return render(request, "user/passwordreset_request.html", {"sent_email": True})
-    return render(request, "user/passwordreset_request.html")
+        return render(request, "user/passwordreset_request.html", {"sent_email": True, "half_page": settings.CONTENT["half_page"]})
+    return render(request, "user/passwordreset_request.html", {"half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("ticketcontrol.add_user")
@@ -402,7 +430,7 @@ def edit_user_view(request, id):
                             if email_authorized:
                                 user.update_user(email=email)
                                 user.send_emailverification_mail(request)
-                                return render(request, "user/activate.html")
+                                return render(request, "user/activate.html", {"half_page": settings.CONTENT["half_page"]})
                             else:
                                 return render_error(request, 406, "Your E-Mail address is not white-listed")
                     else:
@@ -485,7 +513,7 @@ def create_group_view(request):
                 group.permissions.add(permission)
         group.save()
         return redirect("manage_groups")
-    return render(request, "user/group/create.html", {"permissions": Permission.objects.all()})
+    return render(request, "user/group/create.html", {"permissions": Permission.objects.all(), "half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("auth.view_group")
@@ -526,7 +554,8 @@ def edit_group_view(request, id):
     return render(request, "user/group/edit.html",
                   {"group": group, "group_permissions": groupPermissions, "permissions": Permission.objects.all(),
                    "can_change": can_edit, "can_delete": request.user.has_perm(
-                      "ticketcontrol.delete_group") and group.name != "admin" and group.name != "moderator" and group.name != "user"})
+                      "ticketcontrol.delete_group") and group.name != "admin" and group.name != "moderator" and group.name != "user",
+                   "half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("auth.delete_group")
@@ -549,8 +578,15 @@ def ticket_new_view(request):
             user = User.objects.get(id=request.user.id)
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
+        location = None
+        if settings.GENERAL["allow_location"]:
+            location = request.POST["location"]
+            if settings.GENERAL["force_location"] and not location:
+                return render_error(request, 406, "You have to fill in the location")
+        if not request.POST["title"] or not request.POST["description"]:
+            return render_error(request, 406, "You have to fill in title and description.")
         ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
-                                   Category.objects.get(id=request.POST["category"]), request.POST["location"])
+                                   Category.objects.get(id=request.POST["category"]), location)
         for attachment_id in request.POST.getlist("attachments"):
             try:
                 attachment = Attachment.objects.get(id=attachment_id)
@@ -561,8 +597,9 @@ def ticket_new_view(request):
         ticket.save()
         return redirect('/ticket/my')
     else:
-        category = Category.objects.all()
-        context = {"category": category}
+        context = {"categories": Category.objects.all(),
+                   "allow_location": settings.GENERAL["allow_location"],
+                   "force_location": settings.GENERAL["force_location"]}
         return render(request, "ticket/new.html", context)
 
 
@@ -774,17 +811,15 @@ def settings_view(request):
             content = settings_json['content']
             content['frontpage'] = request.POST['content.frontpage']
             content['half_page'] = request.POST['content.half-page']
+            content['imprint'] = request.POST['content.imprint']
+            content['privacy_and_policy'] = request.POST['content.privacy-and-policy']
 
             register = settings_json['register']
-            register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
+            register['allow_custom_username'] = request.POST.get("register.allow-custom-username", False) == "on"
             register['email_whitelist_enable'] = request.POST.get("register.email-whitelist-enable", False) == "on"
             register['email_whitelist'] = []
             for entry in request.POST.getlist('register.email-whitelist'):
                 register['email_whitelist'].append(entry)
-
-            legal = settings_json['legal']
-            legal['privacy_and_policy'] = request.POST['legal.privacy-and-policy']
-            legal['imprint'] = request.POST['legal.imprint']
 
             try:
                 settings_file = open("settings/settings.json", "w+")
@@ -913,8 +948,9 @@ def ticket_info_update(request, id):
             if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
                 if request.POST['title'] != "" and not None:
                     ticket.title = request.POST['title']
-                if request.POST['location'] != "" and not None:
-                    ticket.location = request.POST['location']
+                if settings.GENERAL["allow_location"]:
+                    if (request.POST['location'] != "" and not None) or not settings.GENERAL["force_location"]:
+                        ticket.location = request.POST['location']
                 if not request.POST['category'] in (0, "", "0", None):
                     ticket.category = Category.objects.get(id=request.POST['category'])
                 ticket.save()
@@ -961,3 +997,10 @@ def ticket_edit(request, id):
             return render_error(request, 403, "You aren't allowed to edit this ticket")
     else:
         return render_error(request, 405, "This site is only available for POST requests")
+
+def imprint_view(request):
+    return render(request, "imprint.html", {"imprint": settings.CONTENT["imprint"]})
+
+
+def privacy_and_policy_view(request):
+    return render(request, "privacy_and_policy.html", {"privacy_and_policy": settings.CONTENT["privacy_and_policy"]})

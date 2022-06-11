@@ -29,34 +29,57 @@
             <input type="password" id="password_retype" name="confirm_password"
                    class="form-control" required minlength="8"/>
         </div>
-        <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" value="" id="checkCustomUsername"
-                   name="checkCustomUsername" onclick="showCustomUsername()">
-            <label class="form-check-label" for="checkCustomUsername">Custom username</label>
-        </div>
-        <div class="form-outline mb-4" style="display:none" id="customUsername">
-            <input type="username" id="username" name="username" class="form-control" required/>
+        <div class="form-outline mb-4">
+            <label for="username">Username</label>
+            {% if allow_custom_username %}
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="" id="checkCustomUsername"
+                           name="checkCustomUsername" onclick="showCustomUsername()">
+                    <label class="form-check-label" for="checkCustomUsername">Custom username</label>
+                </div>
+            {% endif %}
+            <input type="username" id="username" name="username" class="form-control" oninput="check_username(false)" onchange="check_username()" required disabled/>
         </div>
         <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
     </form>
     Have a login? <a href="{% url 'login' %}">Login</a>
 <script>
     function showCustomUsername() {
-        var chboxs = document.getElementsByName("checkCustomUsername");
-        var vis = "none";
-        for (var i = 0; i < chboxs.length; i++) {
-            if (chboxs[i].checked) {
-                vis = "block";
-                break;
-            }
+        let checkbox = document.getElementById("checkCustomUsername");
+        if (checkbox.checked) {
+            document.getElementById("username").removeAttribute("disabled");
+        } else {
+            document.getElementById("username").setAttribute("disabled", "");
         }
-        document.getElementById("customUsername").style.display = vis;
     }
 
     async function update_username() {
-        var firstname = document.getElementById("firstname").value.substring(0, 1);
-        var lastname = document.getElementById("lastname").value;
+        let firstname = document.getElementById("firstname").value.substring(0, 1);
+        let lastname = document.getElementById("lastname").value;
         document.getElementById("username").value = firstname + "." + lastname;
+        check_username();
     }
+
+    async function check_username(autocorrect=true) {
+        let input = document.getElementById("username");
+        let username = input.value;
+        let res = await fetch("/user/check_username/"+username, {methd: "GET"});
+        if (res.status === 200) {
+            input.style.backgroundColor = null;
+        } else {
+            if (res.status === 409) {
+                if (autocorrect) {
+                    input.style.backgroundColor = null;
+                    username = await res.text();
+                    input.value = username;
+                } else {
+                    input.style.backgroundColor = "red";
+                }
+            } else {
+                input.style.backgroundColor = "red";
+            }
+        }
+    }
+    window.onload = check_username;
 </script>
 {% endblock %}

@@ -7,6 +7,7 @@ from django.db import models
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.conf import settings
 import os
 
 from .settings import EMAIL_HOST_USER
@@ -117,6 +118,7 @@ class User(BaseUser):
             'user': self,
             'domain': get_current_site(request).domain,
             'token': account_activation_token.make_token(self),
+            "half_page": settings.CONTENT["half_page"]
         })
         if new_user:
             subject = "Welcome to Ticketcontrol"
@@ -136,6 +138,7 @@ class User(BaseUser):
             'user': self,
             'domain': get_current_site(request).domain,
             'token': password_reset_token.make_token(self),
+            "half_page": settings.CONTENT["half_page"]
         })
         send_mail(
             subject="[Ticketcontrol] Reset your password",
@@ -208,7 +211,7 @@ class Ticket(models.Model):
         OPEN = 'Open'
         WAITING = 'Waiting'
 
-    def add_ticket(title, description, owner, category, location):
+    def add_ticket(title, description, owner, category, location=None):
         ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned', location=location)
         ticket.save()
         return ticket

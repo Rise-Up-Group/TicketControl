@@ -50,6 +50,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
     path('register/activate', activate_user_view, name='activate_user'),
+    path('user/check_username/<str:username>', check_username_view, name='check_username'),
     path('user/create', create_user_view, name='create_user'),
     path('user/<int:id>', user_details_view, name='user_details'),
     path('user/<int:id>/edit', edit_user_view, name='edit_user'),
@@ -70,6 +71,8 @@ urlpatterns = [
     path('category/create', create_category_view, name="create_category"),
     path('settings', settings_view, name='settings'),
     path('', dashboard_view, name='dashboard'),
+    path('imprint', imprint_view, name='imprint'),
+    path('privacy_and_policy', privacy_and_policy_view, name='privacy_and_policy')
 ]
 
 handler404 = "ticketcontrol.views.handler404"

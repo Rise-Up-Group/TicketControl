@@ -1,0 +1,9 @@
+{% extends 'main.html' %}
+
+{% block content %}
+    {% if privacy_and_policy %}
+        {{ privacy_and_policy|safe }}
+    {% else %}
+        default privacy_and_policy...
+    {% endif %}
+{% endblock %}

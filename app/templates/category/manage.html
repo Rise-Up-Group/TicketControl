@@ -22,13 +22,15 @@
         <tr>
             <th>Name</th>
             <th>Farbe</th>
+            <th></th>
         </tr>
         </thead>
         <tbody>
         {% for category in categories %}
             <tr onclick="window.location='{% url 'edit_category' id=category.id %}'">
                 <td>{{ category.name }}</td>
-                <td style="background-color: #{{ category.color }};">#{{ category.color }}</td>
+                <td>#{{ category.color }}</td>
+                <td style="background-color: #{{ category.color }}; width: 2em;"></td>
             </tr>
         {% endfor %}
         </tbody>
