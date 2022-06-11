@@ -353,6 +353,29 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="close-ticket" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ticket #{{ ticket.id }} schließen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="{% url 'close_ticket' id=ticket.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>Ticket schließen?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zurück</button>
+                        <button type="submit" class="btn btn-danger">Schließen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
     <script src="{% static '/js/edit.js' %}"></script>
     <script src="{% static '/js/userSearch.js' %}"></script>

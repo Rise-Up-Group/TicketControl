@@ -30,6 +30,7 @@ urlpatterns = [
     path('ticket/<int:id>', ticket_view, name="ticket_view"),
     path('ticket/<int:id>/comment/add', ticket_comment_add, name="add_comment_to_ticket"),
     path('ticket/<int:id>/status/update', ticket_status_update, name="update_status_ticket"),
+    path('ticket/<int:id>/close', ticket_close, name="close_ticket"),
     path('ticket/<int:id>/hide', ticket_hide, name="hide_ticket"),
     path('ticket/<int:id>/unhide', ticket_unhide, name="unhide_ticket"),
     path('ticket/<int:id>/delete', ticket_delete, name="delete_ticket"),
