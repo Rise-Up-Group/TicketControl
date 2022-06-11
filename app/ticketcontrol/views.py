@@ -121,7 +121,8 @@ def manage_tickets_view(request):
             "GET": request.GET,
             "types": ["is", "is_not", "contain", "contain_not"],
             "categories": Category.objects.all(),
-            "status_choices": Ticket.StatusChoices
+            "status_choices": Ticket.StatusChoices,
+            "allow_location": settings.GENERAL["allow_location"]
         }
         if "category" in request.GET and request.GET["category"]:
             context["category_id"] = int(request.GET["category"])

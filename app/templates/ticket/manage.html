@@ -52,18 +52,21 @@
                             <input type="text" name="title" id="filter-title" value="{{ GET.title }}">
                         </div>
                         <br>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label class="input-group-text" for="filter-location">Standort:</label>
+                        {% if allow_location %}
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-location">Standort:</label>
+                                </div>
+                                <select id="filter-title-type" name="location_type">
+                                    {% for type in types %}
+                                        <option value="{{ type }}"{% if GET.location_type == type %}
+                                                selected{% endif %}>{{ type }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="text" name="location" id="filter-location" value="{{ GET.location }}">
                             </div>
-                            <select id="filter-title-type" name="location_type">
-                                {% for type in types %}
-                                    <option value="{{ type }}"{% if GET.location_type == type %}
-                                            selected{% endif %}>{{ type }}</option>
-                                {% endfor %}
-                            </select>
-                            <input type="text" name="location" id="filter-location" value="{{ GET.location }}">
-                        </div>
+                            <br>
+                        {% endif %}
                         <div class="dropdown">
                             <div class="input-group">
                                 <div class="input-group-prepend">
@@ -117,9 +120,9 @@
                                        onclick="updateHiddenRadiobuttons()" style="display: none;"
                                        {% if GET.hidden == "False" %}checked{% endif %}>
                                 <div class="input-group-append">
-                                <label class="btn" for="filter-hidden-none">None</label>
-                                <label class="btn" for="filter-hidden-false">Versteckt</label>
-                                <label class="btn" for="filter-hidden-true">Sichtbar</label>
+                                    <label class="btn" for="filter-hidden-none">None</label>
+                                    <label class="btn" for="filter-hidden-false">Versteckt</label>
+                                    <label class="btn" for="filter-hidden-true">Sichtbar</label>
                                 </div>
                             </div>
                             <br>
@@ -148,8 +151,10 @@
                             {% if not GET.title or GET.title_type != "is" %}
                                 <th>Titel</th>
                             {% endif %}
-                            {% if not GET.location or GET.location_type != "is" %}
-                                <th>Standort</th>
+                            {% if allow_location %}
+                                {% if not GET.location or GET.location_type != "is" %}
+                                    <th>Standort</th>
+                                {% endif %}
                             {% endif %}
                             {% if not GET.owner %}
                                 <th>Owner</th>
@@ -176,8 +181,10 @@
                                 {% if not GET.title or GET.title_type != "is" %}
                                     <td>{{ ticket.title }}</td>
                                 {% endif %}
-                                {% if not GET.location or GET.location_type != "is" %}
-                                    <td>{{ ticket.location }}</td>
+                                {% if allow_location %}
+                                    {% if not GET.location or GET.location_type != "is" %}
+                                        <td>{{ ticket.location }}</td>
+                                    {% endif %}
                                 {% endif %}
                                 {% if not GET.owner %}
                                     <td>
@@ -211,18 +218,19 @@
     </div>
     <script src="{% static '/js/userSearch.js' %}"></script>
     <script>
-    function updateHiddenRadiobuttons() {
-        document.querySelectorAll('input[type="radio"][name="hidden"]').forEach(radio => {
-            let label = document.querySelector('label[for="' + radio.id + '"]');
-            if (radio.checked) {
-                label.classList.remove("btn-outline-secondary");
-                label.classList.add("btn-primary");
-            } else {
-                label.classList.remove("btn-primary");
-                label.classList.add("btn-outline-secondary");
-            }
-        })
-    }
-    window.onload = updateHiddenRadiobuttons;
+        function updateHiddenRadiobuttons() {
+            document.querySelectorAll('input[type="radio"][name="hidden"]').forEach(radio => {
+                let label = document.querySelector('label[for="' + radio.id + '"]');
+                if (radio.checked) {
+                    label.classList.remove("btn-outline-secondary");
+                    label.classList.add("btn-primary");
+                } else {
+                    label.classList.remove("btn-primary");
+                    label.classList.add("btn-outline-secondary");
+                }
+            })
+        }
+
+        window.onload = updateHiddenRadiobuttons;
     </script>
 {% endblock %}
