@@ -10,11 +10,11 @@
             <input id="title" type="text" class="form-control" placeholder="{{ ticket.title }}"
                    value="{{ ticket.title }}"
                    oninput="show_update_ticket_warning()">
-            <div class="input-group-append">
+            <div class="input-group-append" id="ticket-options">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">options
                 </button>
-                <div class="dropdown-menu">
+                <div class="dropdown-menu" id="ticket-options-dropdown">
                     {% if perms.ticketcontrol.change_status %}
                         <a class="dropdown-item" type="button" data-toggle="modal" data-target="#change-status">Status
                             ändern</a>
@@ -402,5 +402,13 @@
             document.getElementById("new_location").value = location;
             document.getElementById("new_category").value = category;
         }
+
+        async function checkOptionsDropdown() {
+            if (document.getElementById("ticket-options-dropdown").childElementCount === 0) {
+                document.getElementById("ticket-options").remove();
+            }
+        }
+
+        window.onload = checkOptionsDropdown;
     </script>
 {% endblock %}

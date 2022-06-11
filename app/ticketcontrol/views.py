@@ -57,9 +57,9 @@ def dashboard_view(request):
 @login_required()
 def mytickets_view(request):
     own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
-    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id,
-                                                                                moderators=request.user.id, hidden=True)
-    mod_tickets = Ticket.objects.filter(moderators=request.user.id).exclude(owner=request.user.id, hidden=True)
+    part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id,
+                                                                                moderators=request.user.id)
+    mod_tickets = Ticket.objects.filter(moderators=request.user.id, hidden=False).exclude(owner=request.user.id)
     context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "ticket/my.html", context)
 
@@ -139,8 +139,9 @@ def ticket_view(request, id):
         ticket = Ticket.objects.get(pk=id)
         if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
             return render_error(request, 404, "Ticket does not exist")
-        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm(
-                "ticketcontrol.view_ticket"):
+
+        if ticket.owner.id != request.user.id and not User.objects.get(id=request.user.id) in ticket.participating.all() \
+                and not request.user.has_perm("ticketcontrol.view_ticket"):
             return render_error(request, 404, "Ticket does not exist")
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
