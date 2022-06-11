@@ -48,6 +48,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
     path('register/activate', activate_user_view, name='activate_user'),
+    path('user/check_username/<str:username>', check_username_view, name='check_username'),
     path('user/create', create_user_view, name='create_user'),
     path('user/<int:id>', user_details_view, name='user_details'),
     path('user/<int:id>/edit', edit_user_view, name='edit_user'),

@@ -35,11 +35,10 @@
                                     <h2 class="text-primary display-4">Registrierung</h2>
                                     <div class="form-outline mb-4">
                                         <div class="mb-4">
-                                            <input type="checkbox" id="register.allow-custom-nickname"
-                                                   name="register.allow-custom-nickname"
-                                                   {% if settings.register.allow_custom_nickname %}checked{% endif %}>
-                                            <label for="register.allow-custom-nickname">Allow custom
-                                                nickname</label><br>
+                                            <input type="checkbox" id="register.allow-custom-username"
+                                                   name="register.allow-custom-username"
+                                                   {% if settings.register.allow_custom_username %}checked{% endif %}>
+                                            <label for="register.allow-custom-username">Allow custom username</label><br>
                                             <input type="checkbox" id="register.email-whitelist-enable"
                                                    name="register.email-whitelist-enable"
                                                    {% if settings.register.email_whitelist_enable %}checked{% endif %}>

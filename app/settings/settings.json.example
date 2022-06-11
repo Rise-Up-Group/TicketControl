@@ -14,7 +14,7 @@
     "privacy_and_policy": ""
   },
   "register": {
-    "allow_custom_nickname": true,
+    "allow_custom_username": true,
     "email_whitelist_enable": false,
     "email_whitelist": []
   },

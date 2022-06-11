@@ -136,8 +136,17 @@ def register_view(request):
             if len(password) < 8:
                 return render_error(request, 411, "Password must be at least 8 characters long")
             email = request.POST['email']
-            if not User.objects.filter(email=email).exists() and not User.objects.filter(
-                    username=request.POST['username']).exists():
+            firstname = request.POST['firstname']
+            lastname = request.POST['lastname']
+            if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
+                username = request.POST['username']
+            else:
+                username = firstname[0:1] + "." + lastname
+            res = check_username(username)
+            if res["status"] == 409:
+                username = res["username"]
+
+            if not User.objects.filter(email=email).exists() and not res["status"] == 406:
                 email_authorized = False
                 if not settings.REGISTER['email_whitelist_enable']:
                     email_authorized = True
@@ -149,8 +158,7 @@ def register_view(request):
                             email_authorized = True
                             break
                 if email_authorized:
-                    user = User.add_user(None, request.POST['firstname'], request.POST['lastname'],
-                                         request.POST['username'], password, groups=None, is_active=True,
+                    user = User.add_user(None, firstname, lastname, username, password, groups=None, is_active=True,
                                          email_confirmed=False)
                     user.new_email = request.POST['email']
                     user.save()
@@ -166,7 +174,25 @@ def register_view(request):
         else:
             # Should not happen anyway
             return render_error(request, 409, "Passwords do not match")
-    return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"]})
+    return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"],
+                                                  "allow_custom_username": settings.REGISTER["allow_custom_username"]})
+
+def check_username(username):
+    if User.objects.filter(username=username).exists():
+        i = 1
+        while User.objects.filter(username=username+str(i)).exists() and i < 200:
+            i += 1
+        if User.objects.filter(username=username+str(i)).exists():
+            return {"status": 406}
+        return {"status": 409, "username": username+str(i)}
+    return {"status": 200}
+
+def check_username_view(request, username):
+    res = check_username(username)
+    content = ""
+    if res["status"] == 409:
+        content = res["username"]
+    return HttpResponse(status=res["status"], content=content)
 
 
 def activate_user_view(request):
@@ -713,7 +739,7 @@ def settings_view(request):
             content['privacy_and_policy'] = request.POST['content.privacy-and-policy']
 
             register = settings_json['register']
-            register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
+            register['allow_custom_username'] = request.POST.get("register.allow-custom-username", False) == "on"
             register['email_whitelist_enable'] = request.POST.get("register.email-whitelist-enable", False) == "on"
             register['email_whitelist'] = []
             for entry in request.POST.getlist('register.email-whitelist'):
