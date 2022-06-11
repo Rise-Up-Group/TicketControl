@@ -31,7 +31,20 @@
 
 }
 
+.card-body {
+    overflow: scroll;
+}
 
+input[type="text"] {
+    min-width: 8em;
+}
+.input-group-append {
+    flex-wrap: wrap;
+}
+
+.btn {
+    margin: 0;
+}
 .choose-file-button {
     flex-shrink: 0;
     background-color: rgba(255, 255, 255, 0.04);
@@ -64,6 +77,10 @@
 
 .mt-100 {
     margin-top: 100px
+}
+
+.nav-link {
+    cursor: pointer;
 }
 
 option.checkbox:before {
