@@ -24,7 +24,6 @@ settings_file.close()
 
 CONTENT = settings['content']
 REGISTER = settings['register']
-LEGAL = settings['legal']
 GENERAL = settings['general']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

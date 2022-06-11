@@ -68,6 +68,8 @@ urlpatterns = [
     path('category/create', create_category_view, name="create_category"),
     path('settings', settings_view, name='settings'),
     path('', dashboard_view, name='dashboard'),
+    path('imprint', imprint_view, name='imprint'),
+    path('privacy_and_policy', privacy_and_policy_view, name='privacy_and_policy')
 ]
 
 handler404 = "ticketcontrol.views.handler404"

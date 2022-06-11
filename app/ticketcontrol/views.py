@@ -50,7 +50,7 @@ def dashboard_view(request):
         context = {'tickets': {'own': own_tickets, 'part': part_tickets}}
         return render(request, "dashboard.html", context)
     else:
-        return render(request, "home.html")
+        return render(request, "home.html", {"content": settings.CONTENT['frontpage']})
 
 
 @login_required()
@@ -123,7 +123,7 @@ def login_view(request):
             error = "Wrong username or password"
     if request.user.is_authenticated:
         return redirect("dashboard")
-    return render(request, "user/login.html", {"error": error, "next": next})
+    return render(request, "user/login.html", {"error": error, "next": next, "half_page": settings.CONTENT["half_page"]})
 
 
 def register_view(request):
@@ -156,7 +156,7 @@ def register_view(request):
                         User.send_emailverification_mail(user, request)
                     except SMTPRecipientsRefused:
                         return render_error(request, 500, "Unable to send verification email")
-                    return render(request, "user/activate.html", {'action': 'activate'})
+                    return render(request, "user/activate.html", {'action': 'activate', "half_page": settings.CONTENT["half_page"]})
                 else:
                     return render_error(request, 406, "Your E-Mail address is not white-listed")
             else:
@@ -164,7 +164,7 @@ def register_view(request):
         else:
             # Should not happen anyway
             return render_error(request, 409, "Passwords do not match")
-    return render(request, "user/register.html")
+    return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"]})
 
 
 def activate_user_view(request):
@@ -192,7 +192,7 @@ def activate_user_view(request):
         user = User.objects.get(id=request.GET['user-id'])
     except User.DoesNotExist:
         return render_error(request, 404, "User does not exist")
-    return render(request, "user/activate.html", {"content_user": user, "token": request.GET['token']})
+    return render(request, "user/activate.html", {"content_user": user, "token": request.GET['token'], "half_page": settings.CONTENT["half_page"]})
 
 
 def user_passwordreset_view(request):
@@ -216,7 +216,7 @@ def user_passwordreset_view(request):
     except User.DoesNotExist:
         return render_error(request, 404, "User does not exist")
     return render(request, "user/passwordreset.html",
-                  {"content_user": user, "token": request.GET['token']})
+                  {"content_user": user, "token": request.GET['token'], "half_page": settings.CONTENT["half_page"]})
 
 
 def user_passwordreset_request_view(request):
@@ -231,8 +231,8 @@ def user_passwordreset_request_view(request):
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
         user.send_passwordreset_mail(request)
-        return render(request, "user/passwordreset_request.html", {"sent_email": True})
-    return render(request, "user/passwordreset_request.html")
+        return render(request, "user/passwordreset_request.html", {"sent_email": True, "half_page": settings.CONTENT["half_page"]})
+    return render(request, "user/passwordreset_request.html", {"half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("ticketcontrol.add_user")
@@ -329,7 +329,7 @@ def edit_user_view(request, id):
                             if email_authorized:
                                 user.update_user(email=email)
                                 user.send_emailverification_mail(request)
-                                return render(request, "user/activate.html")
+                                return render(request, "user/activate.html", {"half_page": settings.CONTENT["half_page"]})
                             else:
                                 return render_error(request, 406, "Your E-Mail address is not white-listed")
                     else:
@@ -411,7 +411,7 @@ def create_group_view(request):
                 group.permissions.add(permission)
         group.save()
         return redirect("manage_groups")
-    return render(request, "user/group/create.html", {"permissions": Permission.objects.all()})
+    return render(request, "user/group/create.html", {"permissions": Permission.objects.all(), "half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("auth.view_group")
@@ -452,7 +452,8 @@ def edit_group_view(request, id):
     return render(request, "user/group/edit.html",
                   {"group": group, "group_permissions": groupPermissions, "permissions": Permission.objects.all(),
                    "can_change": can_edit, "can_delete": request.user.has_perm(
-                      "ticketcontrol.delete_group") and group.name != "admin" and group.name != "moderator" and group.name != "user"})
+                      "ticketcontrol.delete_group") and group.name != "admin" and group.name != "moderator" and group.name != "user",
+                   "half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("auth.delete_group")
@@ -699,6 +700,7 @@ def settings_view(request):
             content['frontpage'] = request.POST['content.frontpage']
             content['half_page'] = request.POST['content.half-page']
             content['imprint'] = request.POST['content.imprint']
+            content['privacy_and_policy'] = request.POST['content.privacy_and_policy']
 
             register = settings_json['register']
             register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
@@ -706,9 +708,6 @@ def settings_view(request):
             register['email_whitelist'] = []
             for entry in request.POST.getlist('register.email-whitelist'):
                 register['email_whitelist'].append(entry)
-
-            legal = settings_json['legal']
-            legal['privacy_and_policy'] = request.POST['legal.privacy-and-policy']
 
             try:
                 settings_file = open("settings/settings.json", "w+")
@@ -867,3 +866,10 @@ def ticket_edit(request, id):
     else:
         return render_error(request, 405, "This site is only available for POST requests")
 
+
+def imprint_view(request):
+    return render(request, "imprint.html", {"imprint": settings.CONTENT["imprint"]})
+
+
+def privacy_and_policy_view(request):
+    return render(request, "privacy_and_policy.html", {"privacy_and_policy": settings.CONTENT["privacy_and_policy"]})

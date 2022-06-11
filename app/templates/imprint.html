@@ -1,9 +1,9 @@
 {% extends 'main.html' %}
 
 {% block content %}
-    {% if content %}
-        {{ content|safe }}
+    {% if imprint %}
+        {{ imprint|safe }}
     {% else %}
-        default start page...
+        default imprint...
     {% endif %}
 {% endblock %}
