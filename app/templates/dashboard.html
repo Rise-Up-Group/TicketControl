@@ -8,7 +8,7 @@
     <br>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5>Meine Profil</h5>
@@ -49,7 +49,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5>Meine Tickets</h5>
@@ -66,7 +66,7 @@
                                     <th scope="row">Id</th>
                                     <th>Kategorie</th>
                                     <th>Titel</th>
-                                    <th>Moderator</th>
+                                    <th>Moderators</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,7 +76,7 @@
                                     <td>{{ ticket.category }}</td>
                                     <td>{{ ticket.title }}</td>
                                     <td>
-                                        {% for moderator in ticket.moderator.all %}
+                                        {% for moderator in ticket.moderators.all %}
                                             <a href="{% url 'user_details' id=moderator.id %}">{{ moderator.username }}</a>
                                             {% if not forloop.last %},{% endif %}
                                         {% endfor %}
@@ -88,9 +88,9 @@
                     {% else %}
                         <p>
                             Aktuell sind keine eigenen Tickets vorhanden!
-                            <a type="button" href="{% url 'create_ticket' %}">Ticket erstellen?</a>
                         </p>
                     {% endif %}
+                    <a type="button" href="{% url 'create_ticket' %}">Ticket erstellen</a>
                     {% if tickets.part|length > 0 %}
                         <p class="font-weight-bold">Teilnahme an Tickets</p>
                         <table class="table table-sm table-hover">

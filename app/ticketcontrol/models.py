@@ -151,11 +151,11 @@ class User(BaseUser):
         for ticket in tickets:
             ticket.owner = ghost
             ticket.save()
-        mod_tickets = Ticket.objects.filter(moderator=self.id)
+        mod_tickets = Ticket.objects.filter(moderators=self.id)
         for ticket in mod_tickets:
-            for mod in ticket.moderator.all():
+            for mod in ticket.moderators.all():
                 if mod.id == self.id:
-                    ticket.moderator.remove(mod)
+                    ticket.moderators.remove(mod)
                     ticket.save()
         comments = self.comment_set.all()
         for comment in comments:
@@ -251,10 +251,10 @@ class Ticket(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="owner")
+    owner = models.ForeignKey(User, related_name="tickets", on_delete=models.DO_NOTHING)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
-    participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
-    moderator = models.ManyToManyField("User", related_name="moderator", blank=True)  # TODO: 'moderatorS'
+    participating = models.ManyToManyField("User", related_name="participating", blank=True)  # does NOT contain owner
+    moderators = models.ManyToManyField("User", related_name="moderating", blank=True)
     hidden = models.BooleanField(default=False)
     location = models.CharField(max_length=255, null=True, blank=True)
 

@@ -15,6 +15,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Q
 
 from django.views.static import serve
 
@@ -56,10 +57,78 @@ def dashboard_view(request):
 @login_required()
 def mytickets_view(request):
     own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
-    part_tickets = Ticket.objects.filter(participating=request.user.id).exclude(owner=request.user.id, moderator=request.user.id, hidden=False)
-    mod_tickets = Ticket.objects.filter(moderator=request.user.id).exclude(owner=request.user.id, hidden=False)
+    part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id,
+                                                                                moderators=request.user.id)
+    mod_tickets = Ticket.objects.filter(moderators=request.user.id, hidden=False).exclude(owner=request.user.id)
     context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
-    return render(request, "ticket/manage.html", context)
+    return render(request, "ticket/my.html", context)
+
+
+def handle_filter(GET, objects, name):
+    if name in GET and GET[name] and GET[name] != "0":
+        filter = {}
+        if not (name + "_type" in GET and GET[name + "_type"]) \
+                or GET[name + "_type"] == "is":
+            filter[name] = GET[name]
+            print("is")
+            return objects.filter(**filter)
+        elif GET[name + "_type"] == "is_not":
+            filter[name] = GET[name]
+            return objects.exclude(**filter)
+        elif GET[name + "_type"] == "contain":
+            filter[name + "__contains"] = GET[name]
+            return objects.filter(**filter)
+        elif GET[name + "_type"] == "contain_not":
+            filter[name + "__contains"] = GET[name]
+            return objects.exclude(**filter)
+    return objects
+
+
+def handle_user_filter(GET, objects, name):
+    if name in GET and GET[name]:
+        for username in GET[name].split(","):
+            filter = {}
+            filter[name] = User.objects.get(username=username.strip()).id
+            objects = objects.filter(**filter)
+    return objects
+
+
+@login_required()
+def manage_tickets_view(request):
+    try:
+        tickets = Ticket.objects.filter(Q(owner=request.user.id) |
+                                        Q(participating=request.user.id) |
+                                        Q(moderators=request.user.id)).distinct()
+
+        tickets = handle_filter(request.GET, tickets, "status")
+        tickets = handle_filter(request.GET, tickets, "category")
+        tickets = handle_filter(request.GET, tickets, "title")
+        tickets = handle_filter(request.GET, tickets, "location")
+        if request.user.has_perm("ticketcontrol.unhide_ticket"):
+            tickets = handle_filter(request.GET, tickets, "hidden")
+        else:
+            tickets = tickets.filter(hidden=False)
+        tickets = handle_user_filter(request.GET, tickets, "owner")
+        tickets = handle_user_filter(request.GET, tickets, "participating")
+        tickets = handle_user_filter(request.GET, tickets, "moderators")
+
+        if not request.user.has_perm("ticketcontrol.view_ticket"):
+            tickets.filter(Q(owner=request.user.id, hidden=False) | Q(participating=request.user.id, hidden=False) | Q(
+                moderators=request.user.id))
+
+        context = {
+            "tickets": tickets,
+            "GET": request.GET,
+            "types": ["is", "is_not", "contain", "contain_not"],
+            "categories": Category.objects.all(),
+            "status_choices": Ticket.StatusChoices,
+            "allow_location": settings.GENERAL["allow_location"]
+        }
+        if "category" in request.GET and request.GET["category"]:
+            context["category_id"] = int(request.GET["category"])
+        return render(request, "ticket/manage.html", context)
+    except Category.DoesNotExist:
+        return render_error(request, 404, "Category does not exist")
 
 
 @login_required()
@@ -70,12 +139,14 @@ def ticket_view(request, id):
         ticket = Ticket.objects.get(pk=id)
         if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
             return render_error(request, 404, "Ticket does not exist")
-        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.view_ticket"):
+
+        if ticket.owner.id != request.user.id and not User.objects.get(id=request.user.id) in ticket.participating.all() \
+                and not request.user.has_perm("ticketcontrol.view_ticket"):
             return render_error(request, 404, "Ticket does not exist")
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
         categories = Category.objects.all()
-        context = {"ticket": ticket, "moderators": ticket.moderator.all(),
+        context = {"ticket": ticket, "moderators": ticket.moderators.all(),
                    "participants": ticket.participating.all(), "comments": comments, "categories": categories}
         return render(request, "ticket/detail.html", context)
     except Ticket.DoesNotExist:
@@ -142,7 +213,7 @@ def register_view(request):
                 else:
                     for whitelist_entry in settings.REGISTER['email_whitelist']:
                         if whitelist_entry.startswith("@"):
-                            whitelist_entry = ".*"+whitelist_entry
+                            whitelist_entry = ".*" + whitelist_entry
                         if re.fullmatch(whitelist_entry, email) is not None:
                             email_authorized = True
                             break
@@ -260,7 +331,8 @@ def create_user_view(request):
 @permission_required("ticketcontrol.view_user")
 def manage_users_view(request):
     return render(request, "user/manage.html",
-                  {"users": User.objects.all().exclude(username="ghost"), "can_create": request.user.has_perm("ticketcontrol.create_user"),
+                  {"users": User.objects.all().exclude(username="ghost"),
+                   "can_create": request.user.has_perm("ticketcontrol.create_user"),
                    "can_change": request.user.has_perm("ticketcontrol.change_user"),
                    "can_delete": request.user.has_perm("ticketcontrol.delete_user")})
 
@@ -389,7 +461,8 @@ def delete_user_view(request, id):
 @permission_required("auth.view_group")
 def manage_groups_view(request):
     return render(request, "user/group/manage.html",
-                  {"groups": Group.objects.all().order_by("id"), "can_create": request.user.has_perm("ticketcontrol.create_user")})
+                  {"groups": Group.objects.all().order_by("id"),
+                   "can_create": request.user.has_perm("ticketcontrol.create_user")})
 
 
 # noinspection PyPep8Naming
@@ -502,9 +575,10 @@ def ticket_comment_add(request, id):
             return render_error(request, 404, "Ticket does not exist")
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
-        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm("ticketcontrol.view_ticket"):
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm(
+                "ticketcontrol.view_ticket"):
             return render_error(request, 404, "Ticket does not exist")
-        
+
         comment = ticket.add_comment(request.POST["comment"], user)
         for attachment_id in request.POST.getlist("attachments"):
             try:
@@ -533,8 +607,8 @@ def ticket_participant_add(request, id, username=None):
             return render_error(request, 404, "Ticket does not exist")
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
-        #except DatabaseError:
-            #return render_error(request, 409, "Database error") # TODO
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
     return render_error(request, 405, "This page is only for post requests")
 
 
@@ -545,7 +619,7 @@ def ticket_moderator_add(request, id, username=None):
             return render_error(request, 406, "Username is required")
         try:
             ticket = Ticket.objects.get(id=id)
-            ticket.moderator.add(User.objects.get(username=username))
+            ticket.moderators.add(User.objects.get(username=username))
             if ticket.status == "Unassigned":
                 ticket.set_status("Assigned")
                 ticket.save()
@@ -554,8 +628,8 @@ def ticket_moderator_add(request, id, username=None):
             return render_error(request, 404, "Ticket does not exist")
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
-        #except DatabaseError:
-            #return render_error(request, 409, "Database error") # TODO
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
     return render_error(request, 405, "This page is only for post requests")
 
 
@@ -580,7 +654,7 @@ def attachment_access_control(request, id, name=None):
             if request.user.id == participant.id:
                 authorized = True
         if not authorized:
-            for moderator in attachment.ticket.moderator.all():
+            for moderator in attachment.ticket.moderators.all():
                 if request.user.id == moderator.id:
                     authorized = True
     if authorized:
@@ -655,7 +729,7 @@ def delete_attachment(request, id):
             return render_error(request, 403, "You aren't allowed to delete this attachment")
     return render_error(request, 405, "This site is only available for post requests")
 
-          
+
 @permission_required("ticketcontrol.change_ticket")
 def ticket_status_update(request, id):
     if request.method == "POST":
@@ -665,8 +739,8 @@ def ticket_status_update(request, id):
             return redirect("ticket_view", id=id)
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
-        #except DatabaseError:
-            #return render_error(request, 409, "Database error") # TODO
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
     return render_error(request, 400, "This site is only available for post requests")
 
 
@@ -692,13 +766,13 @@ def settings_view(request):
             email_server['smtp_use_tls'] = request.POST.get("email-server.smtp-use-tls", False) == "on"
             email_server['smtp_use_ssl'] = request.POST.get("email-server.smtp-use-ssl", False) == "on"
             email_server['smtp_user'] = request.POST['email-server.smtp-user']
-            if request.POST['email-server.smtp-password'] is not None and request.POST['email-server.smtp-password'] != "":
+            if request.POST['email-server.smtp-password'] is not None and request.POST[
+                'email-server.smtp-password'] != "":
                 email_server['smtp_password'] = request.POST['email-server.smtp-password']
 
             content = settings_json['content']
             content['frontpage'] = request.POST['content.frontpage']
             content['half_page'] = request.POST['content.half-page']
-            content['imprint'] = request.POST['content.imprint']
 
             register = settings_json['register']
             register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
@@ -709,6 +783,7 @@ def settings_view(request):
 
             legal = settings_json['legal']
             legal['privacy_and_policy'] = request.POST['legal.privacy-and-policy']
+            legal['imprint'] = request.POST['legal.imprint']
 
             try:
                 settings_file = open("settings/settings.json", "w+")
@@ -732,6 +807,7 @@ def create_category_view(request):
         return redirect("manage_categories")
     else:
         return render(request, "category/create.html")
+
 
 @permission_required("ticketcontrol.view_category")
 def edit_category_view(request, id):
@@ -768,7 +844,8 @@ def delete_category_view(request, id):
 @permission_required("ticketcontrol.view_category")
 def manage_categories_view(request):
     return render(request, "category/manage.html",
-                  {"categories": Category.objects.all(), "can_create": request.user.has_perm("ticketcontrol.create_category")})
+                  {"categories": Category.objects.all(),
+                   "can_create": request.user.has_perm("ticketcontrol.create_category")})
 
 
 @permission_required("ticketcontrol.hide_ticket")
@@ -780,8 +857,8 @@ def ticket_hide(request, id):
             return redirect("dashboard")
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
-        #except DatabaseError:
-            #return render_error(request, 409, "Database error") # TODO
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
     return render_error(request, 405, "This site is only available for POST requests")
 
 
@@ -794,8 +871,8 @@ def ticket_unhide(request, id):
             return redirect("ticket_view", id=id)
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
-        #except DatabaseError:
-            #return render_error(request, 409, "Database error") # TODO
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
     return render_error(request, 405, "This site is only available for POST requests")
 
 
@@ -808,10 +885,11 @@ def ticket_delete(request, id):
             return redirect("dashboard")
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
-        #except DatabaseError:
-            #return render_error(request, 409, "Database error") # TODO
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
     else:
         return render_error(request, 405, "This site is only available for POST requests")
+
 
 def ticket_info_update(request, id):
     if request.method == "POST":
@@ -826,12 +904,13 @@ def ticket_info_update(request, id):
                     ticket.category = Category.objects.get(id=request.POST['category'])
                 ticket.save()
             else:
-                return render_error(request, 403, "You aren't allowed to edit tickets or you aren't the owner of the ticket")
+                return render_error(request, 403,
+                                    "You aren't allowed to edit tickets or you aren't the owner of the ticket")
             return redirect("ticket_view", id=id)
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket doesn't exist")
-        #except DatabaseError:
-            #return render_error(request, 409, "Database error") # TODO
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
     else:
         return render_error(request, 405, "This site is only available for POST requests")
 
@@ -847,7 +926,8 @@ def edit_comment(request, id):
             comment.save()
             return redirect('ticket_view', id=comment.ticket_id)
         else:
-            return render_error(request, 403, "You aren't allowed to edit comments or you aren't the owner of this comment")
+            return render_error(request, 403,
+                                "You aren't allowed to edit comments or you aren't the owner of this comment")
     else:
         return render_error(request, 405, "This site is only available for POST requests")
 
@@ -866,4 +946,3 @@ def ticket_edit(request, id):
             return render_error(request, 403, "You aren't allowed to edit this ticket")
     else:
         return render_error(request, 405, "This site is only available for POST requests")
-

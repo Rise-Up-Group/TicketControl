@@ -15,11 +15,9 @@
                         <a class="dropdown-toggle nav-link" id="dropdownMenu2" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">Ticket</a>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                            <a class="dropdown-item" href="/ticket/new">Open Ticket</a>
-                            <a class="dropdown-item" href="/ticket/my">My Tickets</a>
-                            {% if perms.ticketcontrol.change_ticket %}
-                                <a class="dropdown-item" href="/ticket/manage">Manage Tickets</a>
-                            {% endif %}
+                            <a class="dropdown-item" href="{% url 'create_ticket' %}">Open Ticket</a>
+                            <a class="dropdown-item" href="{% url 'my_tickets' %}">My Tickets</a>
+                            <a class="dropdown-item" href="{% url 'manage_tickets' %}">Manage Tickets</a>
                         </div>
                     </div>
                 </li>

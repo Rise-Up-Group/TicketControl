@@ -10,11 +10,11 @@
             <input id="title" type="text" class="form-control" placeholder="{{ ticket.title }}"
                    value="{{ ticket.title }}"
                    oninput="show_update_ticket_warning()">
-            <div class="input-group-append">
+            <div class="input-group-append" id="ticket-options">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">options
                 </button>
-                <div class="dropdown-menu">
+                <div class="dropdown-menu" id="ticket-options-dropdown">
                     {% if perms.ticketcontrol.change_status %}
                         <a class="dropdown-item" type="button" data-toggle="modal" data-target="#change-status">Status
                             ändern</a>
@@ -92,7 +92,8 @@
                             <div class="input-group-text">@</div>
                         </div>
                         <input type="text" class="form-control" id="search-user" placeholder="Username"
-                               list="user-search-dropdown-menu" oninput="search_and_update_usernames(this.value);"
+                               list="user-search-dropdown-menu"
+                               oninput="search_and_update_usernames(this.value, 'user-search-dropdown-menu', false);"
                                onchange="add_user(`participants`, this.value);">
                     </div>
                     <datalist id="user-search-dropdown-menu">
@@ -354,41 +355,22 @@
     </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
     <script src="{% static '/js/edit.js' %}"></script>
+    <script src="{% static '/js/userSearch.js' %}"></script>
     <script>
-        async function search_and_update_usernames(typed_username) {
-            const users = await (await fetch(`{% url 'user_live_search' %}${typed_username || "_"}`)).json();
-            const dropdown = $("#user-search-dropdown-menu");
-            dropdown.children().remove();
-            for (user of users) {
-                dropdown.append($(`<option>${user.username}</option>`));
-            }
-        }
-
-        var participantToken, moderatorToken;
-
-        async function get_token() {
-            let tokenResponse = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}`);
-            participantToken = new FormData();
-            participantToken.append("csrfmiddlewaretoken", await tokenResponse.text());
-            tokenResponse = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}`);
-            moderatorToken = new FormData();
-            moderatorToken.append("csrfmiddlewaretoken", await tokenResponse.text());
-        }
-
-        get_token();
 
         async function add_user(mode, username) {
             if (username !== "") {
                 let response;
+                let token = document.querySelector('[name=csrfmiddlewaretoken]').value;
                 if (mode === "participants") {
                     response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {
                         method: "POST",
-                        body: participantToken
+                        headers: {'X-CSRFToken': token}
                     });
                 } else if (mode === "moderators") {
                     response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {
                         method: "POST",
-                        body: moderatorToken
+                        headers: {'X-CSRFToken': token}
                     });
                 }
                 if (response.ok) {
@@ -413,5 +395,13 @@
             document.getElementById("new_location").value = location;
             document.getElementById("new_category").value = category;
         }
+
+        async function checkOptionsDropdown() {
+            if (document.getElementById("ticket-options-dropdown").childElementCount === 0) {
+                document.getElementById("ticket-options").remove();
+            }
+        }
+
+        window.onload = checkOptionsDropdown;
     </script>
 {% endblock %}

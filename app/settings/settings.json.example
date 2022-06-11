@@ -10,7 +10,6 @@
   "content": {
     "frontpage": "",
     "half_page": "",
-    "imprint": ""
   },
   "register": {
     "allow_custom_nickname": true,
@@ -18,7 +17,8 @@
     "email_whitelist": []
   },
   "legal": {
-    "privacy_and_policy": ""
+    "privacy_and_policy": "",
+    "imprint": ""
   },
   "general": {
     "contact_email": "contact@riseupgroup.net",
