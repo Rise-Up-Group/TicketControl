@@ -2,6 +2,7 @@
     :root {
         --color-background: white;
         --color-background-hover: #e8e9ea;
+        --color-navbar-background: #343a40;
         --color-text: black;
         --color-hover: #212529;
         --color-muted: #6c757d;
@@ -28,6 +29,7 @@
     :root {
         --color-background: #151515;
         --color-background-hover: #282828;
+        --color-navbar-background: #202020;
         --color-text: lightgrey;
         --color-hover: white;
         --color-muted: #6c757d;
@@ -41,8 +43,8 @@
         --color-nav-item-hover: rgba(255,255,255,.75);
         --color-nav-item-active: white;
         --color-card-header-text: var(--color-text);
-        --color-card-header: #282828;
-        --color-card-body: #1c1c1c;
+        --color-card-header: #202020;
+        --color-card-body: #151515;
         --color-input-background: #080808;
         --color-input-border: #404040;
         --color-input-group-text-background: #202020;
@@ -57,6 +59,10 @@ body {
 }
 hr {
    border-top-color: var(--color-border);
+}
+
+.navbar {
+    background-color: var(--color-navbar-background);
 }
 
 /* -------------------- text -------------------- */
@@ -77,16 +83,16 @@ hr {
 }
 
 /* -------------------- navbar -------------------- */
-.navbar-dark .navbar-nav .nav-link {
+.navbar .navbar-nav .nav-link {
     color: var(--color-nav-item);
 }
-.navbar-dark .navbar-nav .nav-link:hover {
+.navbar .navbar-nav .nav-link:hover {
     color: var(--color-nav-item-hover);
 }
-.navbar-dark .navbar-nav .show > .nav-link {
+.navbar .navbar-nav .show > .nav-link {
      color: var(--color-nav-item-hover);
 }
-.navbar-dark .navbar-nav .active > .nav-link {
+.navbar .navbar-nav .active > .nav-link {
     color: var(--color-nav-item-active)
 }
 .dropdown-menu {
@@ -120,6 +126,12 @@ hr {
     color: var(--color-text);
     border-color: var(--color-border);
 }
+.close {
+    color: var(--color-text);
+}
+.close:hover {
+    color: var(--color-text);
+}
 
 figure {
     border: .05rem solid var(--color-border);
@@ -137,8 +149,9 @@ figure {
     border-top-color: var(--color-border-light);
 }
 .table-hover tbody tr:hover {
-  color: var(--color-hover);
-  background-color: var(--color-background-hover);
+    color: var(--color-hover);
+    background-color: var(--color-background-hover);
+    cursor: pointer;
 }
 
 /* -------------------- forms -------------------- */

@@ -46,8 +46,9 @@ def render_error(request, status, message=""):
 
 def dashboard_view(request):
     if request.user.is_authenticated:
-        own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
-        part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id)
+        own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False).exclude(status=str(Ticket.StatusChoices.CLOSED))
+        part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id,
+                                                                                                  status=str(Ticket.StatusChoices.CLOSED))
         context = {'tickets': {'own': own_tickets, 'part': part_tickets}}
         return render(request, "dashboard.html", context)
     else:
@@ -56,10 +57,12 @@ def dashboard_view(request):
 
 @login_required()
 def mytickets_view(request):
-    own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False)
+    own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False).exclude(status=str(Ticket.StatusChoices.CLOSED))
     part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id,
-                                                                                moderators=request.user.id)
-    mod_tickets = Ticket.objects.filter(moderators=request.user.id, hidden=False).exclude(owner=request.user.id)
+                                                                                moderators=request.user.id,
+                                                                                status=str(Ticket.StatusChoices.CLOSED))
+    mod_tickets = Ticket.objects.filter(moderators=request.user.id, hidden=False).exclude(owner=request.user.id,
+                                                                                          status=str(Ticket.StatusChoices.CLOSED))
     context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "ticket/my.html", context)
 
@@ -728,7 +731,7 @@ def delete_attachment(request, id):
     return render_error(request, 405, "This site is only available for post requests")
 
 
-@permission_required("ticketcontrol.change_ticket")
+@permission_required("ticketcontrol.change_ticket_status")
 def ticket_status_update(request, id):
     if request.method == "POST":
         try:
@@ -858,6 +861,20 @@ def ticket_hide(request, id):
         # except DatabaseError:
         # return render_error(request, 409, "Database error") # TODO
     return render_error(request, 405, "This site is only available for POST requests")
+
+
+@login_required()
+def ticket_close(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket_status"):
+                ticket.set_status(str(Ticket.StatusChoices.CLOSED))
+            else:
+                return redirect("login")
+            return redirect("dashboard")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
 
 
 @permission_required("ticketcontrol.unhide_ticket")

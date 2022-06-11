@@ -12,10 +12,10 @@
         </div>
         <label for="permissions">Berechtigungen</label>
         <div class="form-outline">
-            <select style="height: 45vh;" multiple="" name="permissions" id="permissions" class="mb-4">
+            <select style="height: 45vh; width: 100%;" multiple="" name="permissions" id="permissions" class="mb-4">
                 {% for permission in permissions %}
                     <option class="checkbox"
-                            value="{{ permission.perm.id }}">{{ permission.perm.content_type.app_label }}.{{ permission.perm.content_type.model }}.{{ permission.perm.name }}</option>
+                            value="{{ permission.perm.id }}">{{ permission.perm.content_type.model }}.{{ permission.perm.name }}</option>
                 {% endfor %}
             </select>
         </div>
