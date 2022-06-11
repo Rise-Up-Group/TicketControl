@@ -251,10 +251,10 @@ class Ticket(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="owner")
+    owner = models.ForeignKey(User, related_name="tickets", on_delete=models.DO_NOTHING)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING)
-    participating = models.ManyToManyField("User", blank=True)  # does NOT contain owner
-    moderators = models.ManyToManyField("User", related_name="moderators", blank=True)
+    participating = models.ManyToManyField("User", related_name="participating", blank=True)  # does NOT contain owner
+    moderators = models.ManyToManyField("User", related_name="moderating", blank=True)
     hidden = models.BooleanField(default=False)
     location = models.CharField(max_length=255, null=True, blank=True)
 
