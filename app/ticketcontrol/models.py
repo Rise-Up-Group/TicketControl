@@ -211,7 +211,7 @@ class Ticket(models.Model):
         OPEN = 'Open'
         WAITING = 'Waiting'
 
-    def add_ticket(title, description, owner, category, location):
+    def add_ticket(title, description, owner, category, location=None):
         ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned', location=location)
         ticket.save()
         return ticket

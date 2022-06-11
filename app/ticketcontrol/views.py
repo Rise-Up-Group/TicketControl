@@ -76,7 +76,9 @@ def ticket_view(request, id):
 
         categories = Category.objects.all()
         context = {"ticket": ticket, "moderators": ticket.moderator.all(),
-                   "participants": ticket.participating.all(), "comments": comments, "categories": categories}
+                   "participants": ticket.participating.all(), "comments": comments, "categories": categories,
+                   "allow_location": settings.GENERAL["allow_location"],
+                   "force_location": settings.GENERAL["force_location"]}
         return render(request, "ticket/detail.html", context)
     except Ticket.DoesNotExist:
         return render_error(request, 404, "Ticket does not exist")
@@ -476,8 +478,15 @@ def ticket_new_view(request):
             user = User.objects.get(id=request.user.id)
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
+        location = None
+        if settings.GENERAL["allow_location"]:
+            location = request.POST["location"]
+            if settings.GENERAL["force_location"] and not location:
+                return render_error(request, 406, "You have to fill in the location")
+        if not request.POST["title"] or not request.POST["description"]:
+            return render_error(request, 406, "You have to fill in title and description.")
         ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
-                                   Category.objects.get(id=request.POST["category"]), request.POST["location"])
+                                   Category.objects.get(id=request.POST["category"]), location)
         for attachment_id in request.POST.getlist("attachments"):
             try:
                 attachment = Attachment.objects.get(id=attachment_id)
@@ -488,8 +497,9 @@ def ticket_new_view(request):
         ticket.save()
         return redirect('/ticket/my')
     else:
-        category = Category.objects.all()
-        context = {"category": category}
+        context = {"categories": Category.objects.all(),
+                   "allow_location": settings.GENERAL["allow_location"],
+                   "force_location": settings.GENERAL["force_location"]}
         return render(request, "ticket/new.html", context)
 
 
@@ -700,7 +710,7 @@ def settings_view(request):
             content['frontpage'] = request.POST['content.frontpage']
             content['half_page'] = request.POST['content.half-page']
             content['imprint'] = request.POST['content.imprint']
-            content['privacy_and_policy'] = request.POST['content.privacy_and_policy']
+            content['privacy_and_policy'] = request.POST['content.privacy-and-policy']
 
             register = settings_json['register']
             register['allow_custom_nickname'] = request.POST.get("register.allow-custom-nickname", False) == "on"
@@ -819,8 +829,9 @@ def ticket_info_update(request, id):
             if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
                 if request.POST['title'] != "" and not None:
                     ticket.title = request.POST['title']
-                if request.POST['location'] != "" and not None:
-                    ticket.location = request.POST['location']
+                if settings.GENERAL["allow_location"]:
+                    if (request.POST['location'] != "" and not None) or not settings.GENERAL["force_location"]:
+                        ticket.location = request.POST['location']
                 if not request.POST['category'] in (0, "", "0", None):
                     ticket.category = Category.objects.get(id=request.POST['category'])
                 ticket.save()
