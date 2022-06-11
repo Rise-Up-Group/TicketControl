@@ -5,35 +5,11 @@
     <title>{% block title %}TicketControl | Default Page{% endblock %}</title>
     <link rel="stylesheet" href="{% static '/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static '/css/custom.css' %}">
+    <link rel="stylesheet" href="{% static '/css/colors.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=0.8">
-    <style>
-
-        #logo {
-        }
-
-        body {
-            background-color: #ebeff5;
-        }
-
-
-        #total-orders {
-            background-color: #4cb4c7;
-        }
-
-
-        #orders-delivered {
-            background-color: #7abecc;
-        }
-
-        #orders-pending {
-            background-color: #7CD1C0;
-        }
-
-
-    </style>
 </head>
 
-<body class="bg-white">
+<body>
 {% include "navbar.html" %}
 <div class="container-fluid mt-4">
     {% block content %}

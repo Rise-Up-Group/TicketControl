@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% load static %}
 {% block content %}
-    <div class="container bg-transparent text-dark rounded mt-3">
+    <div class="container bg-transparent rounded mt-3">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <span class="input-group-text">#{{ ticket.id }}</span>
@@ -118,8 +118,7 @@
             </div>
         </div>
         <div id="update-ticket-warning" style="display: none">
-            <figure class="bg-light p-3 rounded  border-1"
-                    style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ed4245;">
+            <figure class="p-3 rounded  border-1" style="border-left-color: #ed4245;">
                 <div class="row justify-content-between">
                     <div class="col-auto">
                         <p class="lead">
@@ -140,8 +139,7 @@
                 </div>
             </figure>
         </div>
-        <figure class="bg-light p-3 rounded  border-1"
-                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #5865f2;">
+        <figure class="p-3 rounded  border-1" style="border-left-color: #5865D2;">
             <form method="post" action="{% url 'edit_ticket' id=ticket.id %}">
                 {% csrf_token %}
                 <p class="lead">Beschreibung</p>
@@ -149,8 +147,7 @@
                 <p data-input type="textarea" name="description">{{ ticket.description }}</p>
                 {% if ticket.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
                     Attachments:<br>
-                    <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
-                         id="file-drop-box-ticket">
+                    <div class="input file-drop-box text-center" id="file-drop-box-ticket">
                         <div class="file-drop-list">
                             {% for attachment in ticket.attachment_set.all %}
                                 <div>
@@ -178,13 +175,12 @@
                     | {{ ticket.creationDate }}
                 </p>
                 {% if perms.ticketcontrol.change_comment or ticket.owner_id == user.id %}
-                    <button onclick="makeEditable(this);">Bearbeiten</button>
+                    <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
                 {% endif %}
             </form>
         </figure>
         {% for comment in comments %}
-            <figure class="bg-light p-3 rounded"
-                    style="border: .05rem solid #a9a9a9; border-left: .25rem solid #ff9f00;">
+            <figure class="p-3 rounded" style="border-left-color: #D09000">
                 <form method="post" action="{% url 'edit_comment' id=comment.id %}">
                     {% csrf_token %}
                     <p class="lead">{{ comment.user.username }}
@@ -193,8 +189,7 @@
                     <p data-input type="textarea" name="content">{{ comment.content }}</p>
                     {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
                         Attachments:<br>
-                        <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
-                             id="file-drop-box-comment-{{ comment.id }}">
+                        <div class="input file-drop-box text-center" id="file-drop-box-comment-{{ comment.id }}">
                             <div class="file-drop-list">
                                 {% for attachment in comment.attachment_set.all %}
                                     <div>
@@ -222,13 +217,12 @@
                         {{ comment.creationDate }}
                     </p>
                     {% if perms.ticketcontrol.change_comment or comment.user_id == user.id %}
-                        <button onclick="makeEditable(this);">Bearbeiten</button>
+                        <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
                     {% endif %}
                 </form>
             </figure>
         {% endfor %}
-        <figure class="bg-light p-3 rounded"
-                style="border: .05rem solid #a9a9a9; border-left: .25rem solid #00ff00;">
+        <figure class="p-3 rounded" style="border-left-color: #00A000;">
             <p class="lead">Kommentar hinzufügen:</p>
             <hr>
             <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST">
@@ -237,8 +231,7 @@
                                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
                                           name="comment"></textarea>
                 </div>
-                <div class="file-drop-box bg-white text-center" style="border: .05rem solid #a9a9a9"
-                     id="file-drop-box-new-comment">
+                <div class="input file-drop-box text-center" id="file-drop-box-new-comment">
                     <div class="file-drop-list"></div>
                     <div class="file-drop-area">
                         <input class="file-input" type="file" name="attachments-input"
@@ -247,7 +240,7 @@
                     </div>
                 </div>
                 <br>
-                <div class="text-white">
+                <div>
                     <div class="row justify-content-between">
                         <div class="col-auto">
                             <p class="blockquote-footer mb-0 font-italic">
