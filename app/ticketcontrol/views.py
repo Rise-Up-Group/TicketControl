@@ -115,9 +115,12 @@ def manage_tickets_view(request):
         tickets = handle_filter(request.GET, tickets, "hidden")
     else:
         tickets = tickets.filter(hidden=False)
-    tickets = handle_user_filter(request.GET, tickets, "owner")
-    tickets = handle_user_filter(request.GET, tickets, "participating")
-    tickets = handle_user_filter(request.GET, tickets, "moderators")
+    try:
+        tickets = handle_user_filter(request.GET, tickets, "owner")
+        tickets = handle_user_filter(request.GET, tickets, "participating")
+        tickets = handle_user_filter(request.GET, tickets, "moderators")
+    except User.DoesNotExist:
+        return render_error(request, 404, "Filtered user does not exist")
 
     context = {
         "tickets": tickets,
