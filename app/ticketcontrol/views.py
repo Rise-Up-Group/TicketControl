@@ -69,17 +69,19 @@ def handle_filter(GET, objects, name):
         filter = {}
         if not (name + "_type" in GET and GET[name + "_type"]) \
                 or GET[name + "_type"] == "is":
-            filter[name] = GET[name]
-            print("is")
+            if not (name + "_type" in GET and GET[name + "_type"]):
+                filter[name] = GET[name]
+            else:
+                filter[name+"__iexact"] = GET[name]
             return objects.filter(**filter)
         elif GET[name + "_type"] == "is_not":
-            filter[name] = GET[name]
+            filter[name+"__iexact"] = GET[name]
             return objects.exclude(**filter)
         elif GET[name + "_type"] == "contain":
-            filter[name + "__contains"] = GET[name]
+            filter[name + "__icontains"] = GET[name]
             return objects.filter(**filter)
         elif GET[name + "_type"] == "contain_not":
-            filter[name + "__contains"] = GET[name]
+            filter[name + "__icontains"] = GET[name]
             return objects.exclude(**filter)
     return objects
 
@@ -95,40 +97,36 @@ def handle_user_filter(GET, objects, name):
 
 @login_required()
 def manage_tickets_view(request):
-    try:
+    if request.user.has_perm("ticketcontrol.view_ticket"):
+        tickets = Ticket.objects.all()
+    else:
         tickets = Ticket.objects.filter(Q(owner=request.user.id) |
                                         Q(participating=request.user.id) |
                                         Q(moderators=request.user.id)).distinct()
 
-        tickets = handle_filter(request.GET, tickets, "status")
-        tickets = handle_filter(request.GET, tickets, "category")
-        tickets = handle_filter(request.GET, tickets, "title")
-        tickets = handle_filter(request.GET, tickets, "location")
-        if request.user.has_perm("ticketcontrol.unhide_ticket"):
-            tickets = handle_filter(request.GET, tickets, "hidden")
-        else:
-            tickets = tickets.filter(hidden=False)
-        tickets = handle_user_filter(request.GET, tickets, "owner")
-        tickets = handle_user_filter(request.GET, tickets, "participating")
-        tickets = handle_user_filter(request.GET, tickets, "moderators")
+    tickets = handle_filter(request.GET, tickets, "status")
+    tickets = handle_filter(request.GET, tickets, "category")
+    tickets = handle_filter(request.GET, tickets, "title")
+    tickets = handle_filter(request.GET, tickets, "location")
+    if request.user.has_perm("ticketcontrol.unhide_ticket"):
+        tickets = handle_filter(request.GET, tickets, "hidden")
+    else:
+        tickets = tickets.filter(hidden=False)
+    tickets = handle_user_filter(request.GET, tickets, "owner")
+    tickets = handle_user_filter(request.GET, tickets, "participating")
+    tickets = handle_user_filter(request.GET, tickets, "moderators")
 
-        if not request.user.has_perm("ticketcontrol.view_ticket"):
-            tickets.filter(Q(owner=request.user.id, hidden=False) | Q(participating=request.user.id, hidden=False) | Q(
-                moderators=request.user.id))
-
-        context = {
-            "tickets": tickets,
-            "GET": request.GET,
-            "types": ["is", "is_not", "contain", "contain_not"],
-            "categories": Category.objects.all(),
-            "status_choices": Ticket.StatusChoices,
-            "allow_location": settings.GENERAL["allow_location"]
-        }
-        if "category" in request.GET and request.GET["category"]:
-            context["category_id"] = int(request.GET["category"])
-        return render(request, "ticket/manage.html", context)
-    except Category.DoesNotExist:
-        return render_error(request, 404, "Category does not exist")
+    context = {
+        "tickets": tickets,
+        "GET": request.GET,
+        "types": ["is", "is_not", "contain", "contain_not"],
+        "categories": Category.objects.all(),
+        "status_choices": Ticket.StatusChoices,
+        "allow_location": settings.GENERAL["allow_location"]
+    }
+    if "category" in request.GET and request.GET["category"]:
+        context["category_id"] = int(request.GET["category"])
+    return render(request, "ticket/manage.html", context)
 
 
 @login_required()
@@ -139,9 +137,9 @@ def ticket_view(request, id):
         ticket = Ticket.objects.get(pk=id)
         if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
             return render_error(request, 404, "Ticket does not exist")
-
-        if ticket.owner.id != request.user.id and not User.objects.get(id=request.user.id) in ticket.participating.all() \
-                and not request.user.has_perm("ticketcontrol.view_ticket"):
+        user = User.objects.get(id=request.user.id)
+        if ticket.owner.id != request.user.id and not user in ticket.participating.all() \
+                and not user in ticket.moderators.all() and not request.user.has_perm("ticketcontrol.view_ticket"):
             return render_error(request, 404, "Ticket does not exist")
         comments = Comment.objects.filter(ticket_id=ticket.id)
 

@@ -10,14 +10,13 @@
                     <h5>Filters</h5>
                 </div>
                 <div class="card-body bg-light">
-                    {{ filters }}
                     <form method="get">
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="filter-status">Status:</label>
                             </div>
                             <select class="custom-select form-control" id="filter-status" name="status">
-                                <option value="0">None</option>
+                                <option value="0">Nicht filtern</option>
                                 {% for status in status_choices %}
                                     <option value="{{ status }}"{% if status == GET.status %}
                                             selected{% endif %}>{{ status }}</option>
@@ -30,7 +29,7 @@
                                 <label class="input-group-text" for="filter-category">Kategorie:</label>
                             </div>
                             <select class="custom-select form-control" id="filter-category" name="category">
-                                <option value="0">None</option>
+                                <option value="0">Nicht filtern</option>
                                 {% for category in categories %}
                                     <option value="{{ category.id }}"{% if category.id == category_id %}
                                             selected{% endif %}>{{ category.name }}</option>
@@ -123,7 +122,7 @@
                                        onclick="updateHiddenRadiobuttons()" style="display: none;"
                                        {% if GET.hidden == "False" %}checked{% endif %}>
                                 <div class="input-group-append">
-                                    <label class="btn" for="filter-hidden-none">None</label>
+                                    <label class="btn" for="filter-hidden-none">Nicht filtern</label>
                                     <label class="btn" for="filter-hidden-false">Versteckt</label>
                                     <label class="btn" for="filter-hidden-true">Sichtbar</label>
                                 </div>
