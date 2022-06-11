@@ -79,6 +79,10 @@ input[type="text"] {
     margin-top: 100px
 }
 
+.nav-link {
+    cursor: pointer;
+}
+
 option.checkbox:before {
     content: "☐ "
 }
