@@ -32,7 +32,7 @@
 }
 
 .card-body {
-    overflow: scroll;
+    overflow: auto;
 }
 
 input[type="text"] {
