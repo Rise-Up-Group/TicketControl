@@ -31,6 +31,17 @@
 
 }
 
+.card-body {
+    overflow: scroll;
+}
+
+input[type="text"] {
+    min-width: 8em;
+}
+.input-group-append {
+    flex-wrap: wrap;
+}
+
 .btn {
     margin: 0;
 }

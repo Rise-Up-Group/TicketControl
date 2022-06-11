@@ -8,7 +8,7 @@
     <br>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5>Meine Profil</h5>
@@ -49,7 +49,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5>Meine Tickets</h5>
@@ -65,8 +65,7 @@
                                     <th scope="row">Id</th>
                                     <th>Kategorie</th>
                                     <th>Titel</th>
-                                    <th>Moderator</th>
-
+                                    <th>Moderators</th>
                                 </tr>
                             {% for ticket in tickets.own %}
                                 <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">

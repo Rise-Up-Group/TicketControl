@@ -4,7 +4,7 @@
 {% block content %}
     <br>
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-xl-3">
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5>Filters</h5>
@@ -16,7 +16,7 @@
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="filter-status">Status:</label>
                             </div>
-                            <select class="custom-select" id="filter-status" name="status">
+                            <select class="custom-select form-control" id="filter-status" name="status">
                                 <option value="0">None</option>
                                 {% for status in status_choices %}
                                     <option value="{{ status }}"{% if status == GET.status %}
@@ -29,8 +29,7 @@
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="filter-category">Kategorie:</label>
                             </div>
-
-                            <select class="custom-select" id="filter-category" name="category">
+                            <select class="custom-select form-control" id="filter-category" name="category">
                                 <option value="0">None</option>
                                 {% for category in categories %}
                                     <option value="{{ category.id }}"{% if category.id == category_id %}
@@ -43,13 +42,15 @@
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="filter_title">Titel:</label>
                             </div>
-                            <select id="filter-title-type" name="title_type">
+                            <select class="custom-select form-control" id="filter-title-type" name="title_type"
+                                    style="width: auto; flex-grow: 0;">
                                 {% for type in types %}
                                     <option value="{{ type }}"{% if GET.title_type == type %}
                                             selected{% endif %}>{{ type }}</option>
                                 {% endfor %}
                             </select>
-                            <input type="text" name="title" id="filter-title" value="{{ GET.title }}">
+                            <input class="form-control" type="text" name="title" id="filter-title"
+                                   value="{{ GET.title }}">
                         </div>
                         <br>
                         {% if allow_location %}
@@ -57,13 +58,15 @@
                                 <div class="input-group-prepend">
                                     <label class="input-group-text" for="filter-location">Standort:</label>
                                 </div>
-                                <select id="filter-title-type" name="location_type">
+                                <select class="custom-select form-control" id="filter-title-type" name="location_type"
+                                        style="width: auto; flex-grow: 0;">
                                     {% for type in types %}
                                         <option value="{{ type }}"{% if GET.location_type == type %}
                                                 selected{% endif %}>{{ type }}</option>
                                     {% endfor %}
                                 </select>
-                                <input type="text" name="location" id="filter-location" value="{{ GET.location }}">
+                                <input class="form-control" type="text" name="location" id="filter-location"
+                                       value="{{ GET.location }}">
                             </div>
                             <br>
                         {% endif %}
@@ -72,9 +75,8 @@
                                 <div class="input-group-prepend">
                                     <label class="input-group-text" for="filter-owner">Besitzer:</label>
                                 </div>
-                                <input type="text" name="owner" id="filter-owner" value="{{ GET.owner }}"
-                                       placeholder="username"
-                                       list="filter-owner-data-list"
+                                <input class="form-control" type="text" name="owner" id="filter-owner"
+                                       value="{{ GET.owner }}" placeholder="username" list="filter-owner-data-list"
                                        oninput="search_and_update_usernames(this.value, 'filter-owner-data-list', false);">
                             </div>
                             <datalist id="filter-owner-data-list"></datalist>
@@ -85,7 +87,7 @@
                                 <div class="input-group-prepend">
                                     <label class="input-group-text" for="filter-participating">Teilnehmer:</label>
                                 </div>
-                                <input type="text" name="participating" id="filter-participating"
+                                <input class="form-control" type="text" name="participating" id="filter-participating"
                                        value="{{ GET.participating }}" placeholder="username, username"
                                        list="filter-participating-data-list"
                                        oninput="search_and_update_usernames(this.value, 'filter-participating-data-list');">
@@ -98,8 +100,9 @@
                                 <div class="input-group-prepend">
                                     <label class="input-group-text" for="filter-moderators">Moderatoren:</label>
                                 </div>
-                                <input type="text" name="moderators" id="filter-moderators" value="{{ GET.moderators }}"
-                                       placeholder="username, username" list="filter-moderators-data-list"
+                                <input class="form-control" type="text" name="moderators" id="filter-moderators"
+                                       value="{{ GET.moderators }}" placeholder="username, username"
+                                       list="filter-moderators-data-list"
                                        oninput="search_and_update_usernames(this.value, 'filter-moderators-data-list');">
                             </div>
                             <datalist id="filter-moderators-data-list"></datalist>
@@ -132,7 +135,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="col-xl-9">
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5>Tickets</h5>
