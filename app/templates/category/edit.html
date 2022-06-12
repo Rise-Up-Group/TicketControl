@@ -26,11 +26,6 @@
             <input type="text" id="name" name="name" class="form-control"
                    value="{{ category.name }}" required {% if not can_change %}disabled{% endif %}/>
         </div>
-        <div class="form-outline mb-4">
-            <label for="color">Color</label>
-            <input type="color" id="color" name="color" class="form-control" placeholder="{{ category.color }}"
-                   value="#{{ category.color }}" required {% if not can_change %}disabled{% endif %}/>
-        </div>
         {% if can_change %}
             <input class="btn btn-primary btn-block mb-2" type="submit" name="submit" id="submit"
                    value="Update">

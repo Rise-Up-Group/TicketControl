@@ -857,7 +857,7 @@ def settings_view(request):
 @permission_required("ticketcontrol.add_category")
 def create_category_view(request):
     if request.method == "POST":
-        Category.objects.create(name=request.POST['name'], color=request.POST['color'].strip("#"))
+        Category.objects.create(name=request.POST['name'])
         return redirect("manage_categories")
     else:
         return render(request, "category/create.html")
@@ -872,7 +872,6 @@ def edit_category_view(request, id):
     if request.method == "POST":
         if request.user.has_perm("ticketcontrol.edit_category"):
             category.name = request.POST['name']
-            category.color = request.POST['color'].strip("#")
             category.save()
             return redirect("manage_categories")
         else:

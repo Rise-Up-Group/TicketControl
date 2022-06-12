@@ -18,19 +18,10 @@
 {% block right %}
     <h1 class="text-center display-4 mb-4">Kategorien</h1>
     <table class="table table-sm table-hover mb-4">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Farbe</th>
-            <th></th>
-        </tr>
-        </thead>
         <tbody>
         {% for category in categories %}
             <tr onclick="window.location='{% url 'edit_category' id=category.id %}'">
                 <td>{{ category.name }}</td>
-                <td>#{{ category.color }}</td>
-                <td style="background-color: #{{ category.color }}; width: 2em;"></td>
             </tr>
         {% endfor %}
         </tbody>

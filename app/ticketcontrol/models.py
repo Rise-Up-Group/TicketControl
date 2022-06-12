@@ -181,7 +181,6 @@ class Permission(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
-    color = models.CharField(max_length=8)
 
     def __str__(self):
         return self.name
