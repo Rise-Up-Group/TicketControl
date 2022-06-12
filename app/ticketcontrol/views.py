@@ -115,9 +115,12 @@ def manage_tickets_view(request):
         tickets = handle_filter(request.GET, tickets, "hidden")
     else:
         tickets = tickets.filter(hidden=False)
-    tickets = handle_user_filter(request.GET, tickets, "owner")
-    tickets = handle_user_filter(request.GET, tickets, "participating")
-    tickets = handle_user_filter(request.GET, tickets, "moderators")
+    try:
+        tickets = handle_user_filter(request.GET, tickets, "owner")
+        tickets = handle_user_filter(request.GET, tickets, "participating")
+        tickets = handle_user_filter(request.GET, tickets, "moderators")
+    except User.DoesNotExist:
+        return render_error(request, 404, "Filtered user does not exist")
 
     context = {
         "tickets": tickets,
@@ -147,7 +150,7 @@ def ticket_view(request, id):
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
         categories = Category.objects.all()
-        context = {"ticket": ticket, "moderators": ticket.moderator.all(),
+        context = {"ticket": ticket, "moderators": ticket.moderators.all(),
                    "participants": ticket.participating.all(), "comments": comments, "categories": categories,
                    "allow_location": settings.GENERAL["allow_location"],
                    "force_location": settings.GENERAL["force_location"]}
@@ -249,12 +252,12 @@ def register_view(request):
     return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"],
                                                   "allow_custom_username": settings.REGISTER["allow_custom_username"]})
 
-def check_username(username):
+def check_username(username, old_username=None):
     if User.objects.filter(username=username).exists():
         i = 1
-        while User.objects.filter(username=username+str(i)).exists() and i < 200:
+        while User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username and i < 200:
             i += 1
-        if User.objects.filter(username=username+str(i)).exists():
+        if User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username:
             return {"status": 406}
         return {"status": 409, "username": username+str(i)}
     return {"status": 200}
@@ -344,10 +347,19 @@ def create_user_view(request):
         groups = None
         if request.user.has_perm("ticketcontrol.change_user_permission"):
             groups = request.POST.getlist("groups")
-        if not User.objects.filter(email=request.POST['email']).exists() and not User.objects.filter(
-                username=request.POST['username']).exists():
+        firstname = request.POST['firstname']
+        lastname = request.POST['lastname']
+        if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
+            username = request.POST['username']
+        else:
+            username = firstname[0:1] + "." + lastname
+        res = check_username(username)
+        if res["status"] == 409:
+            username = res["username"]
+
+        if not User.objects.filter(email=request.POST['email']).exists() and not res["status"] == 406:
             User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                          request.POST['username'], password, groups, request.POST.get("is_active", False) == "on",
+                          username, password, groups, request.POST.get("is_active", False) == "on",
                           email_confirmed=True)
             return redirect("manage_users")
         else:
@@ -373,7 +385,7 @@ def user_details_view(request, id):
     except User.DoesNotExist:
         return render_error(request, 404, "User does not exist")
     if request.user.has_perm("ticketcontrol.view_user") or request.user.id == id:
-        return render(request, "user/details.html", {"content_user": user,
+        return render(request, "user/detail.html", {"content_user": user,
                                                      "can_change": request.user.has_perm(
                                                          "ticketcontrol.change_user") or request.user.id == id})
     return redirect("login")
@@ -405,39 +417,45 @@ def edit_user_view(request, id):
                 return render_error(request, 404, "User does not exist")
             if user.username == "ghost":
                 return render_error(request, 403, "Editing the user ghost is not allowed")
-            if user.username == request.POST['username'] or not User.objects.filter(
-                    username=request.POST['username']).exists():
-                user.update_user(None, request.POST['firstname'], request.POST['lastname'],
-                                 request.POST['username'], password, groups,
-                                 request.POST.get("is_active", False) == "on")
-                email = request.POST['email']
-                if user.email != email:
-                    if not User.objects.filter(email=email).exists():
-                        if request.user.has_perm("ticketcontrol.change_user"):
-                            user.email = email
-                            user.save()
-                        else:
-                            email_authorized = False
-                            if not settings.REGISTER['email_whitelist_enable']:
-                                email_authorized = True
-                            else:
-                                for whitelist_entry in settings.REGISTER['email_whitelist']:
-                                    if whitelist_entry.startswith("@"):
-                                        whitelist_entry = ".*" + whitelist_entry
-                                    if re.fullmatch(whitelist_entry, email) is not None:
-                                        email_authorized = True
-                                        break
-                            if email_authorized:
-                                user.update_user(email=email)
-                                user.send_emailverification_mail(request)
-                                return render(request, "user/activate.html", {"half_page": settings.CONTENT["half_page"]})
-                            else:
-                                return render_error(request, 406, "Your E-Mail address is not white-listed")
+            username = None
+            if settings.REGISTER["allow_custom_username"]:
+                username = request.POST['username']
+                if user.username != username:
+                    res = check_username(username, user.username)
+                    if res["status"] == 409:
+                        username = res["username"]
+                    if res["status"] == 406:
+                        return render_error(request, 406, "Unable to get unused username")
+
+            user.update_user(None, request.POST['firstname'], request.POST['lastname'],
+                             username, password, groups,
+                             request.POST.get("is_active", False) == "on")
+            email = request.POST['email']
+            if user.email != email:
+                if not User.objects.filter(email=email).exists():
+                    if request.user.has_perm("ticketcontrol.change_user"):
+                        user.email = email
+                        user.save()
                     else:
-                        return render_error(request, 409, "E-Mail already exists")
-                    return redirect("edit_user", id=id)
-            else:
-                return render_error(request, 409, "Username already exists")
+                        email_authorized = False
+                        if not settings.REGISTER['email_whitelist_enable']:
+                            email_authorized = True
+                        else:
+                            for whitelist_entry in settings.REGISTER['email_whitelist']:
+                                if whitelist_entry.startswith("@"):
+                                    whitelist_entry = ".*" + whitelist_entry
+                                if re.fullmatch(whitelist_entry, email) is not None:
+                                    email_authorized = True
+                                    break
+                        if email_authorized:
+                            user.update_user(email=email)
+                            user.send_emailverification_mail(request)
+                            return render(request, "user/activate.html", {"half_page": settings.CONTENT["half_page"]})
+                        else:
+                            return render_error(request, 406, "Your E-Mail address is not white-listed")
+                else:
+                    return render_error(request, 409, "E-Mail already exists")
+                return redirect("edit_user", id=id)
         try:
             user = User.objects.get(pk=id)
         except User.DoesNotExist:
@@ -839,7 +857,7 @@ def settings_view(request):
 @permission_required("ticketcontrol.add_category")
 def create_category_view(request):
     if request.method == "POST":
-        Category.objects.create(name=request.POST['name'], color=request.POST['color'].strip("#"))
+        Category.objects.create(name=request.POST['name'])
         return redirect("manage_categories")
     else:
         return render(request, "category/create.html")
@@ -854,7 +872,6 @@ def edit_category_view(request, id):
     if request.method == "POST":
         if request.user.has_perm("ticketcontrol.edit_category"):
             category.name = request.POST['name']
-            category.color = request.POST['color'].strip("#")
             category.save()
             return redirect("manage_categories")
         else:
@@ -910,6 +927,7 @@ def ticket_close(request, id):
             return redirect("dashboard")
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
+    return render_error(request, 405, "This page is only for post requests")
 
 
 @permission_required("ticketcontrol.unhide_ticket")

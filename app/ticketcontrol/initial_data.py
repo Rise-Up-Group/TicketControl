@@ -68,15 +68,8 @@ def load_groups():
                 "ticketcontrol.category": ["view_category"]
             },
             "user": {
-                "ticketcontrol.comment": [
-                    "view_comment", "add_comment"
-                ],
-                "ticketcontrol.ticket": [
-                    "view_ticket", "add_ticket"
-                ],
-                "ticketcontrol.attachment": [
-                    "view_attachment"
-                ],
+                "ticketcontrol.comment": ["add_comment"],
+                "ticketcontrol.ticket": ["add_ticket"],
                 "ticketcontrol.category": ["view_category"],
                 "ticketcontrol.user": ["view_user"]
             }
@@ -104,9 +97,9 @@ def load_admin_user():
 
 def load_categories():
     if Category.objects.count() == 0:
-        Category.objects.create(name="Default", color="ffffffff")
-        Category.objects.create(name="Other", color="5e5e5eff")
-        Category.objects.create(name="IT-Support", color="0000ffff")
+        Category.objects.create(name="Default")
+        Category.objects.create(name="Other")
+        Category.objects.create(name="IT-Support")
 
 
 def load_initial_data():

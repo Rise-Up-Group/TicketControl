@@ -1,4 +1,5 @@
 {% extends "half_page.html" %}
+{% load static %}
 
 {% block title %}Login{% endblock %}
 
@@ -38,48 +39,15 @@
                     <label class="form-check-label" for="checkCustomUsername">Custom username</label>
                 </div>
             {% endif %}
-            <input type="username" id="username" name="username" class="form-control" oninput="check_username(false)" onchange="check_username()" required disabled/>
+            <input type="username" id="username" name="username" class="form-control" oninput="check_username(false)"
+                   onchange="check_username()" required disabled/>
         </div>
         <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
     </form>
     Have a login? <a href="{% url 'login' %}">Login</a>
+
+    <script src="{% static '/js/users.js' %}"></script>
 <script>
-    function showCustomUsername() {
-        let checkbox = document.getElementById("checkCustomUsername");
-        if (checkbox.checked) {
-            document.getElementById("username").removeAttribute("disabled");
-        } else {
-            document.getElementById("username").setAttribute("disabled", "");
-        }
-    }
-
-    async function update_username() {
-        let firstname = document.getElementById("firstname").value.substring(0, 1);
-        let lastname = document.getElementById("lastname").value;
-        document.getElementById("username").value = firstname + "." + lastname;
-        check_username();
-    }
-
-    async function check_username(autocorrect=true) {
-        let input = document.getElementById("username");
-        let username = input.value;
-        let res = await fetch("/user/check_username/"+username, {methd: "GET"});
-        if (res.status === 200) {
-            input.style.backgroundColor = null;
-        } else {
-            if (res.status === 409) {
-                if (autocorrect) {
-                    input.style.backgroundColor = null;
-                    username = await res.text();
-                    input.value = username;
-                } else {
-                    input.style.backgroundColor = "red";
-                }
-            } else {
-                input.style.backgroundColor = "red";
-            }
-        }
-    }
     window.onload = check_username;
 </script>
 {% endblock %}

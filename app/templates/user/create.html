@@ -37,7 +37,8 @@
         </div>
         <div class="form-outline mb-2">
             <label for="password">Username</label>
-            <input type="username" id="username" name="username" class="form-control" required/>
+            <input type="username" id="username" name="username" class="form-control" oninput="check_username(false)"
+                   onchange="check_username()" required/>
         </div>
         <div class="form-outline mb-2">
             <label for="password">Password</label>
@@ -61,15 +62,9 @@
         <label for="is_active">Active</label><br><br>
         <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
     </form>
-    <script>
-        async function update_username() {
-            var firstname = document.getElementById("firstname").value.substring(0, 1);
-            var lastname = document.getElementById("lastname").value;
-            var initials = firstname + lastname.substring(0, 1)
-            var username = firstname + "." + lastname
-            document.getElementById("username").value = username;
-            document.getElementById("preview_username").innerHTML = username;
-            document.getElementById("preview_initials").innerHTML = initials.toUpperCase();
-        }
-    </script>
+
+        <script src="{% static '/js/users.js' %}"></script>
+<script>
+    window.onload = check_username;
+</script>
 {% endblock %}

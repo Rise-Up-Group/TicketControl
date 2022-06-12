@@ -9,6 +9,7 @@ function makeEditable(button) {
             input = document.createElement("input");
             input.setAttribute("type", element.getAttribute("type"));
         }
+        input.classList.add("form-control");
         input.setAttribute("name", element.getAttribute("name"));
         input.innerHTML = element.innerHTML;
         element.parentNode.replaceChild(input, element);
