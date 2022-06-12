@@ -2,7 +2,7 @@ from django.contrib.auth.models import Permission as BasePermission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 
-from .models import Permission, User, Category
+from .models import *
 
 
 def load_permissions():

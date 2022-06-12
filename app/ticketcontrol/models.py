@@ -8,6 +8,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Max
 import os
 
 from .settings import EMAIL_HOST_USER
@@ -217,7 +218,7 @@ class Ticket(models.Model):
     def add_comment(self, content, user):
         comment = Comment(content=content, ticket=self, user=user)
         try:
-            comment.num = Comment.objects.get(ticket=self).count() + 1,
+            comment.num = int(Comment.objects.get(ticket=self).aggregate(Max('num'))) + 1
         except:
             comment.num = 1
 
