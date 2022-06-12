@@ -5,6 +5,7 @@ async function check_username(autocorrect=true, old_username="") {
         let res = await fetch("/user/check_username/" + username, {methd: "GET"});
         if (res.status === 200) {
             input.style.backgroundColor = null;
+            update_username_preview(username);
         } else {
             if (res.status === 409) {
                 username = await res.text();
@@ -21,6 +22,7 @@ async function check_username(autocorrect=true, old_username="") {
         }
     } else {
         input.style.backgroundColor = null;
+        update_username_preview(username);
     }
 }
 
