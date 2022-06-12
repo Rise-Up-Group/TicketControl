@@ -43,7 +43,8 @@
                                             <label for="register.allow-custom-username">Allow custom
                                                 username</label><br>
                                             <input type="checkbox" id="register.email-whitelist-enable"
-                                                   name="register.email-whitelist-enable" onclick="show_email_whitelist()"
+                                                   name="register.email-whitelist-enable"
+                                                   onclick="show_email_whitelist()"
                                                    {% if settings.register.email_whitelist_enable %}checked{% endif %}>
                                             <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label>
                                         </div>
@@ -163,25 +164,13 @@
             </div>
             <div class="px-4 py-5 px-md-5 text-center text-lg-start">
                 <div class="container mb-4">
-                    <div class="row gx-lg-5 align-items-center">
-                        <div class="col-lg-6 mb-5 mb-lg-0">
+                    <div class="card">
+                        <div class="card-body py-5 px-md-5">
                             <h2 class="text-danger display-4">Warnung</h2>
-                            <p class="text-muted">
-                                Nach dem speichern muss der Server (der Container) neu gestartet werden. Zum neu
-                                starten kann der Hacken bei Server neu starten gesetzt werden. Wenn TicketControl
-                                außerhalb von Docker installiert ist, wird der ganze Host neugestartet.
+                            <p class=   "text-muted">
+                                Nach dem speichern muss der Server (der Container) neu gestartet werden.
                             </p>
-                        </div>
-                        <div class="col-lg-6 mb-5 mb-lg-0">
-                            <div class="card">
-                                <div class="card-body py-5 px-md-5">
-                                    <div class="form-outline">
-                                        <input type="checkbox" name="restart-server" id="restart-server">
-                                        <label for="restart-server">Server neu Starten</label>
-                                    </div>
-                                    <input type="submit" class="btn btn-primary btn-block" value="Speichern">
-                                </div>
-                            </div>
+                            <input type="submit" class="btn btn-primary btn-block" value="Speichern">
                         </div>
                     </div>
                 </div>
