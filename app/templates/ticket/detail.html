@@ -4,6 +4,7 @@
     <div class="container bg-transparent rounded mt-3">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
+                <span id="ticket-id" style="display:none;">{{ ticket.id }}</span>
                 <span class="input-group-text">#{{ ticket.id }}</span>
                 <span class="input-group-text">{{ ticket.status }}</span>
             </div>
@@ -43,7 +44,7 @@
                         <div role="separator" class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
                             zuweisen</a>
-                        <a class="dropdown-item" href="#">Zuweisung ändern</a>
+                        <a class="dropdown-item" type="button" data-toggle="modal" data-target="#assign-moderator">Moderator zuweisen</a>
                     {% endif %}
                 </div>
             </div>
@@ -77,16 +78,16 @@
                     <span id="moderators">
                         {% if not moderators.count == 0 %}
                             {% for moderator in moderators %}
-                                <form action="{% url 'ticket_remove_moderator' id=ticket.id username=moderator.username %}" method="POST">
-                                    {% csrf_token %}
-                                    {{ moderator.username }}
-                                    <span class="text-red" type="submit" value="Submit">
-                                        (x)
-                                    </span>
+                                <span id="moderator-{{ moderator.username }}">
+                                {{ moderator.username }}
+                                    {% if perms.ticketcontrol.change_ticket %}
+                                        [<span class="text-danger" type="submit"
+                                              onclick="delete_moderator(`{{ moderator.username }}`);">x</span>]
+                                    {% endif %}
                                     {% if not forloop.last %}
                                         ,
                                     {% endif %}
-                                </form>
+                                </span>
                             {% endfor %}
                         {% endif %}
                 </span>
@@ -113,11 +114,16 @@
                     <span id="participants">
                         {% if not participants.count == 0 %}
                             {% for participant in participants %}
-                                {% if forloop.last %}
-                                    {{ participant.username }}
-                                {% else %}
-                                    {{ participant.username }},
-                                {% endif %}
+                                <span id="participant-{{ participant.username }}">
+                                {{ participant.username }}
+                                    {% if perms.ticketcontrol.change_ticket %}
+                                        [<span class="text-danger" type="submit"
+                                              onclick="delete_participant(`{{ participant.username }}`);">x</span>]
+                                    {% endif %}
+                                    {% if not forloop.last %}
+                                        ,
+                                    {% endif %}
+                                </span>
                             {% endfor %}
                         {% endif %}
                     </span>
@@ -383,21 +389,56 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="assign-moderator" tabindex="-1" role="dialog"
+         aria-labelledby="assign-moderator-title" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assign-moderator-title">Add moderator</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="dropdown" id="moderator-searchbar">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">@</div>
+                        </div>
+                        <input type="text" class="form-control" id="search-user" placeholder="Username"
+                               list="moderator-search-dropdown-menu"
+                               oninput="search_and_update_usernames(this.value, 'moderator-search-dropdown-menu', false);"
+                               onchange="add_user(`moderators`, this.value);">
+                    </div>
+                    <datalist id="user-search-dropdown-menu">
+                        <!--Will be filled in with js-->
+                    </datalist>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
     <script src="{% static '/js/edit.js' %}"></script>
     <script src="{% static '/js/userSearch.js' %}"></script>
+    <script src="{% static '/js/ticket.js' %}"></script>
     <script>
 
         async function add_user(mode, username) {
             if (username !== "") {
                 let response;
                 let token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                let type;
                 if (mode === "participants") {
+                    type = "participant";
                     response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {
                         method: "POST",
                         headers: {'X-CSRFToken': token}
                     });
                 } else if (mode === "moderators") {
+                    type = "moderator";
                     response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {
                         method: "POST",
                         headers: {'X-CSRFToken': token}
@@ -405,13 +446,21 @@
                 }
                 if (response.ok) {
                     document.getElementById("search-user").value = "";
-                    let userList = document.getElementById(mode);
-                    let userListHtml = userList.innerHTML.trim();
-                    if (typeof userListHtml === "undefined" || userListHtml === "") {
-                        userList.innerHTML = userListHtml + username;
-                    } else {
-                        userList.innerHTML = userListHtml + ", " + username;
+                    let user_list = document.getElementById(mode);
+                    let user_span = document.createElement("span");
+                    user_span.setAttribute("id", type+"-"+username);
+                    if (user_list.childElementCount !== 0) {
+                        user_span.innerHTML = ", ";
                     }
+                    user_span.innerHTML += username + " [";
+                    let delete_span = document.createElement("span");
+                    delete_span.innerHTML = "x";
+                    delete_span.classList.add("text-danger");
+                    delete_span.setAttribute("onclick", "delete_"+type+"(`"+username+"`);");
+                    delete_span.setAttribute("type", "submit");
+                    user_span.appendChild(delete_span);
+                    user_span.innerHTML += "]";
+                    user_list.appendChild(user_span);
                 }
             }
         }

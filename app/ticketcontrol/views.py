@@ -399,9 +399,9 @@ def user_details_view(request, id):
 
 @login_required()
 def user_live_search(request, typed_username):
-    some_users = User.objects.filter(username__contains=typed_username)[:10]
+    users = User.objects.filter(username__contains=typed_username)[:10]
     res = []
-    for user in some_users:
+    for user in users:
         newUser = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
         res.append(newUser)
     return JsonResponse(res, safe=False)  # It's ok. Disables typecheck for dict. Make sure to only pass an array
@@ -697,10 +697,8 @@ def ticket_moderator_add(request, id, username=None):
 
 
 @permission_required("ticketcontrol.change_ticket")
-def ticket_moderator_remove(request, id, username=None):
+def ticket_moderator_remove(request, id, username):
     if request.method == "POST":
-        if username == None:
-            return render_error(request, 406, "Username is required")
         try:
             ticket = Ticket.objects.get(id=id)
             ticket.moderators.remove(User.objects.get(username=username))
@@ -709,8 +707,23 @@ def ticket_moderator_remove(request, id, username=None):
             return render_error(request, 404, "Ticket does not exist")
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
+    return render_error(request, 405, "This page is only for post requests")
+
+
+@login_required()
+def ticket_participant_remove(request, id, username):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
+                ticket.participating.remove(User.objects.get(username=username))
+                return HttpResponse(status=200)
+            else:
+                return render_error(request, 401, "You are not allowed to remove participants from this ticket")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
     return render_error(request, 405, "This page is only for post requests")
 
 
