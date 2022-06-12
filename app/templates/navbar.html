@@ -15,9 +15,9 @@
                         <a class="dropdown-toggle nav-link" id="dropdown-menu-ticket" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">Ticket</a>
                         <div class="dropdown-menu" aria-labelledby="dropdown-menu-ticket">
-                            <a class="dropdown-item" href="{% url 'create_ticket' %}">Open Ticket</a>
-                            <a class="dropdown-item" href="{% url 'my_tickets' %}">My Tickets</a>
-                            <a class="dropdown-item" href="{% url 'manage_tickets' %}">Manage Tickets</a>
+                            <a class="dropdown-item" href="{% url 'create_ticket' %}">Ticket erstellen</a>
+                            <a class="dropdown-item" href="{% url 'my_tickets' %}">Meine Tickets</a>
+                            <a class="dropdown-item" href="{% url 'manage_tickets' %}">Moderator Tickets</a>
                         </div>
                     </div>
                 </li>
@@ -28,13 +28,13 @@
                         <a class="dropdown-toggle nav-link" id="dropdown-menu-administration" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">Administration</a>
                         <div class="dropdown-menu" aria-labelledby="dropdown-menu-administration">
-                            <a class="dropdown-item" href="{% url 'manage_categories' %}">Categories</a>
+                            <a class="dropdown-item" href="{% url 'manage_categories' %}">Kategorien</a>
                             {% if perms.ticketcontrol.change_user or perms.ticketcontrol.add_user %}
-                                <a class="dropdown-item" href="{% url 'manage_users' %}">Users</a>
+                                <a class="dropdown-item" href="{% url 'manage_users' %}">Benutzer</a>
                             {% endif %}
                             {% if user.is_superuser %}
-                                <a class="dropdown-item" href="{% url 'manage_groups' %}">Groups</a>
-                                <a class="dropdown-item" href="{% url 'settings' %}">System settings</a>
+                                <a class="dropdown-item" href="{% url 'manage_groups' %}">Gruppen</a>
+                                <a class="dropdown-item" href="{% url 'settings' %}">Systemeinstellungen</a>
                             {% endif %}
                         </div>
                     </div>
@@ -48,7 +48,7 @@
                         <a class="dropdown-toggle nav-link" id="dropdown-menu-profile" data-toggle="dropdown"
                            aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-menu-profile">
-                            <a class="dropdown-item" href="{% url 'user_details' id=user.id %}">My Profile</a>
+                            <a class="dropdown-item" href="{% url 'user_details' id=user.id %}">Mein Profil</a>
                             <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
                         </div>
                     </div>

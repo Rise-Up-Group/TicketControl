@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Settings{% endblock %}
+{% block title %}Einstellungen{% endblock %}
 
 {% block content %}
     <h1 class="text-center display-4">Einstellungen</h1>
@@ -23,10 +23,10 @@
                                     </div>
                                     <input type="checkbox" id="general.allow-location" name="general.allow-location"
                                            {% if settings.general.allow_location %}checked{% endif %}>
-                                    <label for="general.allow-location">Allow location</label><br>
+                                    <label for="general.allow-location">Standort erlauben</label><br>
                                     <input type="checkbox" id="general.force-location" name="general.force-location"
                                            {% if settings.general.force_location %}checked{% endif %}>
-                                    <label for="general.force-location">Force location</label>
+                                    <label for="general.force-location">Standort erzwingen</label>
                                 </div>
                             </div>
                             <br>
@@ -40,13 +40,12 @@
                                             <input type="checkbox" id="register.allow-custom-username"
                                                    name="register.allow-custom-username"
                                                    {% if settings.register.allow_custom_username %}checked{% endif %}>
-                                            <label for="register.allow-custom-username">Allow custom
-                                                username</label><br>
+                                            <label for="register.allow-custom-username">Benutzerdefinierte Benutzernamen erlauben</label><br>
                                             <input type="checkbox" id="register.email-whitelist-enable"
                                                    name="register.email-whitelist-enable"
                                                    onclick="show_email_whitelist()"
                                                    {% if settings.register.email_whitelist_enable %}checked{% endif %}>
-                                            <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label>
+                                            <label for="register.email-whitelist-enable">E-Mail Whitelist</label>
                                         </div>
                                         <div id="email-whitelist">
                                             <p>E-Mail Whitelist</p>

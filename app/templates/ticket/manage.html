@@ -163,11 +163,11 @@
                             {% if not GET.owner %}
                                 <th>Owner</th>
                             {% endif %}
-                            <th>Participants</th>
-                            <th>Modarators</th>
+                            <th>Teilnehmer</th>
+                            <th>Moderatoren</th>
                             {% if perms.ticketcontrol.unhide_ticket %}
                                 {% if not GET.hidden or GET.hidden == "0" %}
-                                    <th>Hidden</th>
+                                    <th>Versteckt</th>
                                 {% endif %}
                             {% endif %}
                         </tr>
