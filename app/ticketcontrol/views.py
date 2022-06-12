@@ -589,7 +589,7 @@ def register_view(request):
         confirm_password = request.POST['confirm_password']
         if password == confirm_password:
             if len(password) < 8:
-                return render_error(request, 411, "Password must be at least 8 characters long")
+                return render_error(request, 406, "Password must be at least 8 characters long")
             email = request.POST['email']
             firstname = request.POST['firstname']
             lastname = request.POST['lastname']
@@ -621,6 +621,8 @@ def register_view(request):
                         User.send_emailverification_mail(user, request)
                     except SMTPRecipientsRefused:
                         return render_error(request, 500, "Unable to send verification email")
+                    except ConnectionRefusedError:
+                        return render_error(request, 500, "Unable to connect to E-Mail server")
                     return render(request, "user/activate.html",
                                   {'action': 'activate', "half_page": settings.CONTENT["half_page"]})
                 else:
@@ -729,7 +731,12 @@ def user_passwordreset_request_view(request):
                 user = User.objects.get(username=username)
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
-        user.send_passwordreset_mail(request)
+        try:
+            user.send_passwordreset_mail(request)
+        except SMTPRecipientsRefused:
+            return render_error(request, 500, "Unable to send verification email")
+        except ConnectionRefusedError:
+            return render_error(request, 500, "Unable to connect to E-Mail server")
         return render(request, "user/passwordreset_request.html",
                       {"sent_email": True, "half_page": settings.CONTENT["half_page"]})
     return render(request, "user/passwordreset_request.html", {"half_page": settings.CONTENT["half_page"]})
@@ -815,7 +822,12 @@ def user_edit_view(request, id):
                                     break
                         if email_authorized:
                             user.update_user(email=email)
-                            user.send_emailverification_mail(request)
+                            try:
+                                user.send_emailverification_mail(request)
+                            except SMTPRecipientsRefused:
+                                return render_error(request, 500, "Unable to send verification email")
+                            except ConnectionRefusedError:
+                                return render_error(request, 500, "Unable to connect to E-Mail server")
                             return render(request, "user/activate.html", {"half_page": settings.CONTENT["half_page"]})
                         else:
                             return render_error(request, 406, "Your E-Mail address is not white-listed")
