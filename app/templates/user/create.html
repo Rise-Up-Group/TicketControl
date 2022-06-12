@@ -5,11 +5,7 @@
 
 {% block left %}
     <h1 class="display-3 fw-bold ls-tight">Neuer Nutzer</h1>
-    <h2 class="text-primary display-4" id="preview_username">M.Mustermann</h2>
-    <div class="col-md-6 mb-4 mx-auto rounded">
-        <!--<img class="rounded-circle" alt="100x100" src="" data-holder-rendered="true">-->
-        <p class="display-1" id="preview_initials">MM</p>
-    </div>
+    <h2 class="text-primary display-4" id="preview_username"></h2>
     <p class="text-muted">
         Nach dem erstellen eines Nutzers durch einen Administrator / Moderator wird keine E-Mail zur
         bestätigung benötigt. Der User kann sich sofort mit den eingegebenen Nutzerdaten anmelden.
@@ -63,8 +59,8 @@
         <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
     </form>
 
-        <script src="{% static '/js/users.js' %}"></script>
+        <script src="{% static '/js/user.js' %}"></script>
 <script>
-    window.onload = check_username;
+    window.addEventListener("load", check_username);
 </script>
 {% endblock %}

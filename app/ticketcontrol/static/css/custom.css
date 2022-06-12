@@ -1,4 +1,51 @@
+.mt-100 {
+    margin-top: 100px
+}
 
+.nav-link {
+    cursor: pointer;
+}
+
+.card-body {
+    overflow: auto;
+}
+
+/* -------------------- input -------------------- */
+input[type="text"] {
+    min-width: 8em;
+}
+.input-group-append {
+    flex-wrap: wrap;
+}
+
+.btn {
+    margin: 0;
+}
+
+input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+    opacity: 0
+}
+
+select {
+    max-width: 100%;
+}
+
+option.checkbox:before {
+    content: "☐ "
+
+}
+
+option.checkbox:checked:before {
+    content: "☑ "
+}
+
+/* -------------------- file drop box -------------------- */
 .file-drop-box {
     display: flex;
     max-width: 100%;
@@ -29,69 +76,4 @@
 .file-drop-list div {
     white-space: nowrap;
 
-}
-
-.card-body {
-    overflow: auto;
-}
-
-input[type="text"] {
-    min-width: 8em;
-}
-.input-group-append {
-    flex-wrap: wrap;
-}
-
-.btn {
-    margin: 0;
-}
-.choose-file-button {
-    flex-shrink: 0;
-    background-color: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-    padding: 8px 15px;
-    margin-right: 10px;
-    font-size: 12px;
-    text-transform: uppercase
-}
-
-.file-message {
-    font-size: small;
-    font-weight: 300;
-    line-height: 1.4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis
-}
-
-.file-input {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 100%;
-    cursor: pointer;
-    opacity: 0
-}
-
-.mt-100 {
-    margin-top: 100px
-}
-
-.nav-link {
-    cursor: pointer;
-}
-
-select {
-    max-width: 100%;
-}
-
-option.checkbox:before {
-    content: "☐ "
-
-}
-
-option.checkbox:checked:before {
-    content: "☑ "
 }

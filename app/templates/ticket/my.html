@@ -1,10 +1,13 @@
 {% extends "main.html" %}
 
+{% block title %}My tickets{% endblock %}
+
 {% block content %}
     <br>
     <div class="card mb-4">
         <div class="card-header">
-            <h5>Meine Tickets <a style="float: right" class="btn btn-primary" type="button" href="{% url 'create_ticket' %}">Ticket erstellen</a></h5>
+            <h5>Meine Tickets <a style="float: right" class="btn btn-primary" type="button"
+                                 href="{% url 'create_ticket' %}">Ticket erstellen</a></h5>
         </div>
         <div class="card-body">
             {% if tickets.own|length > 0 %}
@@ -42,9 +45,10 @@
                     </tbody>
                 </table>
             {% else %}
-                <p>Aktuell sind keine offenen Tickets vorhanden! <a class="btn btn-link" type="button"
-                                                                    href="{% url 'create_ticket' %}">Ticket
-                    erstellen?</a></p>
+                <p>
+                    Aktuell sind keine offenen Tickets vorhanden!
+                    <a class="btn btn-link" type="button" href="{% url 'create_ticket' %}">Ticket erstellen?</a>
+                </p>
             {% endif %}
         </div>
     </div>

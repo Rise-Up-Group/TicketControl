@@ -7,11 +7,6 @@
 {% block left %}
     <h1 class="display-3 fw-bold ls-tight">Nutzer Bearbeiten</h1>
     <h2 class="text-primary display-4" id="preview_username">{{ content_user.username }}</h2>
-    <div class="col-md-6 mb-4 mx-auto rounded">
-        <!--<img class="rounded-circle" alt="100x100" src="" data-holder-rendered="true">-->
-        <p class="display-1" id="preview_initials">
-            {{ content_user.first_name|make_list|first }}{{ content_user.last_name|make_list|first }}</p>
-    </div>
     <p class="text-muted">
         Die Bearbeitung eines Nutzers erfordert keine Bestätigung. Jede Veränderung wird dem Click auf
         Submit sofort angenommen und ist nicht wiederrufbar. Der User kann seinen Account sofort
@@ -33,13 +28,13 @@
         <div class="form-outline mb-2">
             <label for="firstname">Firstname</label>
             <input type="firstname" id="firstname" name="firstname" class="form-control"
-                   placeholder="Max" value="{{ content_user.first_name }}"
+                   placeholder="Max" value="{{ content_user.first_name }}" oninput="update_username_preview()"
                    required/>
         </div>
         <div class="form-outline mb-2">
             <label for="lastname">Lastname</label>
             <input type="lastname" id="lastname" name="lastname" class="form-control"
-                   placeholder="Mustermann" value="{{ content_user.last_name }}"
+                   placeholder="Mustermann" value="{{ content_user.last_name }}" oninput="update_username_preview()"
                    required/>
         </div>
         <div class="form-outline mb-2">
@@ -77,16 +72,16 @@
         {% endif %}
         {% if can_delete %}
             <a class="btn btn-danger btn-block mb-4"
-               href="" data-toggle="modal" data-target="#deleteUser">Delete</a>
+               href="" data-toggle="modal" data-target="#delete-user">Delete</a>
         {% endif %}
     </form>
     {% if can_delete %}
-        <div class="modal fade" id="deleteUser" tabindex="-1" role="dialog" aria-labelledby="deleteUserLabel"
+        <div class="modal fade" id="delete-user" tabindex="-1" role="dialog" aria-labelledby="delete-user-label"
              aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="deleteUserLabel">Löschen bestätigen</h5>
+                        <h5 class="modal-title" id="delete-user-label">Löschen bestätigen</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -105,5 +100,5 @@
             </div>
         </div>
     {% endif %}
-    <script src="{% static '/js/users.js' %}"></script>
+    <script src="{% static '/js/user.js' %}"></script>
 {% endblock %}

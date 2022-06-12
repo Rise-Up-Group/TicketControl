@@ -1,5 +1,8 @@
 {% extends "main.html" %}
 {% load static %}
+
+{% block title %}Ticket details: {{ ticket.title }}{% endblock %}
+
 {% block content %}
     <div class="container bg-transparent rounded mt-3">
         <div class="input-group mb-3">
@@ -48,15 +51,15 @@
                 </div>
             </div>
         </div>
-    {% if allow_location %}
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text">Standort / Raum</span>
+        {% if allow_location %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Standort / Raum</span>
+                </div>
+                <input id="location" type="text" class="form-control" placeholder="{{ ticket.location }}"
+                       value="{{ ticket.location }}" oninput="show_update_ticket_warning()">
             </div>
-            <input id="location" type="text" class="form-control" placeholder="{{ ticket.location }}"
-                   value="{{ ticket.location }}" oninput="show_update_ticket_warning()">
-        </div>
-    {% endif %}
+        {% endif %}
         <div class="mb-3 row">
             <div class="col-6">
                 <div class="input-group">
@@ -158,7 +161,7 @@
                                         <a class="text-danger" href="" data-toggle="modal"
                                            data-target="#confirm-delete-attachment"
                                            attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-ticket"
-                                           onclick="selectAttachmentForDelete(this);">Delete</a>
+                                           onclick="select_attachment_for_delete(this);">Delete</a>
                                     {% endif %}
                                 </div>
                             {% endfor %}
@@ -166,7 +169,7 @@
                         {% if perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
                             <div class="file-drop-area">
                                 <input class="file-input" type="file" name="attachments-input"
-                                       onchange="updateFileDropArea(this, {{ ticket.id }});" multiple/>
+                                       onchange="update_file_drop_area(this, {{ ticket.id }});" multiple/>
                                 <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
                             </div>
                         {% endif %}
@@ -174,10 +177,10 @@
                 {% endif %}
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ ticket.owner.username }} | {{ ticket.owner.first_name }} {{ ticket.owner.last_name }}
-                    | {{ ticket.creationDate }}
+                    | {{ ticket.creation_date }}
                 </p>
                 {% if perms.ticketcontrol.change_comment or ticket.owner_id == user.id %}
-                    <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
+                    <button class="btn btn-outline-secondary" onclick="make_editable(this);">Bearbeiten</button>
                 {% endif %}
             </form>
         </figure>
@@ -201,7 +204,7 @@
                                                data-target="#confirm-delete-attachment"
                                                attachment-id="{{ attachment.id }}"
                                                file-drop-box-id="file-drop-box-comment-{{ comment.id }}"
-                                               onclick="selectAttachmentForDelete(this);">Delete</a>
+                                               onclick="select_attachment_for_delete(this);">Delete</a>
                                         {% endif %}
                                     </div>
                                 {% endfor %}
@@ -209,17 +212,18 @@
                             {% if perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
                                 <div class="file-drop-area">
                                     <input class="file-input" type="file" name="attachments-input"
-                                           onchange="updateFileDropArea(this, undefined, {{ comment.id }});" multiple/>
+                                           onchange="update_file_drop_area(this, undefined, {{ comment.id }});"
+                                           multiple/>
                                     <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
                                 </div>
                             {% endif %}
                         </div>
                     {% endif %}
                     <p class="blockquote-footer mb-0 font-italic">
-                        {{ comment.creationDate }}
+                        {{ comment.creation_date }}
                     </p>
                     {% if perms.ticketcontrol.change_comment or comment.user_id == user.id %}
-                        <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
+                        <button class="btn btn-outline-secondary" onclick="make_editable(this);">Bearbeiten</button>
                     {% endif %}
                 </form>
             </figure>
@@ -230,14 +234,13 @@
             <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
-                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="5"
-                                          name="comment"></textarea>
+                    <textarea class="form-control" rows="5" name="comment"></textarea>
                 </div>
                 <div class="input file-drop-box text-center" id="file-drop-box-new-comment">
                     <div class="file-drop-list"></div>
                     <div class="file-drop-area">
                         <input class="file-input" type="file" name="attachments-input"
-                               onchange="updateFileDropArea(this);" multiple/>
+                               onchange="update_file_drop_area(this);" multiple/>
                         <span class="btn btn-outline-primary">Datei auswählen oder in Fenster ziehen</span>
                     </div>
                 </div>
@@ -259,12 +262,12 @@
             </form>
         </figure>
     </div>
-    <div class="modal fade" id="change-status" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="change-status" tabindex="-1" role="dialog" aria-labelledby="change-status-title"
+         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Status von Ticket #{{ ticket.id }} ändern</h5>
+                    <h5 class="modal-title" id="change-status-title">Status von Ticket #{{ ticket.id }} ändern</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -288,11 +291,15 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="confirm-delete-attachment" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="confirm-delete-attachment" tabindex="-1" role="dialog"
+         aria-labelledby="confirm-delete-attachment-label" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4>Löschen bestätigen</h4>
+                    <h4 class="modal-title" id="confirm-delete-attachment-title">Löschen bestätigen</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p>Anhang wirklich löschen?</p>
@@ -301,19 +308,19 @@
                     {% csrf_token %}
                     <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
                     <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model"
-                            onclick="deleteAttachment(this);">Löschen
+                            onclick="delete_attachment(this);">Löschen
                     </button>
                 </div>
             </div>
         </div>
     </div>
     {% if not ticket.hidden %}
-        <div class="modal fade" id="hide-ticket" tabindex="-1" role="dialog"
-             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal fade" id="hide-ticket" tabindex="-1" role="dialog" aria-labelledby="hide-ticket-title"
+             aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Ticket #{{ ticket.id }} löschen</h5>
+                        <h5 class="modal-title" id="hide-ticket-title">Ticket #{{ ticket.id }} löschen</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -332,12 +339,12 @@
             </div>
         </div>
     {% endif %}
-    <div class="modal fade" id="delete-ticket" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="delete-ticket" tabindex="-1" role="dialog" aria-labelledby="delete-ticket-title"
+         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Ticket #{{ ticket.id }} aus Datenbank löschen</h5>
+                    <h5 class="modal-title" id="delete-ticket-title">Ticket #{{ ticket.id }} aus Datenbank löschen</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -355,12 +362,12 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="close-ticket" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="close-ticket" tabindex="-1" role="dialog" aria-labelledby="close-ticket-label"
+         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Ticket #{{ ticket.id }} schließen</h5>
+                    <h5 class="modal-title" id="close-ticket-label">Ticket #{{ ticket.id }} schließen</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -379,56 +386,10 @@
         </div>
     </div>
     <script src="{% static '/js/fileDropArea.js' %}"></script>
+    <script src="{% static '/js/ticket.js' %}"></script>
     <script src="{% static '/js/edit.js' %}"></script>
-    <script src="{% static '/js/userSearch.js' %}"></script>
+    <script src="{% static '/js/user.js' %}"></script>
     <script>
-
-        async function add_user(mode, username) {
-            if (username !== "") {
-                let response;
-                let token = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                if (mode === "participants") {
-                    response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {
-                        method: "POST",
-                        headers: {'X-CSRFToken': token}
-                    });
-                } else if (mode === "moderators") {
-                    response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {
-                        method: "POST",
-                        headers: {'X-CSRFToken': token}
-                    });
-                }
-                if (response.ok) {
-                    document.getElementById("search-user").value = "";
-                    let userList = document.getElementById(mode);
-                    let userListHtml = userList.innerHTML.trim();
-                    if (typeof userListHtml === "undefined" || userListHtml === "") {
-                        userList.innerHTML = userListHtml + username;
-                    } else {
-                        userList.innerHTML = userListHtml + ", " + username;
-                    }
-                }
-            }
-        }
-
-        async function show_update_ticket_warning() {
-            document.getElementById("update-ticket-warning").style.display = "";
-            var title = document.getElementById("title").value;
-            var category = document.getElementById("category").value
-            document.getElementById("new_title").value = title;
-            document.getElementById("new_category").value = category;
-            if (document.getElementById("location")) {
-                var location = document.getElementById("location").value;
-                document.getElementById("new_location").value = location;
-            }
-        }
-
-        async function checkOptionsDropdown() {
-            if (document.getElementById("ticket-options-dropdown").childElementCount === 0) {
-                document.getElementById("ticket-options").remove();
-            }
-        }
-
-        window.onload = checkOptionsDropdown;
+        window.addEventListener("load", check_options_dropdown);
     </script>
 {% endblock %}
