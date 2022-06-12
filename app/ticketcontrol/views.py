@@ -638,12 +638,13 @@ def user_create_view(request):
     if (request.method == 'POST'):
         password = request.POST['password']
         if len(password) < 8:
-            return render_error(request, 411, "Password must be at least 8 characters long")
+            return render_error(request, 406, "Password must be at least 8 characters long")
         groups = None
         if request.user.has_perm("ticketcontrol.change_user_permission"):
             groups = request.POST.getlist("groups")
         firstname = request.POST['firstname']
         lastname = request.POST['lastname']
+        username = None
         if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
             username = request.POST['username']
         else:
@@ -767,12 +768,12 @@ def user_live_search(request, typed_username):
 
 
 @login_required()
-def edit_user_view(request, id):
+def user_edit_view(request, id):
     if request.user.has_perm("ticketcontrol.change_user") or request.user.id == id:
         if request.method == 'POST':
             password = request.POST['password']
             if password != "" and len(password) < 8:
-                return render_error(request, 411, "Password must be at least 8 characters long")
+                return render_error(request, 406, "Password must be at least 8 characters long")
             groups = None
             if request.user.has_perm("ticketcontrol.change_user_permission"):
                 groups = request.POST.getlist("groups")

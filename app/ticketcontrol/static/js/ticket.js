@@ -2,16 +2,17 @@ async function add_user(mode, username) {
     if (username !== "") {
         let response;
         let token = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        let ticket_id = document.getElementById("ticket-id").innerHTML
         let type;
         if (mode === "participants") {
             type = "participant";
-            response = await fetch(`{% url 'ticket_add_participant' id=ticket.id %}${username}`, {
+            response = await fetch(`/ticket/${ticket_id}/participants/add/${username}`, {
                 method: "POST",
                 headers: {'X-CSRFToken': token}
             });
         } else if (mode === "moderators") {
             type = "moderator";
-            response = await fetch(`{% url 'ticket_add_moderator' id=ticket.id %}${username}`, {
+            response = await fetch(`/ticket/${ticket_id}/moderators/add/${username}`, {
                 method: "POST",
                 headers: {'X-CSRFToken': token}
             });
