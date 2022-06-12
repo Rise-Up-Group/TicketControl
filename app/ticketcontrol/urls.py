@@ -37,6 +37,7 @@ urlpatterns = [
     path('ticket/<int:id>/participants/add/<str:username>', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/participants/add/', ticket_participant_add, name="ticket_add_participant"),
     path('ticket/<int:id>/moderators/add/<str:username>', ticket_moderator_add, name="ticket_add_moderator"),
+    path('ticket/<int:id>/moderators/remove/<str:username>', ticket_moderator_remove, name="ticket_remove_moderator"),
     path('ticket/<int:id>/moderators/add/', ticket_moderator_add, name="ticket_add_moderator"),
     path('ticket/<int:id>/info/update/', ticket_info_update, name="update_ticket_info"),
     path('ticket/<int:id>/edit', ticket_edit, name="edit_ticket"),

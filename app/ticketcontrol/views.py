@@ -696,6 +696,24 @@ def ticket_moderator_add(request, id, username=None):
     return render_error(request, 405, "This page is only for post requests")
 
 
+@permission_required("ticketcontrol.change_ticket")
+def ticket_moderator_remove(request, id, username=None):
+    if request.method == "POST":
+        if username == None:
+            return render_error(request, 406, "Username is required")
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.moderators.remove(User.objects.get(username=username))
+            return HttpResponse(status=200)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+        # except DatabaseError:
+        # return render_error(request, 409, "Database error") # TODO
+    return render_error(request, 405, "This page is only for post requests")
+
+
 def attachment_access_control(request, id, name=None):
     if name is None:
         name = str(id)

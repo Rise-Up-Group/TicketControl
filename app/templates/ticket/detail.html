@@ -48,15 +48,15 @@
                 </div>
             </div>
         </div>
-    {% if allow_location %}
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text">Standort / Raum</span>
+        {% if allow_location %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Standort / Raum</span>
+                </div>
+                <input id="location" type="text" class="form-control" placeholder="{{ ticket.location }}"
+                       value="{{ ticket.location }}" oninput="show_update_ticket_warning()">
             </div>
-            <input id="location" type="text" class="form-control" placeholder="{{ ticket.location }}"
-                   value="{{ ticket.location }}" oninput="show_update_ticket_warning()">
-        </div>
-    {% endif %}
+        {% endif %}
         <div class="mb-3 row">
             <div class="col-6">
                 <div class="input-group">
@@ -77,14 +77,19 @@
                     <span id="moderators">
                         {% if not moderators.count == 0 %}
                             {% for moderator in moderators %}
-                                {% if forloop.last %}
+                                <form action="{% url 'ticket_remove_moderator' id=ticket.id username=moderator.username %}" method="POST">
+                                    {% csrf_token %}
                                     {{ moderator.username }}
-                                {% else %}
-                                    {{ moderator.username }},
-                                {% endif %}
+                                    <span class="text-red" type="submit" value="Submit">
+                                        (x)
+                                    </span>
+                                    {% if not forloop.last %}
+                                        ,
+                                    {% endif %}
+                                </form>
                             {% endfor %}
                         {% endif %}
-                    </span>
+                </span>
                 </p>
             </div>
             <div class="col-6">
