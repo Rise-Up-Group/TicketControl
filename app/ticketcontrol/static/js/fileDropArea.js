@@ -65,12 +65,20 @@ async function delete_attachment(button) {
     }
 }
 
-function update_file_drop_area(input, ticket = undefined, comment = undefined) {
+async function update_file_drop_area(input, ticket = undefined, comment = undefined) {
     let file_drop_list = input.parentNode.parentNode.querySelector("div.file-drop-list");
     for (let file of input.files) {
         let div = document.createElement("div");
         let file_link = document.createElement("a");
-        file_link.innerHTML = file.name + " (size: " + file.size + ")";
+        let size_unit = "B";
+        let size = file.size;
+        ["KB", "MB", "GB"].forEach(unit => {
+            if (size > 2048) {
+                size_unit = unit;
+                size = parseInt(size / 1024);
+            }
+        });
+        file_link.innerHTML = file.name + " (size: " + size + size_unit + ")";
         file_link.style.color = "grey";
         div.appendChild(file_link);
         file_drop_list.appendChild(div);

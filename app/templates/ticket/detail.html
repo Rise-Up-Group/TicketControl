@@ -177,7 +177,7 @@
                 {% endif %}
                 <p class="blockquote-footer mb-0 font-italic">
                     {{ ticket.owner.username }} | {{ ticket.owner.first_name }} {{ ticket.owner.last_name }}
-                    | {{ ticket.creationDate }}
+                    | {{ ticket.creation_date }}
                 </p>
                 {% if perms.ticketcontrol.change_comment or ticket.owner_id == user.id %}
                     <button class="btn btn-outline-secondary" onclick="make_editable(this);">Bearbeiten</button>
@@ -220,7 +220,7 @@
                         </div>
                     {% endif %}
                     <p class="blockquote-footer mb-0 font-italic">
-                        {{ comment.creationDate }}
+                        {{ comment.creation_date }}
                     </p>
                     {% if perms.ticketcontrol.change_comment or comment.user_id == user.id %}
                         <button class="btn btn-outline-secondary" onclick="make_editable(this);">Bearbeiten</button>

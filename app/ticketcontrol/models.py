@@ -44,13 +44,10 @@ class User(BaseUser):
     email_confirmed = models.BooleanField(default=False)
     reset_password = models.BooleanField(default=False)
 
-    def add_user(email, firstname, lastname, username, password, groups, is_active, email_confirmed=False,
+    def add_user(email:str, firstname:str, lastname:str, username:str, password:str, groups, is_active, email_confirmed=False,
                  is_superuser=None):
-        # TODO: preview in javascrip and show to user
-        # TODO: nickname has to be unique (possibly with db)
         if username == "":
             username = firstname[0:1] + ". " + lastname
-        # Creates ticketcontrol.user; never create a BaseUser
         user = User.objects.create_user(username=username, password=password, email=email)
         user.first_name = firstname
         user.last_name = lastname
@@ -101,9 +98,9 @@ class User(BaseUser):
 
             self.is_superuser = False
             self.is_staff = False
-            adminId = Group.objects.get(name="admin").id
-            for groupId in groups:
-                if int(groupId) == adminId:
+            admin_id = Group.objects.get(name="admin").id
+            for group_id in groups:
+                if int(group_id) == admin_id:
                     self.is_superuser = True
                     self.is_staff = True
 
@@ -188,7 +185,7 @@ class Category(models.Model):
 
 class Comment(models.Model):
     content = models.TextField()
-    creationDate = models.DateTimeField(auto_now_add=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
     num = models.IntegerField()
     ticket = models.ForeignKey("Ticket", on_delete=models.DO_NOTHING)
     user = models.ForeignKey("User", on_delete=models.DO_NOTHING)
@@ -212,7 +209,7 @@ class Ticket(models.Model):
         OPEN = 'Open'
         WAITING = 'Waiting'
 
-    def add_ticket(title, description, owner, category, location=None):
+    def add_ticket(title:str, description:str, owner, category, location=None):
         ticket = Ticket(title=title, description=description, owner=owner, category=category, status='Unassigned', location=location)
         ticket.save()
         return ticket
@@ -252,7 +249,7 @@ class Ticket(models.Model):
         super().delete()
 
     status = models.CharField(max_length=15, choices=StatusChoices.choices, default=StatusChoices.UNASSIGNED)
-    creationDate = models.DateTimeField(auto_now_add=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
     owner = models.ForeignKey(User, related_name="tickets", on_delete=models.DO_NOTHING)
@@ -269,10 +266,17 @@ class Ticket(models.Model):
 class Attachment(models.Model):
     filename = models.CharField(max_length=255)
     size = models.IntegerField()
-    creationDate = models.DateTimeField(auto_now_add=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
     ticket = models.ForeignKey(Ticket, on_delete=models.DO_NOTHING, null=True, blank=True)
     comment = models.ForeignKey(Comment, on_delete=models.DO_NOTHING, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, blank=False)
 
     def __str__(self):
-        return self.filename + " (size: " + str(self.size) + ")"
+        size_unit = "B"
+        size = self.size
+        for unit in ["KB", "MB", "GB"]:
+            if size > 2048:
+                size_unit = unit
+                size = int(size / 1024)
+
+        return self.filename + " (size: " + str(size) + size_unit + ")"
