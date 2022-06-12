@@ -41,7 +41,7 @@
                                             <label for="register.allow-custom-username">Allow custom
                                                 username</label><br>
                                             <input type="checkbox" id="register.email-whitelist-enable"
-                                                   name="register.email-whitelist-enable" onclick="showEmailWhitelist()"
+                                                   name="register.email-whitelist-enable" onclick="show_email_whitelist()"
                                                    {% if settings.register.email_whitelist_enable %}checked{% endif %}>
                                             <label for="register.email-whitelist-enable">Enable E-Mail whitelist</label>
                                         </div>
@@ -64,13 +64,13 @@
                                                                type="button"
                                                                data-toggle="dropdown" aria-haspopup="true"
                                                                aria-expanded="false"
-                                                               onclick="removeEmailWhitelistEntry(this);">Löschen</a>
+                                                               onclick="remove_email_whitelist_entry(this);">Löschen</a>
                                                         </div>
                                                     </div>
                                                 {% endfor %}
                                             </div>
                                             <a class="btn btn-primary btn-block text-white"
-                                               onclick="addEmailWhitelistEntry();">Domain/E-Mail hinzufügen</a>
+                                               onclick="add_email_whitelist_entry();">Domain/E-Mail hinzufügen</a>
                                         </div>
                                     </div>
                                 </div>
@@ -158,7 +158,7 @@
                     <i>*Hier kann übliches html/css/js (incl. Bootstrap 5) verwendet werden*</i></p>
                 <div class="form-group">
                 <textarea class="form-control" id="content.privacy-and-policy" name="content.privacy-and-policy"
-                          rows="5">{{ settings.content.privacy_and_policy }}</textarea>
+                          rows="5">{{ settings.content.privacy }}</textarea>
                 </div>
             </div>
             <div class="px-4 py-5 px-md-5 text-center text-lg-start">
@@ -188,32 +188,9 @@
             </div>
         </form>
     </div>
-    <script src="{% static '/js/emailWhitelist.js' %}"></script>
+    <script src="{% static '/js/settings.js' %}"></script>
     <script>
-        function showEmailWhitelist() {
-            let checkbox = document.getElementById("register.email-whitelist-enable");
-            let whitelist = document.getElementById("email-whitelist");
-            if (checkbox.checked) {
-                whitelist.style.display = "block";
-            } else {
-                whitelist.style.display = "None";
-            }
-        }
-
-        window.addEventListener("load", showEmailWhitelist);
-
-        function add_textarea_open_listeners() {
-            document.querySelectorAll("textarea").forEach(textarea => {
-                textarea.addEventListener("focus", event => {
-                    event.target.rows = 25;
-                    event.target.parentNode.parentNode.scrollIntoView();
-                });
-                textarea.addEventListener("focusout", event => {
-                    event.target.rows = 5;
-                });
-            })
-        }
-
         window.addEventListener("load", add_textarea_open_listeners);
+        window.addEventListener("load", show_email_whitelist);
     </script>
 {% endblock %}

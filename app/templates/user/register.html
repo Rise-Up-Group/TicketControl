@@ -34,9 +34,9 @@
             <label for="username">Username</label>
             {% if allow_custom_username %}
                 <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" value="" id="checkCustomUsername"
-                           name="checkCustomUsername" onclick="showCustomUsername()">
-                    <label class="form-check-label" for="checkCustomUsername">Custom username</label>
+                    <input class="form-check-input" type="checkbox" value="" id="custom-username-checkbox"
+                           name="custom-username-checkbox" onclick="show_custom_username()">
+                    <label class="form-check-label" for="custom-username-checkbox">Custom username</label>
                 </div>
             {% endif %}
             <input type="username" id="username" name="username" class="form-control" oninput="check_username(false)"
@@ -48,6 +48,6 @@
 
     <script src="{% static '/js/users.js' %}"></script>
 <script>
-    window.onload = check_username;
+    window.addEventListener("load", check_username);
 </script>
 {% endblock %}

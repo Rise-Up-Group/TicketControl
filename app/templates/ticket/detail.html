@@ -158,7 +158,7 @@
                                         <a class="text-danger" href="" data-toggle="modal"
                                            data-target="#confirm-delete-attachment"
                                            attachment-id="{{ attachment.id }}" file-drop-box-id="file-drop-box-ticket"
-                                           onclick="selectAttachmentForDelete(this);">Delete</a>
+                                           onclick="select_attachment_for_delete(this);">Delete</a>
                                     {% endif %}
                                 </div>
                             {% endfor %}
@@ -177,7 +177,7 @@
                     | {{ ticket.creationDate }}
                 </p>
                 {% if perms.ticketcontrol.change_comment or ticket.owner_id == user.id %}
-                    <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
+                    <button class="btn btn-outline-secondary" onclick="make_editable(this);">Bearbeiten</button>
                 {% endif %}
             </form>
         </figure>
@@ -201,7 +201,7 @@
                                                data-target="#confirm-delete-attachment"
                                                attachment-id="{{ attachment.id }}"
                                                file-drop-box-id="file-drop-box-comment-{{ comment.id }}"
-                                               onclick="selectAttachmentForDelete(this);">Delete</a>
+                                               onclick="select_attachment_for_delete(this);">Delete</a>
                                         {% endif %}
                                     </div>
                                 {% endfor %}
@@ -219,7 +219,7 @@
                         {{ comment.creationDate }}
                     </p>
                     {% if perms.ticketcontrol.change_comment or comment.user_id == user.id %}
-                        <button class="btn btn-outline-secondary" onclick="makeEditable(this);">Bearbeiten</button>
+                        <button class="btn btn-outline-secondary" onclick="make_editable(this);">Bearbeiten</button>
                     {% endif %}
                 </form>
             </figure>
@@ -301,7 +301,7 @@
                     {% csrf_token %}
                     <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
                     <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model"
-                            onclick="deleteAttachment(this);">Löschen
+                            onclick="delete_attachment(this);">Löschen
                     </button>
                 </div>
             </div>
@@ -400,12 +400,12 @@
                 }
                 if (response.ok) {
                     document.getElementById("search-user").value = "";
-                    let userList = document.getElementById(mode);
-                    let userListHtml = userList.innerHTML.trim();
-                    if (typeof userListHtml === "undefined" || userListHtml === "") {
-                        userList.innerHTML = userListHtml + username;
+                    let user_list = document.getElementById(mode);
+                    let user_list_html = user_list.innerHTML.trim();
+                    if (typeof user_list_html === "undefined" || user_list_html === "") {
+                        user_list.innerHTML = user_list_html + username;
                     } else {
-                        userList.innerHTML = userListHtml + ", " + username;
+                        user_list.innerHTML = user_list_html + ", " + username;
                     }
                 }
             }
@@ -413,22 +413,22 @@
 
         async function show_update_ticket_warning() {
             document.getElementById("update-ticket-warning").style.display = "";
-            var title = document.getElementById("title").value;
-            var category = document.getElementById("category").value
+            let title = document.getElementById("title").value;
+            let category = document.getElementById("category").value
             document.getElementById("new_title").value = title;
             document.getElementById("new_category").value = category;
             if (document.getElementById("location")) {
-                var location = document.getElementById("location").value;
+                let location = document.getElementById("location").value;
                 document.getElementById("new_location").value = location;
             }
         }
 
-        async function checkOptionsDropdown() {
+        async function check_options_dropdown() {
             if (document.getElementById("ticket-options-dropdown").childElementCount === 0) {
                 document.getElementById("ticket-options").remove();
             }
         }
 
-        window.onload = checkOptionsDropdown;
+        window.addEventListener("load", check_options_dropdown);
     </script>
 {% endblock %}

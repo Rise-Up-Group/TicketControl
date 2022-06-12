@@ -23,12 +23,12 @@ async function check_username(autocorrect=true, old_username="") {
     }
 }
 
-async function search_and_update_usernames(typed_username, id, multipleEnable=true) {
+async function search_and_update_usernames(typed_username, id, multiple_enable=true) {
     let seperator = typed_username.lastIndexOf(",");
-    let typed, otherUsernames = "";
-    if (multipleEnable && seperator !== -1) {
+    let typed, other_usernames = "";
+    if (multiple_enable && seperator !== -1) {
         typed = typed_username.substr(seperator+1).trim();
-        otherUsernames = typed_username.substr(0, seperator+1).trim();
+        other_usernames = typed_username.substr(0, seperator+1).trim();
     } else {
         typed = typed_username.trim();
     }
@@ -36,19 +36,19 @@ async function search_and_update_usernames(typed_username, id, multipleEnable=tr
     let dropdown = $("#"+id);
     dropdown.children().remove();
     for (user of users) {
-        dropdown.append($(`<option>${otherUsernames} ${user.username}</option>`));
+        dropdown.append($(`<option>${other_usernames} ${user.username}</option>`));
     }
 }
 
 async function update_username() {
-    let firstname = document.getElementById("firstname").value.substring(0, 1);
-    let lastname = document.getElementById("lastname").value;
-    document.getElementById("username").value = firstname + "." + lastname;
+    let first_name = document.getElementById("firstname").value.substring(0, 1);
+    let last_name = document.getElementById("lastname").value;
+    document.getElementById("username").value = first_name + "." + last_name;
     check_username();
 }
 
-function showCustomUsername() {
-    let checkbox = document.getElementById("checkCustomUsername");
+function show_custom_username() {
+    let checkbox = document.getElementById("custom-username-checkbox");
     if (checkbox.checked) {
         document.getElementById("username").removeAttribute("disabled");
     } else {
