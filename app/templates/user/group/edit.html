@@ -1,6 +1,6 @@
 {% extends "half_page.html" %}
 
-{% block title %}Gruppe bearbeiten{% endblock %}
+{% block title %}Edit group{% endblock %}
 
 {% block right %}
     <h3 class="display-4">Gruppe bearbeiten</h3>
@@ -26,16 +26,16 @@
             <input class="btn btn-primary btn-block" type="submit" name="submit" id="submit" value="Update">
         {% endif %}
         {% if can_delete %}
-            <a class="btn btn-danger btn-block" data-toggle="modal" href="" data-target="#deleteGroup">Delete</a>
+            <a class="btn btn-danger btn-block" data-toggle="modal" href="" data-target="#delete-group">Delete</a>
         {% endif %}
     </form>
     <!-- Modal -->
-    <div class="modal fade" id="deleteGroup" tabindex="-1" role="dialog" aria-labelledby="deleteGroupLabel"
+    <div class="modal fade" id="delete-group" tabindex="-1" role="dialog" aria-labelledby="delete-group-label"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteGroupLabel">Löschen bestätigen</h5>
+                    <h5 class="modal-title" id="delete-group-label">Löschen bestätigen</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

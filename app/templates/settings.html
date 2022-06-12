@@ -1,6 +1,8 @@
 {% extends 'main.html' %}
 {% load static %}
+
 {% block title %}Settings{% endblock %}
+
 {% block content %}
     <h1 class="text-center display-4">Einstellungen</h1>
     <hr>
@@ -48,10 +50,8 @@
                                         <div id="email-whitelist">
                                             <p>E-Mail Whitelist</p>
                                             <p class="text-muted">Bei jedem Eintrag der E-Mail whitelist kann entweder
-                                                die
-                                                Domain
-                                                beginnend mit einem <code>@</code> oder eine RexEx-pattern angegeben
-                                                werden
+                                                die Domain beginnend mit einem <code>@</code> oder eine RexEx-pattern
+                                                angegeben werden
                                             </p>
                                             <div id="register.email_whitelist" class="mb-4">
                                                 {% for entry in settings.register.email_whitelist %}

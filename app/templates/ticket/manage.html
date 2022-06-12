@@ -1,6 +1,8 @@
 {% extends "main.html" %}
 {% load static %}
 
+{% block title %}Manage tickets{% endblock %}
+
 {% block content %}
     <br>
     <div class="row">
@@ -233,6 +235,6 @@
             })
         }
 
-        window.onload = update_hidden_filter_radiobuttons;
+        window.addEventListener("load", update_hidden_filter_radiobuttons);
     </script>
 {% endblock %}

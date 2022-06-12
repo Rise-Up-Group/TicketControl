@@ -65,7 +65,7 @@ async function delete_attachment(button) {
     }
 }
 
-function updateFileDropArea(input, ticket = undefined, comment = undefined) {
+function update_file_drop_area(input, ticket = undefined, comment = undefined) {
     let file_drop_list = input.parentNode.parentNode.querySelector("div.file-drop-list");
     for (let file of input.files) {
         let div = document.createElement("div");
