@@ -523,7 +523,6 @@ def username_check(username, old_username=None):
     return {"status": 200}
 
 
-@login_required()
 def username_check_view(request, username):
     res = username_check(username)
     content = ""
