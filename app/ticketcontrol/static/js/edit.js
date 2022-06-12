@@ -1,4 +1,4 @@
-function makeEditable(button) {
+function make_editable(button) {
     let form = button.parentNode;
     form.querySelectorAll("[data-input]").forEach(element => {
         let input;

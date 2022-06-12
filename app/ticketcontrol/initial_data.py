@@ -2,7 +2,7 @@ from django.contrib.auth.models import Permission as BasePermission, Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 
-from .models import Permission, User, Category
+from .models import *
 
 
 def load_permissions():
@@ -99,15 +99,13 @@ def load_categories():
     if Category.objects.count() == 0:
         Category.objects.create(name="Default")
         Category.objects.create(name="Other")
-        Category.objects.create(name="IT-Support")
 
 
 def load_initial_data():
-    if "ticketcontrol_permission" in connection.introspection.table_names():
+    table_names = connection.introspection.table_names()
+    if "ticketcontrol_permission" in table_names and "auth_group" in table_names and "ticketcontrol_user" in table_names \
+            and "ticketcontrol_category" in table_names and "ticketcontrol_ticket" in table_names:
         load_permissions()
-        if "auth_group" in connection.introspection.table_names():
-            load_groups()
-            if "ticketcontrol_user" in connection.introspection.table_names():
-                load_admin_user()
-    if "ticketcontrol_category" in connection.introspection.table_names():
+        load_groups()
+        load_admin_user()
         load_categories()
