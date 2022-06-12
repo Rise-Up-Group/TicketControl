@@ -927,6 +927,7 @@ def ticket_close(request, id):
             return redirect("dashboard")
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
+    return render_error(request, 405, "This page is only for post requests")
 
 
 @permission_required("ticketcontrol.unhide_ticket")
