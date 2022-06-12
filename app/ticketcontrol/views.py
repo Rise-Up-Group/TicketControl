@@ -44,6 +44,10 @@ def render_error(request, status, message=""):
     return render(request, "error.html", context, status=status)
 
 
+def handler404(request, exception):
+    return render_error(request, 404, exception)
+
+
 def dashboard_view(request):
     if request.user.is_authenticated:
         own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False).exclude(
@@ -100,7 +104,7 @@ def handle_user_filter(GET, objects, name):
 
 
 @login_required()
-def manage_tickets_view(request):
+def ticket_manage_view(request):
     if request.user.has_perm("ticketcontrol.view_ticket"):
         tickets = Ticket.objects.all()
     else:
@@ -138,8 +142,6 @@ def manage_tickets_view(request):
 
 @login_required()
 def ticket_view(request, id):
-    id = str(id)  # TODO: no conversion
-
     try:
         ticket = Ticket.objects.get(pk=id)
         if ticket.hidden and not request.user.has_perm("ticketcontrol.unhide_ticket"):
@@ -160,8 +162,353 @@ def ticket_view(request, id):
         return render_error(request, 404, "Ticket does not exist")
 
 
-def handler404(request, exception, template_name="error.html"):
-    return render_error(request, 404)
+@login_required()
+def ticket_new_view(request):
+    if request.method == 'POST':
+        try:
+            user = User.objects.get(id=request.user.id)
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+        location = None
+        if settings.GENERAL["allow_location"]:
+            location = request.POST["location"]
+            if settings.GENERAL["force_location"] and not location:
+                return render_error(request, 406, "You have to fill in the location")
+        if not request.POST["title"] or not request.POST["description"]:
+            return render_error(request, 406, "You have to fill in title and description.")
+        ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
+                                   Category.objects.get(id=request.POST["category"]), location)
+        for attachment_id in request.POST.getlist("attachments"):
+            try:
+                attachment = Attachment.objects.get(id=attachment_id)
+            except Attachment.DoesNotExist:
+                return render_error(request, 404, "Attachment does not exist")
+            if attachment.user.id == request.user.id:
+                ticket.attachment_set.add(attachment)
+        ticket.save()
+        return redirect('/ticket/my')
+    else:
+        context = {"categories": Category.objects.all(),
+                   "allow_location": settings.GENERAL["allow_location"],
+                   "force_location": settings.GENERAL["force_location"]}
+        return render(request, "ticket/new.html", context)
+
+
+@login_required()
+def ticket_comment_add(request, id):
+    if request.method == 'POST':
+        try:
+            ticket = Ticket.objects.get(id=id)
+            user = User.objects.get(id=request.user.id)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm(
+                "ticketcontrol.view_ticket"):
+            return render_error(request, 404, "Ticket does not exist")
+
+        comment = ticket.add_comment(request.POST["comment"], user)
+        for attachment_id in request.POST.getlist("attachments"):
+            try:
+                attachment = Attachment.objects.get(id=attachment_id)
+            except Attachment.DoesNotExist:
+                return render_error(request, 404, "Attachment does not exist")
+            if attachment.user.id == request.user.id:
+                comment.attachment_set.add(attachment)
+        comment.save()
+        return redirect('/ticket/' + str(id))
+    return render_error(request, 405, "This site is only available for POST requests")
+
+
+@login_required()
+def comment_edit(request, id):
+    if request.method == "POST":
+        try:
+            comment = Comment.objects.get(id=id)
+        except Comment.DoesNotExist:
+            return render_error(request, 404, "Comment not found")
+        if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == comment.user.id:
+            comment.content = request.POST['content']
+            comment.save()
+            return redirect('ticket_view', id=comment.ticket_id)
+        else:
+            return render_error(request, 403,
+                                "You aren't allowed to edit comments or you aren't the owner of this comment")
+    else:
+        return render_error(request, 405, "This site is only available for POST requests")
+
+
+@login_required()
+def ticket_participant_add(request, id, username=None):
+    if request.method == "POST":
+        if username is None:
+            return render_error(request, 406, "Username is required")
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
+                ticket.participating.add(User.objects.get(username=username))
+                return HttpResponse(status=200)
+            return render_error(request, 404, "Ticket does not exist")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+    return render_error(request, 405, "This page is only for post requests")
+
+
+@permission_required("ticketcontrol.change_ticket")
+def ticket_moderator_add(request, id, username=None):
+    if request.method == "POST":
+        if username is None:
+            return render_error(request, 406, "Username is required")
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.moderators.add(User.objects.get(username=username))
+            if ticket.status == "Unassigned":
+                ticket.set_status("Assigned")
+                ticket.save()
+            return HttpResponse(status=200)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+    return render_error(request, 405, "This page is only for post requests")
+
+
+@permission_required("ticketcontrol.change_ticket_status")
+def ticket_status_update(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_status(request.POST['status_choice'])
+            return redirect("ticket_view", id=id)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+    return render_error(request, 400, "This site is only available for post requests")
+
+
+@login_required()
+def ticket_close(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket_status"):
+                ticket.set_status(str(Ticket.StatusChoices.CLOSED))
+            else:
+                return redirect("login")
+            return redirect("dashboard")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+    return render_error(request, 405, "This page is only for post requests")
+
+
+@permission_required("ticketcontrol.delete_ticket")
+def ticket_delete(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.delete()
+            return redirect("dashboard")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+    else:
+        return render_error(request, 405, "This site is only available for POST requests")
+
+
+@permission_required("ticketcontrol.hide_ticket")
+def ticket_hide(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_hidden(True)
+            return redirect("dashboard")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+    return render_error(request, 405, "This site is only available for POST requests")
+
+
+@permission_required("ticketcontrol.unhide_ticket")
+def ticket_unhide(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.set_hidden(False)
+            return redirect("ticket_view", id=id)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+    return render_error(request, 405, "This site is only available for POST requests")
+
+
+@login_required()
+def ticket_info_update(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
+                if request.POST['title'] != "" and not None:
+                    ticket.title = request.POST['title']
+                if settings.GENERAL["allow_location"]:
+                    if (request.POST['location'] != "" and not None) or not settings.GENERAL["force_location"]:
+                        ticket.location = request.POST['location']
+                if not request.POST['category'] in (0, "", "0", None):
+                    ticket.category = Category.objects.get(id=request.POST['category'])
+                ticket.save()
+            else:
+                return render_error(request, 403,
+                                    "You aren't allowed to edit tickets or you aren't the owner of the ticket")
+            return redirect("ticket_view", id=id)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket doesn't exist")
+    else:
+        return render_error(request, 405, "This site is only available for POST requests")
+
+
+@login_required()
+def ticket_edit(request, id):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == ticket.owner.id:
+            ticket.description = request.POST['description']
+            ticket.save()
+            return redirect('ticket_view', id=id)
+        else:
+            return render_error(request, 403, "You aren't allowed to edit this ticket")
+    else:
+        return render_error(request, 405, "This site is only available for POST requests")
+
+
+@login_required()
+def attachment_access_control(request, id, name=None):
+    if name is None:
+        name = str(id)
+    try:
+        attachment = Attachment.objects.get(id=id)
+    except Attachment.DoesNotExist:
+        return render_error(request, 404, "Attachment does not exist")
+    authorized = False
+    if request.user.id == attachment.user.id:
+        authorized = True
+    elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
+        authorized = True
+    elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
+        authorized = True
+    elif request.user.has_perm("ticketcontrol.view_attachment"):
+        authorized = True
+    else:
+        for participant in attachment.ticket.participating.all():
+            if request.user.id == participant.id:
+                authorized = True
+        if not authorized:
+            for moderator in attachment.ticket.moderators.all():
+                if request.user.id == moderator.id:
+                    authorized = True
+    if authorized:
+        if not settings.DEBUG:
+            response = HttpResponse()
+            # Content-type will be detected by nginx
+            del response['Content-Type']
+            response['X-Accel-Redirect'] = '/serve_attachment/' + str(id)
+            response['Content-Disposition'] = 'attachment;filename="' + name + '"'
+            return response
+        else:
+            response = serve(request, str(id), document_root="uploads")
+            response['Content-Disposition'] = 'attachment;filename="' + name + '"'
+            return response
+    else:
+        return render_error(request, 403)
+
+
+@login_required()
+def attachment_upload(request):
+    if request.method == "POST":
+        try:
+            file = request.FILES['attachment']
+            attachment = Attachment.objects.create(filename=file.name, size=file.size, ticket=None, comment=None,
+                                                   user=User.objects.get(id=request.user.id))
+            with open("uploads/" + str(attachment.id), "wb+") as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+            if request.POST.get("ticket"):
+                ticket = Ticket.objects.get(id=request.POST['ticket'])
+                if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.add_attachment"):
+                    attachment.ticket = ticket
+            elif request.POST.get("comment"):
+                comment = Comment.objects.get(id=request.POST['comment'])
+                if request.user.id == comment.user.id or request.user.has_perm("ticketcontrol.add_attachment"):
+                    attachment.comment = comment
+            attachment.save()
+            return HttpResponse(str(attachment.id))
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except Comment.DoesNotExist:
+            return render_error(request, 404, "Comment does not exist")
+        except PermissionError:
+            return render_error(request, 403, "Unable to save attachment")
+    return render_error(request, 405, "This site is only available for post requests")
+
+
+@login_required()
+def attachment_edit(request, id):
+    if request.method == "POST":
+        try:
+            attachment = Attachment.objects.get(id=id)
+        except Attachment.DoesNotExist:
+            return render_error(request, 404, "Attachment does not exist")
+        authorized = False
+        if request.user.id == attachment.user.id or request.user.has_perm("ticketcontrol.delete_attachment"):
+            authorized = True
+        elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
+            authorized = True
+        elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
+            authorized = True
+        if authorized:
+            try:
+                os.remove("uploads/" + str(id))
+            except PermissionError:
+                return render_error(request, 403, "Unable to delete attachment")
+            except FileNotFoundError:
+                return render_error(request, 404, "Unable to delete attachment: File not found")
+            attachment.delete()
+            return HttpResponse(status=200)
+        else:
+            return render_error(request, 403, "You aren't allowed to delete this attachment")
+    return render_error(request, 405, "This site is only available for post requests")
+
+
+def username_check(username, old_username=None):
+    if User.objects.filter(username=username).exists():
+        i = 1
+        while User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username and i < 200:
+            i += 1
+        if User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username:
+            return {"status": 406}
+        return {"status": 409, "username": username + str(i)}
+    return {"status": 200}
+
+
+@login_required()
+def username_check_view(request, username):
+    res = username_check(username)
+    content = ""
+    if res["status"] == 409:
+        content = res["username"]
+    return HttpResponse(status=res["status"], content=content)
+
+
+@login_required()
+def username_live_search(request, typed_username):
+    some_users = User.objects.filter(username__contains=typed_username)[:10]
+    res = []
+    for user in some_users:
+        newUser = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
+        res.append(newUser)
+    return JsonResponse(res, safe=False)  # It's ok. Disables typecheck for dict. Make sure to only pass an array
 
 
 def logout_view(request):
@@ -208,8 +555,8 @@ def login_view(request):
 def register_view(request):
     if request.method == 'POST':
         password = request.POST['password']
-        confirmPassword = request.POST['confirm_password']
-        if password == confirmPassword:
+        confirm_password = request.POST['confirm_password']
+        if password == confirm_password:
             if len(password) < 8:
                 return render_error(request, 411, "Password must be at least 8 characters long")
             email = request.POST['email']
@@ -219,7 +566,7 @@ def register_view(request):
                 username = request.POST['username']
             else:
                 username = firstname[0:1] + "." + lastname
-            res = check_username(username)
+            res = username_check(username)
             if res["status"] == 409:
                 username = res["username"]
 
@@ -250,31 +597,43 @@ def register_view(request):
             else:
                 return render_error(request, 409, "Username or email already exists")
         else:
-            # Should not happen anyway
             return render_error(request, 409, "Passwords do not match")
     return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"],
                                                   "allow_custom_username": settings.REGISTER["allow_custom_username"]})
 
-def check_username(username, old_username=None):
-    if User.objects.filter(username=username).exists():
-        i = 1
-        while User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username and i < 200:
-            i += 1
-        if User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username:
-            return {"status": 406}
-        return {"status": 409, "username": username + str(i)}
-    return {"status": 200}
+
+@permission_required("ticketcontrol.add_user")
+def user_create_view(request):
+    if (request.method == 'POST'):
+        password = request.POST['password']
+        if len(password) < 8:
+            return render_error(request, 411, "Password must be at least 8 characters long")
+        groups = None
+        if request.user.has_perm("ticketcontrol.change_user_permission"):
+            groups = request.POST.getlist("groups")
+        firstname = request.POST['firstname']
+        lastname = request.POST['lastname']
+        if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
+            username = request.POST['username']
+        else:
+            username = firstname[0:1] + "." + lastname
+        res = username_check(username)
+        if res["status"] == 409:
+            username = res["username"]
+
+        if not User.objects.filter(email=request.POST['email']).exists() and not res["status"] == 406:
+            User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
+                          username, password, groups, request.POST.get("is_active", False) == "on",
+                          email_confirmed=True)
+            return redirect("manage_users")
+        else:
+            return render_error(request, 409, "Username or E-Mail already exists")
+    return render(request, "user/create.html", {"groups": Group.objects.all(),
+                                                "can_change_permission": request.user.has_perm(
+                                                    "ticketcontrol.change_user_permission")})
 
 
-def check_username_view(request, username):
-    res = check_username(username)
-    content = ""
-    if res["status"] == 409:
-        content = res["username"]
-    return HttpResponse(status=res["status"], content=content)
-
-
-def activate_user_view(request):
+def user_activate_view(request):
     if request.method == "POST":
         try:
             user = User.objects.get(id=request.POST['user-id'])
@@ -344,39 +703,8 @@ def user_passwordreset_request_view(request):
     return render(request, "user/passwordreset_request.html", {"half_page": settings.CONTENT["half_page"]})
 
 
-@permission_required("ticketcontrol.add_user")
-def create_user_view(request):
-    if (request.method == 'POST'):
-        password = request.POST['password']
-        if len(password) < 8:
-            return render_error(request, 411, "Password must be at least 8 characters long")
-        groups = None
-        if request.user.has_perm("ticketcontrol.change_user_permission"):
-            groups = request.POST.getlist("groups")
-        firstname = request.POST['firstname']
-        lastname = request.POST['lastname']
-        if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
-            username = request.POST['username']
-        else:
-            username = firstname[0:1] + "." + lastname
-        res = check_username(username)
-        if res["status"] == 409:
-            username = res["username"]
-
-        if not User.objects.filter(email=request.POST['email']).exists() and not res["status"] == 406:
-            User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                          username, password, groups, request.POST.get("is_active", False) == "on",
-                          email_confirmed=True)
-            return redirect("manage_users")
-        else:
-            return render_error(request, 409, "Username or E-Mail already exists")
-    return render(request, "user/create.html", {"groups": Group.objects.all(),
-                                                "can_change_permission": request.user.has_perm(
-                                                    "ticketcontrol.change_user_permission")})
-
-
 @permission_required("ticketcontrol.view_user")
-def manage_users_view(request):
+def user_manage_view(request):
     return render(request, "user/manage.html",
                   {"users": User.objects.all().exclude(username="ghost"),
                    "can_create": request.user.has_perm("ticketcontrol.create_user"),
@@ -398,17 +726,7 @@ def user_details_view(request, id):
 
 
 @login_required()
-def user_live_search(request, typed_username):
-    some_users = User.objects.filter(username__contains=typed_username)[:10]
-    res = []
-    for user in some_users:
-        newUser = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
-        res.append(newUser)
-    return JsonResponse(res, safe=False)  # It's ok. Disables typecheck for dict. Make sure to only pass an array
-
-
-@login_required()
-def edit_user_view(request, id):
+def user_edit_view(request, id):
     if request.user.has_perm("ticketcontrol.change_user") or request.user.id == id:
         if request.method == 'POST':
             password = request.POST['password']
@@ -427,7 +745,7 @@ def edit_user_view(request, id):
             if settings.REGISTER["allow_custom_username"]:
                 username = request.POST['username']
                 if user.username != username:
-                    res = check_username(username, user.username)
+                    res = username_check(username, user.username)
                     if res["status"] == 409:
                         username = res["username"]
                     if res["status"] == 406:
@@ -483,10 +801,10 @@ def edit_user_view(request, id):
 
 @login_required()
 def profile_view(request):
-    return edit_user_view(request, request.user.id)
+    return user_edit_view(request, request.user.id)
 
 
-def unrestricted_delete_user_view(request, id):
+def unrestricted_user_delete_view(request, id):
     if request.method == 'POST':
         try:
             user = User.objects.get(id=id)
@@ -500,27 +818,26 @@ def unrestricted_delete_user_view(request, id):
 
 
 @permission_required("ticketcontrol.delete_user")
-def restricted_delete_user_view(request, id):
-    return unrestricted_delete_user_view(request, id)
+def restricted_user_delete_view(request, id): # TODO
+    return unrestricted_user_delete_view(request, id)
 
 
 @login_required()
-def delete_user_view(request, id):
-    if (request.user.id == id):
-        return unrestricted_delete_user_view(request, id)
-    return restricted_delete_user_view(request, id)
+def user_delete_view(request, id):
+    if request.user.id == id:
+        return unrestricted_user_delete_view(request, id)
+    return restricted_user_delete_view(request, id)
 
 
 @permission_required("auth.view_group")
-def manage_groups_view(request):
+def group_manage_view(request):
     return render(request, "user/group/manage.html",
                   {"groups": Group.objects.all().order_by("id"),
                    "can_create": request.user.has_perm("ticketcontrol.create_user")})
 
 
-# noinspection PyPep8Naming
 @permission_required("auth.create_group")
-def create_group_view(request):
+def group_create_view(request):
     if request.method == 'POST':
         try:
             group = Group.objects.create(name=request.POST['name'])
@@ -542,7 +859,7 @@ def create_group_view(request):
 
 
 @permission_required("auth.view_group")
-def edit_group_view(request, id):
+def group_edit_view(request, id):
     can_edit = request.user.has_perm("auth.change_group")
     try:
         group = Group.objects.get(id=id)
@@ -552,39 +869,39 @@ def edit_group_view(request, id):
         if group.name != "admin" and group.name != "moderator" and group.name != "user":
             group.name = request.POST['name']
         if group.name != "admin":  # admin is superuser anyway
-            groupPermissions = group.permissions.all()
+            group_permissions = group.permissions.all()
             permissions = request.POST.getlist("permissions")
-            allPermissions = Permission.objects.all()
-            for permission in groupPermissions:
+            all_permissions = Permission.objects.all()
+            for permission in group_permissions:
                 if not permission.id in permissions:
                     group.permissions.remove(permission.id)
 
             for permission in permissions:
-                inGroupPermissions = False
-                for perm in groupPermissions:
+                in_group_permissions = False
+                for perm in group_permissions:
                     if perm.id == permission:
-                        inGroupPermissions = True
-                inAllPermissions = False
-                for perm in allPermissions:
+                        in_group_permissions = True
+                in_all_permissions = False
+                for perm in all_permissions:
                     if int(perm.perm.id) == int(permission):
-                        inAllPermissions = True
-                if not inGroupPermissions and inAllPermissions:
+                        in_all_permissions = True
+                if not in_group_permissions and in_all_permissions:
                     group.permissions.add(permission)
             group.save()
             return redirect("manage_groups")
         return render_error(request, 403, "Editing default group \"admin\" is not allowed.")
-    groupPermissions = []
+    group_permissions = []
     for permissionId in group.permissions.all().values_list("id", flat=True):
-        groupPermissions.append(permissionId)
+        group_permissions.append(permissionId)
     return render(request, "user/group/edit.html",
-                  {"group": group, "group_permissions": groupPermissions, "permissions": Permission.objects.all(),
+                  {"group": group, "group_permissions": group_permissions, "permissions": Permission.objects.all(),
                    "can_change": can_edit, "can_delete": request.user.has_perm(
                       "ticketcontrol.delete_group") and group.name != "admin" and group.name != "moderator" and group.name != "user",
                    "half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("auth.delete_group")
-def delete_group_view(request, id):
+def group_delete_view(request, id):
     try:
         group = Group.objects.get(id=id)
     except Group.DoesNotExist:
@@ -594,217 +911,6 @@ def delete_group_view(request, id):
     if request.method == 'POST':
         group.delete()
         return redirect("manage_groups")
-
-
-@login_required()
-def ticket_new_view(request):
-    if request.method == 'POST':
-        try:
-            user = User.objects.get(id=request.user.id)
-        except User.DoesNotExist:
-            return render_error(request, 404, "User does not exist")
-        location = None
-        if settings.GENERAL["allow_location"]:
-            location = request.POST["location"]
-            if settings.GENERAL["force_location"] and not location:
-                return render_error(request, 406, "You have to fill in the location")
-        if not request.POST["title"] or not request.POST["description"]:
-            return render_error(request, 406, "You have to fill in title and description.")
-        ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
-                                   Category.objects.get(id=request.POST["category"]), location)
-        for attachment_id in request.POST.getlist("attachments"):
-            try:
-                attachment = Attachment.objects.get(id=attachment_id)
-            except Attachment.DoesNotExist:
-                return render_error(request, 404, "Attachment does not exist")
-            if attachment.user.id == request.user.id:
-                ticket.attachment_set.add(attachment)
-        ticket.save()
-        return redirect('/ticket/my')
-    else:
-        context = {"categories": Category.objects.all(),
-                   "allow_location": settings.GENERAL["allow_location"],
-                   "force_location": settings.GENERAL["force_location"]}
-        return render(request, "ticket/new.html", context)
-
-
-@login_required()
-def ticket_comment_add(request, id):
-    if request.method == 'POST':
-        try:
-            ticket = Ticket.objects.get(id=id)
-            user = User.objects.get(id=request.user.id)
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        except User.DoesNotExist:
-            return render_error(request, 404, "User does not exist")
-        if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm(
-                "ticketcontrol.view_ticket"):
-            return render_error(request, 404, "Ticket does not exist")
-
-        comment = ticket.add_comment(request.POST["comment"], user)
-        for attachment_id in request.POST.getlist("attachments"):
-            try:
-                attachment = Attachment.objects.get(id=attachment_id)
-            except Attachment.DoesNotExist:
-                return render_error(request, 404, "Attachment does not exist")
-            if attachment.user.id == request.user.id:
-                comment.attachment_set.add(attachment)
-        comment.save()
-        return redirect('/ticket/' + str(id))
-    return render_error(request, 405, "This site is only available for POST requests")
-
-
-@login_required()
-def ticket_participant_add(request, id, username=None):
-    if request.method == "POST":
-        if username == None:
-            return render_error(request, 406, "Username is required")
-        try:
-            ticket = Ticket.objects.get(id=id)
-            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
-                ticket.participating.add(User.objects.get(username=username))
-                return HttpResponse(status=200)
-            return render_error(request, 404, "Ticket does not exist")
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        except User.DoesNotExist:
-            return render_error(request, 404, "User does not exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
-    return render_error(request, 405, "This page is only for post requests")
-
-
-@permission_required("ticketcontrol.change_ticket")
-def ticket_moderator_add(request, id, username=None):
-    if request.method == "POST":
-        if username == None:
-            return render_error(request, 406, "Username is required")
-        try:
-            ticket = Ticket.objects.get(id=id)
-            ticket.moderators.add(User.objects.get(username=username))
-            if ticket.status == "Unassigned":
-                ticket.set_status("Assigned")
-                ticket.save()
-            return HttpResponse(status=200)
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        except User.DoesNotExist:
-            return render_error(request, 404, "User does not exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
-    return render_error(request, 405, "This page is only for post requests")
-
-
-def attachment_access_control(request, id, name=None):
-    if name is None:
-        name = str(id)
-    try:
-        attachment = Attachment.objects.get(id=id)
-    except Attachment.DoesNotExist:
-        return render_error(request, 404, "Attachment does not exist")
-    authorized = False
-    if request.user.id == attachment.user.id:
-        authorized = True
-    elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
-        authorized = True
-    elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
-        authorized = True
-    elif request.user.has_perm("ticketcontrol.view_attachment"):
-        authorized = True
-    else:
-        for participant in attachment.ticket.participating.all():
-            if request.user.id == participant.id:
-                authorized = True
-        if not authorized:
-            for moderator in attachment.ticket.moderators.all():
-                if request.user.id == moderator.id:
-                    authorized = True
-    if authorized:
-        if not settings.DEBUG:
-            response = HttpResponse()
-            # Content-type will be detected by nginx
-            del response['Content-Type']
-            response['X-Accel-Redirect'] = '/serve_attachment/' + str(id)
-            response['Content-Disposition'] = 'attachment;filename="' + name + '"'
-            return response
-        else:
-            response = serve(request, str(id), document_root="uploads")
-            response['Content-Disposition'] = 'attachment;filename="' + name + '"'
-            return response
-    else:
-        return render_error(request, 403)
-
-
-def upload_attachment(request):
-    if request.method == "POST":
-        try:
-            file = request.FILES['attachment']
-            attachment = Attachment.objects.create(filename=file.name, size=file.size, ticket=None, comment=None,
-                                                   user=User.objects.get(id=request.user.id))
-            with open("uploads/" + str(attachment.id), "wb+") as destination:
-                for chunk in file.chunks():
-                    destination.write(chunk)
-            if request.POST.get("ticket"):
-                ticket = Ticket.objects.get(id=request.POST['ticket'])
-                if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.add_attachment"):
-                    attachment.ticket = ticket
-            elif request.POST.get("comment"):
-                comment = Comment.objects.get(id=request.POST['comment'])
-                if request.user.id == comment.user.id or request.user.has_perm("ticketcontrol.add_attachment"):
-                    attachment.comment = comment
-            attachment.save()
-            return HttpResponse(str(attachment.id))
-        except User.DoesNotExist:
-            return render_error(request, 404, "User does not exist")
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        except Comment.DoesNotExist:
-            return render_error(request, 404, "Comment does not exist")
-        except PermissionError:
-            return render_error(request, 403, "Unable to save attachment")
-    return render_error(request, 405, "This site is only available for post requests")
-
-
-def delete_attachment(request, id):
-    if request.method == "POST":
-        try:
-            attachment = Attachment.objects.get(id=id)
-        except Attachment.DoesNotExist:
-            return render_error(request, 404, "Attachment does not exist")
-        authorized = False
-        if request.user.id == attachment.user.id or request.user.has_perm("ticketcontrol.delete_attachment"):
-            authorized = True
-        elif attachment.ticket is not None and request.user.id == attachment.ticket.owner.id:
-            authorized = True
-        elif attachment.comment is not None and request.user.id == attachment.comment.user.id:
-            authorized = True
-        if authorized:
-            try:
-                os.remove("uploads/" + str(id))
-            except PermissionError:
-                return render_error(request, 403, "Unable to delete attachment")
-            except FileNotFoundError:
-                return render_error(request, 404, "Unable to delete attachment: File not found")
-            attachment.delete()
-            return HttpResponse(status=200)
-        else:
-            return render_error(request, 403, "You aren't allowed to delete this attachment")
-    return render_error(request, 405, "This site is only available for post requests")
-
-
-@permission_required("ticketcontrol.change_ticket_status")
-def ticket_status_update(request, id):
-    if request.method == "POST":
-        try:
-            ticket = Ticket.objects.get(id=id)
-            ticket.set_status(request.POST['status_choice'])
-            return redirect("ticket_view", id=id)
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
-    return render_error(request, 400, "This site is only available for post requests")
 
 
 def settings_view(request):
@@ -862,7 +968,7 @@ def settings_view(request):
 
 
 @permission_required("ticketcontrol.add_category")
-def create_category_view(request):
+def category_create_view(request):
     if request.method == "POST":
         Category.objects.create(name=request.POST['name'])
         return redirect("manage_categories")
@@ -871,7 +977,7 @@ def create_category_view(request):
 
 
 @permission_required("ticketcontrol.view_category")
-def edit_category_view(request, id):
+def category_edit_view(request, id):
     try:
         category = Category.objects.get(id=id)
     except Category.DoesNotExist:
@@ -889,7 +995,7 @@ def edit_category_view(request, id):
 
 
 @permission_required("ticketcontrol.delete_category")
-def delete_category_view(request, id):
+def category_delete_view(request, id):
     if request.method == "POST":
         try:
             category = Category.objects.get(id=id)
@@ -902,126 +1008,10 @@ def delete_category_view(request, id):
 
 
 @permission_required("ticketcontrol.view_category")
-def manage_categories_view(request):
+def category_manage_view(request):
     return render(request, "category/manage.html",
                   {"categories": Category.objects.all(),
                    "can_create": request.user.has_perm("ticketcontrol.create_category")})
-
-
-@permission_required("ticketcontrol.hide_ticket")
-def ticket_hide(request, id):
-    if request.method == "POST":
-        try:
-            ticket = Ticket.objects.get(id=id)
-            ticket.set_hidden(True)
-            return redirect("dashboard")
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
-    return render_error(request, 405, "This site is only available for POST requests")
-
-
-@login_required()
-def ticket_close(request, id):
-    if request.method == "POST":
-        try:
-            ticket = Ticket.objects.get(id=id)
-            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket_status"):
-                ticket.set_status(str(Ticket.StatusChoices.CLOSED))
-            else:
-                return redirect("login")
-            return redirect("dashboard")
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-    return render_error(request, 405, "This page is only for post requests")
-
-
-@permission_required("ticketcontrol.unhide_ticket")
-def ticket_unhide(request, id):
-    if request.method == "POST":
-        try:
-            ticket = Ticket.objects.get(id=id)
-            ticket.set_hidden(False)
-            return redirect("ticket_view", id=id)
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
-    return render_error(request, 405, "This site is only available for POST requests")
-
-
-@permission_required("ticketcontrol.delete_ticket")
-def ticket_delete(request, id):
-    if request.method == "POST":
-        try:
-            ticket = Ticket.objects.get(id=id)
-            ticket.delete()
-            return redirect("dashboard")
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
-    else:
-        return render_error(request, 405, "This site is only available for POST requests")
-
-
-def ticket_info_update(request, id):
-    if request.method == "POST":
-        try:
-            ticket = Ticket.objects.get(id=id)
-            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
-                if request.POST['title'] != "" and not None:
-                    ticket.title = request.POST['title']
-                if settings.GENERAL["allow_location"]:
-                    if (request.POST['location'] != "" and not None) or not settings.GENERAL["force_location"]:
-                        ticket.location = request.POST['location']
-                if not request.POST['category'] in (0, "", "0", None):
-                    ticket.category = Category.objects.get(id=request.POST['category'])
-                ticket.save()
-            else:
-                return render_error(request, 403,
-                                    "You aren't allowed to edit tickets or you aren't the owner of the ticket")
-            return redirect("ticket_view", id=id)
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket doesn't exist")
-        # except DatabaseError:
-        # return render_error(request, 409, "Database error") # TODO
-    else:
-        return render_error(request, 405, "This site is only available for POST requests")
-
-
-def edit_comment(request, id):
-    if request.method == "POST":
-        try:
-            comment = Comment.objects.get(id=id)
-        except Comment.DoesNotExist:
-            return render_error(request, 404, "Comment not found")
-        if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == comment.user.id:
-            comment.content = request.POST['content']
-            comment.save()
-            return redirect('ticket_view', id=comment.ticket_id)
-        else:
-            return render_error(request, 403,
-                                "You aren't allowed to edit comments or you aren't the owner of this comment")
-    else:
-        return render_error(request, 405, "This site is only available for POST requests")
-
-
-def ticket_edit(request, id):
-    if request.method == "POST":
-        try:
-            ticket = Ticket.objects.get(id=id)
-        except Ticket.DoesNotExist:
-            return render_error(request, 404, "Ticket does not exist")
-        if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == ticket.owner.id:
-            ticket.description = request.POST['description']
-            ticket.save()
-            return redirect('ticket_view', id=id)
-        else:
-            return render_error(request, 403, "You aren't allowed to edit this ticket")
-    else:
-        return render_error(request, 405, "This site is only available for POST requests")
 
 
 def imprint_view(request):
