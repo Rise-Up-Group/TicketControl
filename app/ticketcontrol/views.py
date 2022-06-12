@@ -804,29 +804,21 @@ def profile_view(request):
     return user_edit_view(request, request.user.id)
 
 
-def unrestricted_user_delete_view(request, id):
-    if request.method == 'POST':
-        try:
-            user = User.objects.get(id=id)
-        except User.DoesNotExist:
-            return render_error(request, 404, "User does not exist")
-        if user.username not in ("ghost", "admin"):
-            user.delete()
-        else:
-            return render_error(request, 403, "Deleting user " + user.username + " is not allowed")
-        return redirect("manage_users")
-
-
-@permission_required("ticketcontrol.delete_user")
-def restricted_user_delete_view(request, id): # TODO
-    return unrestricted_user_delete_view(request, id)
-
-
 @login_required()
 def user_delete_view(request, id):
-    if request.user.id == id:
-        return unrestricted_user_delete_view(request, id)
-    return restricted_user_delete_view(request, id)
+    if request.method == 'POST':
+        if request.user.id == id or request.user.has_perm("ticketcontrol.delete_user"):
+            try:
+                user = User.objects.get(id=id)
+            except User.DoesNotExist:
+                return render_error(request, 404, "User does not exist")
+            if user.username not in ("ghost", "admin"):
+                user.delete()
+            else:
+                return render_error(request, 403, "Deleting user " + user.username + " is not allowed")
+            return redirect("manage_users")
+        return redirect("login")
+    return render_error(request, 405, "This site is only available for POST requests")
 
 
 @permission_required("auth.view_group")
