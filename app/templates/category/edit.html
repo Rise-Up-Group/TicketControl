@@ -1,7 +1,7 @@
 {% extends "half_page.html" %}
 {% load static %}
 
-{% block title %}Edit Category: {{ category.name }}{% endblock %}
+{% block title %}Kategorie bearbeiten: {{ category.name }}{% endblock %}
 
 {% block left %}
     <h1 class="my-5 display-3 fw-bold ls-tight">
@@ -9,11 +9,6 @@
         <br>
         <span class="text-primary display-4">by RiseUp Group</span>
     </h1>
-    <p class="text-muted">
-        Kategorien erleichtern die Suche und Zuweisung der einzelnen Tickets. Ein Moderator kann im Moderator Panel auf
-        einen Aufgabenbereich, wie z.B. IT-Support, Filtern und schneller und einfacher arbeiten. Kategorien ermöglichen
-        u.A. die Zusammenarbeit mehrerer Abteilungen in einem Ticketsystem.
-    </p>
 {% endblock %}
 
 {% block right %}
@@ -31,11 +26,11 @@
         {% endif %}
         {% if can_delete %}
             <a class="btn btn-danger btn-block mb-4"
-               href="" data-toggle="modal" data-target="#selete-category">Delete</a>
+               href="" data-toggle="modal" data-target="#delete-category">Löschen</a>
         {% endif %}
     </form>
     {% if can_delete %}
-        <div class="modal fade" id="selete-category" tabindex="-1" role="dialog" aria-labelledby="delete-category-label"
+        <div class="modal fade" id="delete-category" tabindex="-1" role="dialog" aria-labelledby="delete-category-label"
              aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -49,7 +44,7 @@
                         <p class="h5">Möchtest du wirklich die Kategorie {{ category.name }} löschen?</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
                         <form method="POST" action="{% url 'delete_category' id=category.id %}">
                             {% csrf_token %}
                             <input class="btn btn-danger" type="submit" value="Delete">

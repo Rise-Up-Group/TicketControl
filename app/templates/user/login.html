@@ -10,16 +10,16 @@
     <form method="POST" action="{% url 'login' %}">
         {% csrf_token %}
         <div class="form-outline mb-4">
-            <label for="username">E-Mail / Username</label>
+            <label for="username">E-Mail / Nutzername</label>
             <input type="text" id="username" name="username" class="form-control" autofocus required/>
         </div>
         <div class="form-outline mb-4">
-            <label for="password">Password</label>
+            <label for="password">Passwort</label>
             <input type="password" id="password" name="password" class="form-control" required/>
         </div>
         <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
         {% if next %}<input type="hidden" name="next" id="next" value="{{ next }}">{% endif %}
     </form>
-    Don't have a login? <a href="{% url 'register' %}">Register</a><br>
-    Forgot password? <a href="{% url 'reset_password_request' %}">Reset</a>
+    Noch nicht registriert? <a href="{% url 'register' %}">Registrieren</a><br>
+    Passwort vergessen? <a href="{% url 'reset_password_request' %}">Zurücksetzen</a>
 {% endblock %}

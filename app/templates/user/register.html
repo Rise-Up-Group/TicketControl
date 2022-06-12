@@ -1,10 +1,10 @@
 {% extends "half_page.html" %}
 {% load static %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Registrieren{% endblock %}
 
 {% block right %}
-    <h3 class="display-4">Sign Up</h3>
+    <h3 class="display-4">Registrieren</h3>
     <form method="POST" action="{% url 'register' %}" autocomplete="new-password">
         {% csrf_token %}
         <div class="form-outline mb-2">
@@ -12,26 +12,26 @@
             <input type="email" id="email" name="email" class="form-control" autofocus required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="firstname">Firstname</label>
+            <label for="firstname">Vorname</label>
             <input type="firstname" id="firstname" name="firstname" class="form-control"
                    oninput="update_username()" required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="lastname">Lastname</label>
+            <label for="lastname">Nachname</label>
             <input type="lastname" id="lastname" name="lastname" class="form-control"
                    oninput="update_username()" required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="password">Password</label>
+            <label for="password">Passwort</label>
             <input type="password" id="password" name="password" class="form-control" required minlength="8"/>
         </div>
         <div class="form-outline mb-2">
-            <label for="password_retype">Password</label>
+            <label for="password_retype">Passwort wiederholen</label>
             <input type="password" id="password_retype" name="confirm_password"
                    class="form-control" required minlength="8"/>
         </div>
         <div class="form-outline mb-4">
-            <label for="username">Username</label>
+            <label for="username">Nutzername</label>
             {% if allow_custom_username %}
                 <div class="form-check mb-2">
                     <input class="form-check-input" type="checkbox" value="" id="custom-username-checkbox"
@@ -44,7 +44,7 @@
         </div>
         <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
     </form>
-    Have a login? <a href="{% url 'login' %}">Login</a>
+    Schon registriert? <a href="{% url 'login' %}">Login</a>
 
     <script src="{% static '/js/user.js' %}"></script>
 <script>

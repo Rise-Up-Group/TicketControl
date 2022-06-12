@@ -1,6 +1,6 @@
 {% extends "half_page.html" %}
 
-{% block title %}Edit group{% endblock %}
+{% block title %}Gruppe bearbeiten{% endblock %}
 
 {% block right %}
     <h3 class="display-4">Gruppe bearbeiten</h3>
@@ -23,10 +23,10 @@
             </select>
         </div>
         {% if can_change %}
-            <input class="btn btn-primary btn-block" type="submit" name="submit" id="submit" value="Update">
+            <input class="btn btn-primary btn-block" type="submit" name="submit" id="submit" value="Speichern">
         {% endif %}
         {% if can_delete %}
-            <a class="btn btn-danger btn-block" data-toggle="modal" href="" data-target="#delete-group">Delete</a>
+            <a class="btn btn-danger btn-block" data-toggle="modal" href="" data-target="#delete-group">Löschen</a>
         {% endif %}
     </form>
     <!-- Modal -->
@@ -44,7 +44,7 @@
                     <p class="h5">Möchtest du wirklich die Gruppe {{ group.name }} löschen?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
                     <form method="POST" action="{% url 'delete_group' id=group.id %}">
                         {% csrf_token %}
                         <input class="btn btn-danger" type="submit" value="Delete">
