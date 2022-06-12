@@ -837,7 +837,7 @@ def settings_view(request):
             content['frontpage'] = request.POST['content.frontpage']
             content['half_page'] = request.POST['content.half-page']
             content['imprint'] = request.POST['content.imprint']
-            content['privacy_and_policy'] = request.POST['content.privacy-and-policy']
+            content['privacy'] = request.POST['content.privacy-and-policy']
 
             register = settings_json['register']
             register['allow_custom_username'] = request.POST.get("register.allow-custom-username", False) == "on"
@@ -1028,5 +1028,5 @@ def imprint_view(request):
     return render(request, "imprint.html", {"imprint": settings.CONTENT["imprint"]})
 
 
-def privacy_and_policy_view(request):
-    return render(request, "privacy_and_policy.html", {"privacy_and_policy": settings.CONTENT["privacy_and_policy"]})
+def privacy_view(request):
+    return render(request, "privacy.html", {"privacy": settings.CONTENT["privacy"]})
