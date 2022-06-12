@@ -7,6 +7,7 @@
     <div class="container bg-transparent rounded mt-3">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
+                <span id="ticket-id" style="display:none;">{{ ticket.id }}</span>
                 <span class="input-group-text">#{{ ticket.id }}</span>
                 <span class="input-group-text">{{ ticket.status }}</span>
             </div>
@@ -46,7 +47,7 @@
                         <div role="separator" class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
                             zuweisen</a>
-                        <a class="dropdown-item" href="#">Zuweisung ändern</a>
+                        <a class="dropdown-item" type="button" data-toggle="modal" data-target="#assign-moderator">Moderator zuweisen</a>
                     {% endif %}
                 </div>
             </div>
@@ -80,14 +81,19 @@
                     <span id="moderators">
                         {% if not moderators.count == 0 %}
                             {% for moderator in moderators %}
-                                {% if forloop.last %}
-                                    {{ moderator.username }}
-                                {% else %}
-                                    {{ moderator.username }},
-                                {% endif %}
+                                <span id="moderator-{{ moderator.username }}">
+                                {{ moderator.username }}
+                                    {% if perms.ticketcontrol.change_ticket %}
+                                        [<span class="text-danger" type="submit"
+                                              onclick="delete_moderator(`{{ moderator.username }}`);">x</span>]
+                                    {% endif %}
+                                    {% if not forloop.last %}
+                                        ,
+                                    {% endif %}
+                                </span>
                             {% endfor %}
                         {% endif %}
-                    </span>
+                </span>
                 </p>
             </div>
             <div class="col-6">
@@ -111,11 +117,16 @@
                     <span id="participants">
                         {% if not participants.count == 0 %}
                             {% for participant in participants %}
-                                {% if forloop.last %}
-                                    {{ participant.username }}
-                                {% else %}
-                                    {{ participant.username }},
-                                {% endif %}
+                                <span id="participant-{{ participant.username }}">
+                                {{ participant.username }}
+                                    {% if perms.ticketcontrol.change_ticket %}
+                                        [<span class="text-danger" type="submit"
+                                              onclick="delete_participant(`{{ participant.username }}`);">x</span>]
+                                    {% endif %}
+                                    {% if not forloop.last %}
+                                        ,
+                                    {% endif %}
+                                </span>
                             {% endfor %}
                         {% endif %}
                     </span>
@@ -382,6 +393,37 @@
                         <button type="submit" class="btn btn-danger">Schließen</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="assign-moderator" tabindex="-1" role="dialog"
+         aria-labelledby="assign-moderator-title" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assign-moderator-title">Assign moderator</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="dropdown" id="moderator-searchbar">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">@</div>
+                        </div>
+                        <input type="text" class="form-control" id="search-user" placeholder="Username"
+                               list="moderator-search-dropdown-menu"
+                               oninput="search_and_update_usernames(this.value, 'moderator-search-dropdown-menu', false);"
+                               onchange="add_user(`moderators`, this.value);">
+                    </div>
+                    <datalist id="user-search-dropdown-menu">
+                        <!--Will be filled in with js-->
+                    </datalist>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>

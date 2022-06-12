@@ -276,6 +276,37 @@ def ticket_moderator_add(request, id, username=None):
     return render_error(request, 405, "This page is only for post requests")
 
 
+@permission_required("ticketcontrol.change_ticket")
+def ticket_moderator_remove(request, id, username):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            ticket.moderators.remove(User.objects.get(username=username))
+            return HttpResponse(status=200)
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+    return render_error(request, 405, "This page is only for post requests")
+
+
+@login_required()
+def ticket_participant_remove(request, id, username):
+    if request.method == "POST":
+        try:
+            ticket = Ticket.objects.get(id=id)
+            if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
+                ticket.participating.remove(User.objects.get(username=username))
+                return HttpResponse(status=200)
+            else:
+                return render_error(request, 401, "You are not allowed to remove participants from this ticket")
+        except Ticket.DoesNotExist:
+            return render_error(request, 404, "Ticket does not exist")
+        except User.DoesNotExist:
+            return render_error(request, 404, "User does not exist")
+    return render_error(request, 405, "This page is only for post requests")
+
+
 @permission_required("ticketcontrol.change_ticket_status")
 def ticket_status_update(request, id):
     if request.method == "POST":
@@ -726,7 +757,17 @@ def user_details_view(request, id):
 
 
 @login_required()
-def user_edit_view(request, id):
+def user_live_search(request, typed_username):
+    users = User.objects.filter(username__contains=typed_username)[:10]
+    res = []
+    for user in users:
+        new_user = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
+        res.append(new_user)
+    return JsonResponse(res, safe=False)  # It's ok. Disables typecheck for dict. Make sure to only pass an array
+
+
+@login_required()
+def edit_user_view(request, id):
     if request.user.has_perm("ticketcontrol.change_user") or request.user.id == id:
         if request.method == 'POST':
             password = request.POST['password']
