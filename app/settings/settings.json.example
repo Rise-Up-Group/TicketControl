@@ -1,10 +1,10 @@
 {
   "email_server": {
-    "smtp_host": "smtp.ionos.de",
+    "smtp_host": "smtp.examle.com",
     "smtp_port": 465,
     "smtp_use_tls": true,
     "smtp_use_ssl": false,
-    "smtp_user": "noreply@riseupgroup.net",
+    "smtp_user": "noreply@example.com",
     "smtp_password": ""
   },
   "content": {
@@ -19,7 +19,7 @@
     "email_whitelist": []
   },
   "general": {
-    "contact_email": "contact@riseupgroup.net",
+    "contact_email": "contact@example.com",
     "allow_location": true,
     "force_location": false,
     "meme_mode": false

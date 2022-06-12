@@ -46,9 +46,10 @@ def render_error(request, status, message=""):
 
 def dashboard_view(request):
     if request.user.is_authenticated:
-        own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False).exclude(status=str(Ticket.StatusChoices.CLOSED))
-        part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id,
-                                                                                                  status=str(Ticket.StatusChoices.CLOSED))
+        own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False).exclude(
+            status=str(Ticket.StatusChoices.CLOSED))
+        part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(
+            owner=request.user.id).exclude(status=str(Ticket.StatusChoices.CLOSED))
         context = {'tickets': {'own': own_tickets, 'part': part_tickets}}
         return render(request, "dashboard.html", context)
     else:
@@ -57,12 +58,12 @@ def dashboard_view(request):
 
 @login_required()
 def mytickets_view(request):
-    own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False).exclude(status=str(Ticket.StatusChoices.CLOSED))
-    part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(owner=request.user.id,
-                                                                                moderators=request.user.id,
-                                                                                status=str(Ticket.StatusChoices.CLOSED))
-    mod_tickets = Ticket.objects.filter(moderators=request.user.id, hidden=False).exclude(owner=request.user.id,
-                                                                                          status=str(Ticket.StatusChoices.CLOSED))
+    own_tickets = Ticket.objects.filter(owner=request.user.id, hidden=False).exclude(
+        status=str(Ticket.StatusChoices.CLOSED))
+    part_tickets = Ticket.objects.filter(participating=request.user.id, hidden=False).exclude(
+        owner=request.user.id).exclude(moderators=request.user.id).exclude(status=str(Ticket.StatusChoices.CLOSED))
+    mod_tickets = Ticket.objects.filter(moderators=request.user.id, hidden=False).exclude(
+        owner=request.user.id).exclude(status=str(Ticket.StatusChoices.CLOSED))
     context = {'tickets': {'own': own_tickets, 'part': part_tickets, 'mod': mod_tickets}}
     return render(request, "ticket/my.html", context)
 
@@ -75,10 +76,10 @@ def handle_filter(GET, objects, name):
             if not (name + "_type" in GET and GET[name + "_type"]):
                 filter[name] = GET[name]
             else:
-                filter[name+"__iexact"] = GET[name]
+                filter[name + "__iexact"] = GET[name]
             return objects.filter(**filter)
         elif GET[name + "_type"] == "is_not":
-            filter[name+"__iexact"] = GET[name]
+            filter[name + "__iexact"] = GET[name]
             return objects.exclude(**filter)
         elif GET[name + "_type"] == "contain":
             filter[name + "__icontains"] = GET[name]
@@ -200,7 +201,8 @@ def login_view(request):
             error = "Wrong username or password"
     if request.user.is_authenticated:
         return redirect("dashboard")
-    return render(request, "user/login.html", {"error": error, "next": next, "half_page": settings.CONTENT["half_page"]})
+    return render(request, "user/login.html",
+                  {"error": error, "next": next, "half_page": settings.CONTENT["half_page"]})
 
 
 def register_view(request):
@@ -241,7 +243,8 @@ def register_view(request):
                         User.send_emailverification_mail(user, request)
                     except SMTPRecipientsRefused:
                         return render_error(request, 500, "Unable to send verification email")
-                    return render(request, "user/activate.html", {'action': 'activate', "half_page": settings.CONTENT["half_page"]})
+                    return render(request, "user/activate.html",
+                                  {'action': 'activate', "half_page": settings.CONTENT["half_page"]})
                 else:
                     return render_error(request, 406, "Your E-Mail address is not white-listed")
             else:
@@ -259,8 +262,9 @@ def check_username(username, old_username=None):
             i += 1
         if User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username:
             return {"status": 406}
-        return {"status": 409, "username": username+str(i)}
+        return {"status": 409, "username": username + str(i)}
     return {"status": 200}
+
 
 def check_username_view(request, username):
     res = check_username(username)
@@ -295,7 +299,8 @@ def activate_user_view(request):
         user = User.objects.get(id=request.GET['user-id'])
     except User.DoesNotExist:
         return render_error(request, 404, "User does not exist")
-    return render(request, "user/activate.html", {"content_user": user, "token": request.GET['token'], "half_page": settings.CONTENT["half_page"]})
+    return render(request, "user/activate.html",
+                  {"content_user": user, "token": request.GET['token'], "half_page": settings.CONTENT["half_page"]})
 
 
 def user_passwordreset_view(request):
@@ -334,7 +339,8 @@ def user_passwordreset_request_view(request):
         except User.DoesNotExist:
             return render_error(request, 404, "User does not exist")
         user.send_passwordreset_mail(request)
-        return render(request, "user/passwordreset_request.html", {"sent_email": True, "half_page": settings.CONTENT["half_page"]})
+        return render(request, "user/passwordreset_request.html",
+                      {"sent_email": True, "half_page": settings.CONTENT["half_page"]})
     return render(request, "user/passwordreset_request.html", {"half_page": settings.CONTENT["half_page"]})
 
 
@@ -531,7 +537,8 @@ def create_group_view(request):
                 group.permissions.add(permission)
         group.save()
         return redirect("manage_groups")
-    return render(request, "user/group/create.html", {"permissions": Permission.objects.all(), "half_page": settings.CONTENT["half_page"]})
+    return render(request, "user/group/create.html",
+                  {"permissions": Permission.objects.all(), "half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("auth.view_group")
@@ -1015,6 +1022,7 @@ def ticket_edit(request, id):
             return render_error(request, 403, "You aren't allowed to edit this ticket")
     else:
         return render_error(request, 405, "This site is only available for POST requests")
+
 
 def imprint_view(request):
     return render(request, "imprint.html", {"imprint": settings.CONTENT["imprint"]})

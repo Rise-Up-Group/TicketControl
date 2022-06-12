@@ -15,6 +15,7 @@
         --color-nav-item: rgba(255,255,255,.5);
         --color-nav-item-hover: rgba(255,255,255,.75);
         --color-nav-item-active: white;
+        --color-navbar-brand: white;
         --color-card-header-text: var(--color-inverted);
         --color-card-header: #6c757d;
         --color-card-body: #f8f9fa;
@@ -42,6 +43,7 @@
         --color-nav-item: rgba(255,255,255,.5);
         --color-nav-item-hover: rgba(255,255,255,.75);
         --color-nav-item-active: white;
+        --color-navbar-brand: #007bff;
         --color-card-header-text: var(--color-text);
         --color-card-header: #202020;
         --color-card-body: #151515;
@@ -59,10 +61,6 @@ body {
 }
 hr {
    border-top-color: var(--color-border);
-}
-
-.navbar {
-    background-color: var(--color-navbar-background);
 }
 
 /* -------------------- text -------------------- */
@@ -83,6 +81,12 @@ hr {
 }
 
 /* -------------------- navbar -------------------- */
+.navbar {
+    background-color: var(--color-navbar-background);
+}
+.navbar .navbar-brand {
+    color: var(--color-navbar-brand);
+}
 .navbar .navbar-nav .nav-link {
     color: var(--color-nav-item);
 }
