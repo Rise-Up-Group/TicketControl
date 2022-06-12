@@ -1,7 +1,7 @@
 {% extends "half_page.html" %}
 {% load static %}
 
-{% block title %}View User: {{ content_user.username }}{% endblock %}
+{% block title %}Details zu Nutzer: {{ content_user.username }}{% endblock %}
 
 {% block left %}
     <h1 class="display-2 fw-bold ls-tight">Nutzer</h1>
@@ -11,24 +11,24 @@
 {% block right %}
     <input autocomplete="false" name="hidden" type="text" style="display:none;">
     <div class="form-outline mb-2">
-        <label>Firstname</label>
+        <label>Vorname</label>
         <input type="firstname" class="form-control" value="{{ content_user.first_name }}"
                disabled/>
     </div>
     <div class="form-outline mb-2">
-        <label>Lastname</label>
+        <label>Nachname</label>
         <input type="lastname" class="form-control" value="{{ content_user.last_name }}"
                disabled/>
     </div>
     <div class="form-outline mb-2">
-        <label>Username</label>
+        <label>Nutzername</label>
         <input type="username" class="form-control" value="{{ content_user.username }}" disabled/>
     </div>
     <div class="form-outline mb-4">
-        <label>Date</label>
+        <label>Datum</label>
         <input type="text" class="form-control" value="{{ content_user.date_joined|date }}" disabled/>
     </div>
     {% if can_change %}
-        <a class="btn btn-primary btn-block mb-2" href="{% url 'edit_user' id=content_user.id %}">Edit</a>
+        <a class="btn btn-primary btn-block mb-2" href="{% url 'edit_user' id=content_user.id %}">Bearbeiten</a>
     {% endif %}
 {% endblock %}

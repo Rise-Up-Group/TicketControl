@@ -574,9 +574,9 @@ def login_view(request):
                     return HttpResponseRedirect(next)
                 return redirect("dashboard")
             else:
-                error = "User is not activated or email address is not confirmed"
+                error = "Nutzer ist nicht aktiviert oder E-Mail Adresse wurde nicht bestätigt."
         else:
-            error = "Wrong username or password"
+            error = "Nutzername und Passwort stimmen nicht überein"
     if request.user.is_authenticated:
         return redirect("dashboard")
     return render(request, "user/login.html",

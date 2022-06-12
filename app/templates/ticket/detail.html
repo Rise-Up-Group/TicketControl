@@ -16,7 +16,7 @@
                    oninput="show_update_ticket_warning()">
             <div class="input-group-append" id="ticket-options">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">options
+                        aria-haspopup="true" aria-expanded="false">Optionen
                 </button>
                 <div class="dropdown-menu" id="ticket-options-dropdown">
                     {% if perms.ticketcontrol.change_status %}
@@ -47,7 +47,8 @@
                         <div role="separator" class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
                             zuweisen</a>
-                        <a class="dropdown-item" type="button" data-toggle="modal" data-target="#assign-moderator">Moderator zuweisen</a>
+                        <a class="dropdown-item" type="button" data-toggle="modal" data-target="#assign-moderator">Moderator
+                            zuweisen</a>
                     {% endif %}
                 </div>
             </div>
@@ -85,7 +86,7 @@
                                 {{ moderator.username }}
                                     {% if perms.ticketcontrol.change_ticket %}
                                         [<span class="text-danger" type="submit"
-                                              onclick="delete_moderator(`{{ moderator.username }}`);">x</span>]
+                                               onclick="delete_moderator(`{{ moderator.username }}`);">x</span>]
                                     {% endif %}
                                     {% if not forloop.last %}
                                         ,
@@ -121,7 +122,7 @@
                                 {{ participant.username }}
                                     {% if perms.ticketcontrol.change_ticket %}
                                         [<span class="text-danger" type="submit"
-                                              onclick="delete_participant(`{{ participant.username }}`);">x</span>]
+                                               onclick="delete_participant(`{{ participant.username }}`);">x</span>]
                                     {% endif %}
                                     {% if not forloop.last %}
                                         ,
@@ -401,7 +402,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="assign-moderator-title">Assign moderator</h5>
+                    <h5 class="modal-title" id="assign-moderator-title">Moderator zuweisen</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -422,7 +423,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
                 </div>
             </div>
         </div>

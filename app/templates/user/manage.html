@@ -1,12 +1,12 @@
 {% extends "main.html" %}
 
-{% block title %}Manage Users{% endblock %}
+{% block title %}Nutzer verwalten{% endblock %}
 
 {% block content %}
-    <h1 class="text-center display-4 mb-4">Manage users</h1>
+    <h1 class="text-center display-4 mb-4">Nutzer verwalten</h1>
     <div class="card">
         <div class="card-header">
-            <h5>User Liste</h5>
+            <h5>Nutzerliste</h5>
         </div>
         <div class="card-body">
 
@@ -14,7 +14,7 @@
                 <thead>
                 <tr>
                     <th scope="row">Id</th>
-                    <th>Username</th>
+                    <th>Nutzername</th>
                     <th>E-Mail</th>
                     <th>Vorname</th>
                     <th>Nachname</th>
@@ -34,7 +34,7 @@
                         <td>{{ user.last_name }}</td>
                         <td>{% if user.email_confirmed %}Ja{% else %}Nein{% endif %}</td>
                         {% if can_change or can_delete %}
-                            <td><a href="{% url 'edit_user' id=user.id %}">Edit</a></td>
+                            <td><a href="{% url 'edit_user' id=user.id %}">Bearbeiten</a></td>
                         {% endif %}
                     </tr>
                 {% endfor %}

@@ -2,16 +2,11 @@
 
 {% load static %}
 
-{% block title %}Edit User: {{ content_user.username }}{% endblock %}
+{% block title %}Nutzer bearbeiten: {{ content_user.username }}{% endblock %}
 
 {% block left %}
     <h1 class="display-3 fw-bold ls-tight">Nutzer Bearbeiten</h1>
     <h2 class="text-primary display-4" id="preview_username">{{ content_user.username }}</h2>
-    <p class="text-muted">
-        Die Bearbeitung eines Nutzers erfordert keine Bestätigung. Jede Veränderung wird dem Click auf
-        Submit sofort angenommen und ist nicht wiederrufbar. Der User kann seinen Account sofort
-        weiterbenutzen.
-    </p>
 {% endblock %}
 
 {% block right %}
@@ -26,30 +21,30 @@
                    required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="firstname">Firstname</label>
+            <label for="firstname">Vorname</label>
             <input type="firstname" id="firstname" name="firstname" class="form-control"
                    placeholder="Max" value="{{ content_user.first_name }}" oninput="update_username_preview()"
                    required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="lastname">Lastname</label>
+            <label for="lastname">Nachname</label>
             <input type="lastname" id="lastname" name="lastname" class="form-control"
                    placeholder="Mustermann" value="{{ content_user.last_name }}" oninput="update_username_preview()"
                    required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="username">Username</label>
+            <label for="username">Nutzername</label>
             <input type="username" id="username" name="username" class="form-control"
                    placeholder="M.Mustermann" value="{{ content_user.username }}"
                    oninput="check_username(false, `{{ content_user.username }}`)"
                    onchange="check_username(true, `{{ content_user.username }}`)" required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="password">Password</label>
+            <label for="password">Passwort</label>
             <input type="password" id="password" name="password" class="form-control"
                    placeholder="Password" minlength="8"/>
         </div>
-        <label for="groups">Groups</label>
+        <label for="groups">Gruppen</label>
         <div class="form-outline mb-2">
             {% if can_change_permission %}
                 <select style="width: 100%" multiple="" name="groups" id="groups"
@@ -65,14 +60,14 @@
         </div>
         <input type="checkbox" name="is_active" id="is_active"{% if content_user.is_active %}
                checked{% endif %}>
-        <label for="is_active">Active</label>
+        <label for="is_active">Aktiv</label>
         {% if can_change %}
             <input class="btn btn-primary btn-block mb-2" type="submit" name="submit" id="submit"
                    value="Update">
         {% endif %}
         {% if can_delete %}
             <a class="btn btn-danger btn-block mb-4"
-               href="" data-toggle="modal" data-target="#delete-user">Delete</a>
+               href="" data-toggle="modal" data-target="#delete-user">Löschen</a>
         {% endif %}
     </form>
     {% if can_delete %}
@@ -90,7 +85,7 @@
                         <p class="h5">Möchtest du wirklich den User {{ content_user.username }} löschen?</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
                         <form method="POST" action="{% url 'delete_user' id=content_user.id %}">
                             {% csrf_token %}
                             <input class="btn btn-danger" type="submit" value="Delete">

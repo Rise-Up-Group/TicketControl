@@ -20,10 +20,7 @@
                     </h1>
                     <p class="text-muted">
                         Tickets sind problembezogene Diskussionen die vom Anwender erstellt werden können.
-                        Diese Diskussionen bestehen aus einem Ticket, sowie beliebig vielen Kommentaren
-                        darunter.
-                        Dabei wird meist ein z.B. technisches Problem erstellt und von den Moderatoren
-                        beantwortet.
+                        Dabei geht es meist um technische Probleme, die von Moderatoren beantwortet werden.
                     </p>
                 {% endif %}
             </div>
@@ -32,10 +29,6 @@
                     <div class="card-body py-5 px-md-5">
                         <h3 class="display-4">E-Mail Bestätigung</h3>
                         <p>Hey {{ user.first_name }}, Willkommen zu TicketControl!</p>
-                        <p class="text-muted">
-                            Nur noch ein kleiner Schritt von ihrem Account entfernt. Bitte bestätigen Sie Ihre
-                            E-Mail-Adresse um Ihre Registrierung abzuschließen.
-                        </p>
                         <a class="btn btn-primary mb-4"
                            href="http://{{ domain }}{% url 'activate_user' %}?user-id={{ user.id }}&token={{ token }}">
                             Registration Abschließen

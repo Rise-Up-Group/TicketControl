@@ -1,10 +1,10 @@
 {% extends "half_page.html" %}
 {% load static %}
 
-{% block title %}{% if action == "activate" %}Activate User{% else %}Verify E-Mail{% endif %}{% endblock %}
+{% block title %}{% if action == "activate" %}Nutzer aktivieren{% else %}E-Mail Adresse bestätigen{% endif %}{% endblock %}
 
 {% block right %}
-    <h3 class="display-4">{% if action == "activate" %}Activate User{% else %}Verify E-Mail{% endif %}</h3>
+    <h3 class="display-4">{% if action == "activate" %}Nutzer aktivieren{% else %}E-Mail Adresse bestätigen{% endif %}</h3>
 
     {% if token %}
         <h4 class="h5 mb-4">{{ content_user.username }}</h4>
@@ -15,7 +15,7 @@
             <input type="submit" value="{% if action == "activate" %}Activate{% else %}Verify{% endif %}" class="btn btn-primary btn-block mb-4">
         </form>
     {% else %}
-        You should have an E-Mail with a verification link in your inbox. <br>
+        Du solltest nun eine E-Mail mit dem Verifizierungslink erhalten haben.<br>
     {% endif %}
-    Back to login? <a href="{% url 'login' %}">Login</a>
+    Zurück zum Login? <a href="{% url 'login' %}">Login</a>
 {% endblock %}

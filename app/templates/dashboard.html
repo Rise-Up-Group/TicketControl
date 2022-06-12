@@ -5,7 +5,7 @@
 {% block content %}
     <h1 class="text-center display-4">Dashboard</h1>
     <hr>
-    <h5 class="text-center"> TicketControl by RiseUp-Group</h5>
+    <h5 class="text-center"> TicketControl by RiseUp Group</h5>
 
     <br>
 
@@ -13,7 +13,7 @@
         <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>Meine Profil <a style="float:right;" class="btn btn-primary" type="button" href="{% url 'user_details' id=request.user.id %}">Show profile</a></h5>
+                    <h5>Meine Profil <a style="float:right;" class="btn btn-primary" type="button" href="{% url 'user_details' id=request.user.id %}">Profil Anzeigen</a></h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
@@ -68,7 +68,7 @@
                                     <th scope="row">Id</th>
                                     <th>Kategorie</th>
                                     <th>Titel</th>
-                                    <th>Moderators</th>
+                                    <th>Moderatoren</th>
                                 </tr>
                             </thead>
                             <tbody>
