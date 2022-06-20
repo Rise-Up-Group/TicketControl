@@ -20,15 +20,15 @@
                 </button>
                 <div class="dropdown-menu" id="ticket-options-dropdown">
                     {% if perms.ticketcontrol.change_status %}
-                        <a class="dropdown-item" type="button" data-toggle="modal" data-target="#change-status">Status
+                        <a class="dropdown-item" role="button" data-toggle="modal" data-target="#change-status">Status
                             ändern</a>
                     {% elif user.id == ticket.owner.id %}
-                        <a class="dropdown-item" type="button" data-toggle="modal" data-target="#close-ticket">Ticket
+                        <a class="dropdown-item" role="button" data-toggle="modal" data-target="#close-ticket">Ticket
                             Schließen</a>
                     {% endif %}
                     {% if not ticket.hidden %}
                         {% if perms.ticketcontrol.hide_ticket %}
-                            <a class="dropdown-item" type="button" data-toggle="modal"
+                            <a class="dropdown-item" role="button" data-toggle="modal"
                                data-target="#hide-ticket">Löschen</a>
                         {% endif %}
                     {% else %}
@@ -40,14 +40,14 @@
                         {% endif %}
                     {% endif %}
                     {% if perms.ticketcontrol.delete_ticket %}
-                        <a class="dropdown-item" type="button" data-toggle="modal"
+                        <a class="dropdown-item" role="button" data-toggle="modal"
                            data-target="#delete-ticket">Aus Datenbank löschen</a>
                     {% endif %}
                     {% if perms.ticketcontrol.assign_ticket %}
                         <div role="separator" class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
                             zuweisen</a>
-                        <a class="dropdown-item" type="button" data-toggle="modal" data-target="#assign-moderator">Moderator
+                        <a class="dropdown-item" role="button" data-toggle="modal" data-target="#assign-moderator">Moderator
                             zuweisen</a>
                     {% endif %}
                 </div>
@@ -318,7 +318,7 @@
                 </div>
                 <div class="modal-footer text-white">
                     {% csrf_token %}
-                    <a type="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
+                    <a role="button" class="btn btn-primary" data-dismiss="modal">Zurück</a>
                     <button type="submit" class="btn btn-danger" name="delete-attachment" data-dismiss="model"
                             onclick="delete_attachment(this);">Löschen
                     </button>
