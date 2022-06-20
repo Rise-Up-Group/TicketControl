@@ -13,7 +13,7 @@
         <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>Meine Profil <a style="float:right;" class="btn btn-primary" type="button" href="{% url 'user_details' id=request.user.id %}">Profil Anzeigen</a></h5>
+                    <h5>Meine Profil <a style="float:right;" class="btn btn-primary" role="button" href="{% url 'user_details' id=request.user.id %}">Profil Anzeigen</a></h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
@@ -54,7 +54,7 @@
         <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>Meine Tickets <a style="float:right;" class="btn btn-primary" type="button" href="{% url 'create_ticket' %}">Ticket erstellen</a></h5>
+                    <h5>Meine Tickets <a style="float:right;" class="btn btn-primary" role="button" href="{% url 'create_ticket' %}">Ticket erstellen</a></h5>
                 </div>
 
                 <div class="card-body">
