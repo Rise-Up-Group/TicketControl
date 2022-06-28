@@ -146,10 +146,10 @@
                         <thead>
                         <tr>
                             <th scope="row">Id</th>
-                            {% if GET.status == "0" %}
+                            {% if not GET.status or GET.status == "0" %}
                                 <th>Status</th>
                             {% endif %}
-                            {% if GET.category == "0" %}
+                            {% if not GET.category or GET.category == "0" %}
                                 <th>Kategorie</th>
                             {% endif %}
                             {% if not GET.title or GET.title_type != "is" %}
@@ -176,10 +176,10 @@
                         {% for ticket in tickets %}
                             <tr onclick="window.location = &#39{% url 'ticket_view' id=ticket.id %}&#39">
                                 <th>#{{ ticket.id }}</th>
-                                {% if GET.status == "0" %}
+                                {% if not GET.status or GET.status == "0" %}
                                     <td>{{ ticket.status }}</td>
                                 {% endif %}
-                                {% if GET.category == "0" %}
+                                {% if not GET.status or GET.category == "0" %}
                                     <td>{{ ticket.category }}</td>
                                 {% endif %}
                                 {% if not GET.title or GET.title_type != "is" %}
