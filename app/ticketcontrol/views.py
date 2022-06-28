@@ -45,7 +45,7 @@ def render_error(request, status, message=""):
 
 
 def handler404(request, exception):
-    return render_error(request, 404, exception)
+    return render_error(request, 404, "")
 
 
 def dashboard_view(request):
