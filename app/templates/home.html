@@ -1,11 +1,12 @@
 {% extends 'main.html' %}
-
+{% load static %}
 {% block title %}Home{% endblock %}
+
 
 {% block content %}
     {% if content %}
         {{ content|safe }}
     {% else %}
-        default start page...
+        Please replace this default text with your own. (System Preferences -> Front Page)
     {% endif %}
 {% endblock %}
