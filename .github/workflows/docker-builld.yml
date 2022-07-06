@@ -2,7 +2,7 @@ name: Docker Build and push app and proxy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ release ]
 
 
 jobs:
