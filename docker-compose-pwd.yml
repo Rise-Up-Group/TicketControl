@@ -24,13 +24,13 @@ services:
 
 
   db:
-    image: mariadb:10.6
+    image: mysql:latest
     restart: unless-stopped
     environment:
-      - MARIADB_DATABASE=ticketcontrol
-      - MARIADB_ROOT_PASSWORD=changeme
+      - MYSQL_DATABASE=ticketcontrol
+      - MYSQL_ROOT_PASSWORD=changeme
     volumes:
-      - ticketcontrol-mariadb-data:/var/lib/mysql
+      - ticketcontrol-mysql-data:/var/lib/mysql
 
 
   proxy:
@@ -50,4 +50,4 @@ volumes:
   ticketcontrol-static-data:
   ticketcontrol-uploads:
   ticketcontrol-settings:
-  ticketcontrol-mariadb-data:
+  ticketcontrol-mysql-data:

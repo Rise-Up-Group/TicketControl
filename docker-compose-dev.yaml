@@ -36,10 +36,10 @@ services:
 
 
   db:
-    image: mariadb:10.6
+    image: mysql:latest
     restart: unless-stopped
     environment:
-      - MARIADB_DATABASE=ticketcontrol
-      - MARIADB_ROOT_PASSWORD=changeme
+      - MYSQL_DATABASE=ticketcontrol
+      - MYSQL_ROOT_PASSWORD=changeme
     ports:
       - 3306:3306
