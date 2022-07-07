@@ -595,7 +595,7 @@ def register_view(request):
             if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
                 username = request.POST['username']
             else:
-                username = firstname[0:1] + "." + lastname
+                username = firstname[0:1] + "." + lastname.replace(" ", "-")
             res = username_check(username)
             if res["status"] == 409:
                 username = res["username"]
@@ -649,13 +649,13 @@ def user_create_view(request):
         if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
             username = request.POST['username']
         else:
-            username = firstname[0:1] + "." + lastname
+            username = firstname[0:1] + "." + lastname.replace(" ", "-")
         res = username_check(username)
         if res["status"] == 409:
             username = res["username"]
 
         if not User.objects.filter(email=request.POST['email']).exists() and not res["status"] == 406:
-            User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
+            User.add_user(request.POST['email'], firstname, lastname,
                           username, password, groups, request.POST.get("is_active", False) == "on",
                           email_confirmed=True)
             return redirect("manage_users")

@@ -45,7 +45,7 @@ async function search_and_update_usernames(typed_username, id, multiple_enable=t
 
 async function update_username() {
     let first_name = document.getElementById("firstname").value.substring(0, 1);
-    let last_name = document.getElementById("lastname").value;
+    let last_name = document.getElementById("lastname").value.replace(" ", "-");
     document.getElementById("username").value = first_name + "." + last_name;
     update_username_preview();
     check_username();
@@ -58,7 +58,7 @@ async function update_username_preview(username=null) {
             preview.innerHTML = username;
         } else {
             let first_name = document.getElementById("firstname").value.substring(0, 1);
-            let last_name = document.getElementById("lastname").value;
+            let last_name = document.getElementById("lastname").value.replace(" ", "-");
             preview.innerHTML = first_name + "." + last_name;
         }
     }
