@@ -44,9 +44,16 @@ async function search_and_update_usernames(typed_username, id, multiple_enable=t
 }
 
 async function update_username() {
+    let email = document.getElementById("email").value;
     let first_name = document.getElementById("firstname").value.substring(0, 1);
-    let last_name = document.getElementById("lastname").value;
-    document.getElementById("username").value = first_name + "." + last_name;
+    let last_name = document.getElementById("lastname").value.replace(" ", "-");
+    let use_email_prefix_as_username = document.getElementById("use-email-prefix-as-username").innerHTML;
+    let username_input = document.getElementById("username");
+    if (use_email_prefix_as_username === "True") {
+        username_input.value = email.split("@")[0];
+    } else {
+        username_input.value = first_name + "." + last_name;
+    }
     update_username_preview();
     check_username();
 }
@@ -58,8 +65,13 @@ async function update_username_preview(username=null) {
             preview.innerHTML = username;
         } else {
             let first_name = document.getElementById("firstname").value.substring(0, 1);
-            let last_name = document.getElementById("lastname").value;
-            preview.innerHTML = first_name + "." + last_name;
+            let last_name = document.getElementById("lastname").value.replace(" ", "-");
+            let use_email_prefix_as_username = document.getElementById("use-email-prefix-as-username").innerHTML;
+            if (use_email_prefix_as_username === "True") {
+                preview.innerHTML = email.split("@")[0];
+            } else {
+                preview.innerHTML = first_name + "." + last_name;
+            }
         }
     }
 }

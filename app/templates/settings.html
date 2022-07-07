@@ -41,6 +41,10 @@
                                                    name="register.allow-custom-username"
                                                    {% if settings.register.allow_custom_username %}checked{% endif %}>
                                             <label for="register.allow-custom-username">Benutzerdefinierte Benutzernamen erlauben</label><br>
+                                        <input type="checkbox" id="register.use-email-prefix-as-username"
+                                                   name="register.use-email-prefix-as-username"
+                                                   {% if settings.register.use_email_prefix_as_username %}checked{% endif %}>
+                                            <label for="register.use-email-prefix-as-username">E-Mail Prefix als Nutzernamen verwenden</label><br>
                                             <input type="checkbox" id="register.email-whitelist-enable"
                                                    name="register.email-whitelist-enable"
                                                    onclick="show_email_whitelist()"
