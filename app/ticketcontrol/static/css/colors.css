@@ -20,6 +20,7 @@
         --color-card-header: #6c757d;
         --color-card-body: #f8f9fa;
         --color-input-background: white;
+        --color-input-disabled-background: #e8e8e8;
         --color-input-border: #ced4da;
         --color-input-group-text-background: #e9ecef;
         --color-input-group-text-border: #ced4da;
@@ -48,6 +49,7 @@
         --color-card-header: #202020;
         --color-card-body: #151515;
         --color-input-background: #080808;
+        --color-input-disabled-background: #303030;
         --color-input-border: #404040;
         --color-input-group-text-background: #202020;
         --color-input-group-text-border: #404040;
@@ -168,6 +170,9 @@ input[type="text"], input[type="number"], input[type="color"], input[type="email
     background-color: var(--color-input-background)!important;
     color: var(--color-text)!important;
     border-color: var(--color-input-border)!important;
+}
+input[type="text"][disabled], input[type="number"][disabled], input[type="color"][disabled], input[type="email"][disabled], input[type="password"][disabled], input[type="firstname"][disabled], input[type="lastname"][disabled], input[type="username"][disabled], textarea[disabled], select[disabled], option[disabled], .input[disabled] {
+    background-color: var(--color-input-disabled-background)!important;
 }
 .btn-secondary {
     color: var(--color-inverted);

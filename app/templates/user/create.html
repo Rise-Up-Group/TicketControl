@@ -23,26 +23,26 @@
                    oninput="update_username()"required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="firstname">Firstname</label>
+            <label for="firstname">Vorname</label>
             <input type="firstname" id="firstname" name="firstname" class="form-control"
                    oninput="update_username()" required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="lastname">Lastname</label>
+            <label for="lastname">Nachname</label>
             <input type="lastname" id="lastname" name="lastname" class="form-control"
                    oninput="update_username()" required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="password">Username</label>
+            <label for="password">Nutzername</label>
             <input type="username" id="username" name="username" class="form-control" oninput="check_username(false)"
                    onchange="check_username()" required/>
         </div>
         <div class="form-outline mb-2">
-            <label for="password">Password</label>
+            <label for="password">Passwort</label>
             <input type="password" id="password" name="password" class="form-control" required
                    minlength="8"/>
         </div>
-        <label for="groups">Groups</label>
+        <label for="groups">Gruppen</label>
         <div class="form-outline mb-2">
             {% if can_change_permission %}
                 <select style="width: 100%" multiple="" name="groups" id="groups"
@@ -56,7 +56,7 @@
             {% endif %}
         </div>
         <input type="checkbox" name="is_active" id="is_active" checked>
-        <label for="is_active">Active</label><br><br>
+        <label for="is_active">Aktiviert</label><br><br>
         <input type="submit" value="Submit" class="btn btn-primary btn-block mb-4"/>
     </form>
 
