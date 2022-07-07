@@ -94,6 +94,17 @@ def handle_filter(GET, objects, name):
     return objects
 
 
+def handle_range_filter(GET, objects, name):
+    if name + "_start" in GET and name + "_end" in GET:
+        start = GET[name + "_start"]
+        end = GET[name + "_end"]
+
+        filter = {}
+        filter[name + "__range"] = (start, end)
+        return objects.filter(**filter)
+    return objects
+
+
 def handle_user_filter(GET, objects, name):
     if name in GET and GET[name]:
         for username in GET[name].split(","):
@@ -116,6 +127,7 @@ def ticket_manage_view(request):
     tickets = handle_filter(request.GET, tickets, "category")
     tickets = handle_filter(request.GET, tickets, "title")
     tickets = handle_filter(request.GET, tickets, "location")
+    tickets = handle_range_filter(request.GET, tickets, "creation_date")
     if request.user.has_perm("ticketcontrol.unhide_ticket"):
         tickets = handle_filter(request.GET, tickets, "hidden")
     else:
