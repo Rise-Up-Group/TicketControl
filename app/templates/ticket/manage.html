@@ -6,7 +6,7 @@
 {% block content %}
     <br>
     <div class="row">
-        <div class="col-xl-3">
+        <div class="col-12 col-xl-3">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5>Filters</h5>
@@ -24,6 +24,18 @@
                                             selected{% endif %}>{{ status }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+                        <br>
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-creation_date">Datum:</label>
+                                </div>
+                                <input class="form-control" type="date" name="creation_date_start" value="{{ GET.creation_date_start }}">
+                                <div type="text" class="form-control form-control-text">bis</div>
+                                <input class="form-control" type="date" name="creation_date_end" value="{{ GET.creation_date_end }}">
+                            </div>
+                            <datalist id="filter-owner-data-list"></datalist>
                         </div>
                         <br>
                         <div class="input-group">
@@ -136,7 +148,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-9">
+        <div class="col-12 col-xl-9">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5>Tickets</h5>
@@ -149,6 +161,7 @@
                             {% if not GET.status or GET.status == "0" %}
                                 <th>Status</th>
                             {% endif %}
+                            <th>Datum</th>
                             {% if not GET.category or GET.category == "0" %}
                                 <th>Kategorie</th>
                             {% endif %}
@@ -179,6 +192,7 @@
                                 {% if not GET.status or GET.status == "0" %}
                                     <td>{{ ticket.status }}</td>
                                 {% endif %}
+                                <td>{{ ticket.creation_date|date:"d.m.y" }}</td>
                                 {% if not GET.status or GET.category == "0" %}
                                     <td>{{ ticket.category }}</td>
                                 {% endif %}

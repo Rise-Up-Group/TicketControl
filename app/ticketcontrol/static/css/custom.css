@@ -15,11 +15,17 @@
 }
 
 /* -------------------- input -------------------- */
-input[type="text"] {
-    min-width: 8em;
+input[type="text"], input[type="date"] {
+    min-width: 9em;
 }
 .input-group-append {
     flex-wrap: wrap;
+}
+
+.form-control-text {
+    width: auto!important;
+    flex: 0 0 auto!important;
+    white-space: nowrap;
 }
 
 .btn {
