@@ -100,7 +100,14 @@ def handle_range_filter(GET, objects, name):
         end = GET[name + "_end"]
 
         filter = {}
-        filter[name + "__range"] = (start, end)
+        if not start and end:
+            filter[name + "__lt"] = end
+        elif not end and start:
+            filter[name + "__gt"] = start
+        elif start and end:
+            filter[name + "__range"] = (start, end)
+        else:
+            return objects
         return objects.filter(**filter)
     return objects
 

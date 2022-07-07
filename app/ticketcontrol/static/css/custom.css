@@ -18,6 +18,12 @@ input[type="text"], input[type="date"] {
     flex-wrap: wrap;
 }
 
+.form-control-text {
+    width: auto!important;
+    flex: 0 0 auto!important;
+    white-space: nowrap;
+}
+
 .btn {
     margin: 0;
 }
