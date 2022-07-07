@@ -13,13 +13,14 @@
 {% endblock %}
 
 {% block right %}
+    <div class="setting" id="use-email-prefix-as-username">{{ use_email_prefix_as_username }}</div>
     <form method="POST" action="{% url 'create_user' %}" autocomplete="new-password">
         {% csrf_token %}
         <input autocomplete="false" name="hidden" type="text" style="display:none;">
         <div class="form-outline mb-2">
             <label for="email">E-Mail</label>
             <input type="email" id="email" name="email" class="form-control" autofocus
-                   required/>
+                   oninput="update_username()"required/>
         </div>
         <div class="form-outline mb-2">
             <label for="firstname">Firstname</label>

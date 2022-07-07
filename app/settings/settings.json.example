@@ -15,6 +15,7 @@
     },
     "register": {
         "allow_custom_username": true,
+        "use_email_prefix_as_username": false,
         "email_whitelist_enable": false,
         "email_whitelist": []
     },

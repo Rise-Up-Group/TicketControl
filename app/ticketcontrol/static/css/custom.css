@@ -10,6 +10,10 @@
     overflow: auto;
 }
 
+.setting {
+    display: none;
+}
+
 /* -------------------- input -------------------- */
 input[type="text"] {
     min-width: 8em;

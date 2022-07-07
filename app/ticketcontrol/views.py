@@ -515,9 +515,10 @@ def attachment_edit(request, id):
 def username_check(username, old_username=None):
     if User.objects.filter(username=username).exists():
         i = 1
-        while User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username and i < 200:
+        while User.objects.filter(username=username + str(i)).exists() and username + str(
+                i) != old_username and i < 200:
             i += 1
-        if User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username:
+        if User.objects.filter(username=username + str(i)).exists() and username + str(i) != old_username:
             return {"status": 406}
         return {"status": 409, "username": username + str(i)}
     return {"status": 200}
@@ -594,6 +595,8 @@ def register_view(request):
             lastname = request.POST['lastname']
             if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
                 username = request.POST['username']
+            elif settings.REGISTER["use_email_prefix_as_username"]:
+                username = email.split("@")[0]
             else:
                 username = firstname[0:1] + "." + lastname.replace(" ", "-")
             res = username_check(username)
@@ -631,7 +634,9 @@ def register_view(request):
         else:
             return render_error(request, 409, "Passwords do not match")
     return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"],
-                                                  "allow_custom_username": settings.REGISTER["allow_custom_username"]})
+                                                  "allow_custom_username": settings.REGISTER["allow_custom_username"],
+                                                  "use_email_prefix_as_username": settings.REGISTER[
+                                                      "use_email_prefix_as_username"]})
 
 
 @permission_required("ticketcontrol.add_user")
@@ -643,18 +648,21 @@ def user_create_view(request):
         groups = None
         if request.user.has_perm("ticketcontrol.change_user_permission"):
             groups = request.POST.getlist("groups")
+        email = request.POST['email']
         firstname = request.POST['firstname']
         lastname = request.POST['lastname']
         username = None
         if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
             username = request.POST['username']
+        elif settings.REGISTER["use_email_prefix_as_username"]:
+            username = email.split("@")[0]
         else:
             username = firstname[0:1] + "." + lastname.replace(" ", "-")
         res = username_check(username)
         if res["status"] == 409:
             username = res["username"]
 
-        if not User.objects.filter(email=request.POST['email']).exists() and not res["status"] == 406:
+        if not User.objects.filter(email=email).exists() and not res["status"] == 406:
             User.add_user(request.POST['email'], firstname, lastname,
                           username, password, groups, request.POST.get("is_active", False) == "on",
                           email_confirmed=True)
@@ -663,7 +671,9 @@ def user_create_view(request):
             return render_error(request, 409, "Username or E-Mail already exists")
     return render(request, "user/create.html", {"groups": Group.objects.all(),
                                                 "can_change_permission": request.user.has_perm(
-                                                    "ticketcontrol.change_user_permission")})
+                                                    "ticketcontrol.change_user_permission"),
+                                                "use_email_prefix_as_username": settings.REGISTER[
+                                                    "use_email_prefix_as_username"]})
 
 
 def user_activate_view(request):
@@ -758,8 +768,8 @@ def user_details_view(request, id):
         return render_error(request, 404, "User does not exist")
     if request.user.has_perm("ticketcontrol.view_user") or request.user.id == id:
         return render(request, "user/detail.html", {"content_user": user,
-                                                     "can_change": request.user.has_perm(
-                                                         "ticketcontrol.change_user") or request.user.id == id})
+                                                    "can_change": request.user.has_perm(
+                                                        "ticketcontrol.change_user") or request.user.id == id})
     return redirect("login")
 
 
@@ -768,7 +778,8 @@ def user_live_search(request, typed_username):
     users = User.objects.filter(username__contains=typed_username)[:10]
     res = []
     for user in users:
-        new_user = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
+        new_user = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name,
+                    "id": user.id}
         res.append(new_user)
     return JsonResponse(res, safe=False)  # It's ok. Disables typecheck for dict. Make sure to only pass an array
 
@@ -974,6 +985,7 @@ def settings_view(request):
             general['allow_location'] = request.POST.get("general.allow-location", False) == "on"
             general['force_location'] = request.POST.get("general.force-location", False) == "on"
             general['meme_mode'] = request.POST.get("general.meme-mode", False) == "on"
+
             email_server = settings_json['email_server']
             email_server['smtp_host'] = request.POST['email-server.smtp-host']
             email_server['smtp_port'] = int(request.POST['email-server.smtp-port'])
@@ -992,6 +1004,8 @@ def settings_view(request):
 
             register = settings_json['register']
             register['allow_custom_username'] = request.POST.get("register.allow-custom-username", False) == "on"
+            register['use_email_prefix_as_username'] = request.POST.get("register.use-email-prefix-as-username",
+                                                                        False) == "on"
             register['email_whitelist_enable'] = request.POST.get("register.email-whitelist-enable", False) == "on"
             register['email_whitelist'] = []
             for entry in request.POST.getlist('register.email-whitelist'):

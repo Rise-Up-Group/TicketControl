@@ -4,12 +4,14 @@
 {% block title %}Registrieren{% endblock %}
 
 {% block right %}
+    <div class="setting" id="use-email-prefix-as-username">{{ use_email_prefix_as_username }}</div>
     <h3 class="display-4">Registrieren</h3>
     <form method="POST" action="{% url 'register' %}" autocomplete="new-password">
         {% csrf_token %}
         <div class="form-outline mb-2">
             <label for="email">E-Mail</label>
-            <input type="email" id="email" name="email" class="form-control" autofocus required/>
+            <input type="email" id="email" name="email" class="form-control" autofocus
+                   oninput="update_username()" required/>
         </div>
         <div class="form-outline mb-2">
             <label for="firstname">Vorname</label>
