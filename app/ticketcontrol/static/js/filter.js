@@ -1,4 +1,4 @@
-function update_hidden_filter_radiobuttons() {
+function update_filter_radiobuttons() {
     document.querySelectorAll('input[type="radio"]').forEach(radio => {
         let label = document.querySelector('label[for="' + radio.id + '"]');
         if (radio.checked) {

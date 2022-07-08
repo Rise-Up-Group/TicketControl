@@ -83,13 +83,13 @@
                                 <label class="input-group-text">Verifiziert:</label>
                             </div>
                             <input type="radio" id="filter-hidden-none" name="email_confirmed" value="0"
-                                   onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                   onclick="update_filter_radiobuttons()" style="display: none;"
                                    {% if GET.email_confirmed != "1" and GET.email_confirmed != "2" %}checked{% endif %}>
                             <input type="radio" id="filter-hidden-false" name="email_confirmed" value="False"
-                                   onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                   onclick="update_filter_radiobuttons()" style="display: none;"
                                    {% if GET.email_confirmed == "False" %}checked{% endif %}>
                             <input type="radio" id="filter-hidden-true" name="email_confirmed" value="True"
-                                   onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                   onclick="update_filter_radiobuttons()" style="display: none;"
                                    {% if GET.email_confirmed == "True" %}checked{% endif %}>
                             <div class="input-group-append">
                                 <label class="btn" for="filter-hidden-none">Nicht filtern</label>
@@ -145,14 +145,14 @@
                         </tbody>
                     </table>
                     {% if can_create %}
-                        <a class="btn btn-primary" href="{% url 'create_user' %}">Neuen Nutzer Anlegen</a>{% endif %}
-
+                        <a class="btn btn-primary" href="{% url 'create_user' %}">Neuen Nutzer Anlegen</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
     <script src="{% static '/js/filter.js' %}"></script>
     <script>
-        window.addEventListener("load", update_hidden_filter_radiobuttons);
+        window.addEventListener("load", update_filter_radiobuttons);
     </script>
 {% endblock %}

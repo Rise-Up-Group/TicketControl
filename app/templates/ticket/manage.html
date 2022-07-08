@@ -126,19 +126,19 @@
                                 <div class="input-group-prepend">
                                     <label class="input-group-text">Versteckt:</label>
                                 </div>
-                                <input type="radio" id="filter-hidden-none" name="hidden" value="0"
-                                       onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                <input type="radio" id="filter-email_verified-none" name="hidden" value="0"
+                                       onclick="update_filter_radiobuttons()" style="display: none;"
                                        {% if GET.hidden != "1" and GET.hidden != "2" %}checked{% endif %}>
-                                <input type="radio" id="filter-hidden-false" name="hidden" value="True"
-                                       onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                <input type="radio" id="filter-email_verified-false" name="hidden" value="True"
+                                       onclick="update_filter_radiobuttons()" style="display: none;"
                                        {% if GET.hidden == "True" %}checked{% endif %}>
-                                <input type="radio" id="filter-hidden-true" name="hidden" value="False"
-                                       onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                <input type="radio" id="filter-email_verified-true" name="hidden" value="False"
+                                       onclick="update_filter_radiobuttons()" style="display: none;"
                                        {% if GET.hidden == "False" %}checked{% endif %}>
                                 <div class="input-group-append">
-                                    <label class="btn" for="filter-hidden-none">Nicht filtern</label>
-                                    <label class="btn" for="filter-hidden-false">Versteckt</label>
-                                    <label class="btn" for="filter-hidden-true">Sichtbar</label>
+                                    <label class="btn" for="filter-email_verified-none">Nicht filtern</label>
+                                    <label class="btn" for="filter-email_verified-false">Versteckt</label>
+                                    <label class="btn" for="filter-email_verified-true">Sichtbar</label>
                                 </div>
                             </div>
                             <br>
@@ -237,6 +237,6 @@
     <script src="{% static '/js/user.js' %}"></script>
     <script src="{% static '/js/filter.js' %}"></script>
     <script>
-        window.addEventListener("load", update_hidden_filter_radiobuttons);
+        window.addEventListener("load", update_filter_radiobuttons);
     </script>
 {% endblock %}
