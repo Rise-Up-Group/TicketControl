@@ -1040,8 +1040,9 @@ def settings_view(request):
             if request.POST.get('restart-container', False) == "on":
                 with open("/etc/hostname", "r") as hostname:
                     os.system("docker restart "+hostname.read())
-
-        return render(request, "settings.html", {"settings": settings_json})
+            return HttpResponse(status=200)
+        else:
+            return render(request, "settings.html", {"settings": settings_json})
     else:
         return render_error(request, 403, "Only superuser is allowed to change system settings")
 
