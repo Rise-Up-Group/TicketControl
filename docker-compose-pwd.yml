@@ -8,6 +8,7 @@ services:
       - ticketcontrol-static-data:/vol/web
       - ticketcontrol-uploads:/uploads
       - ticketcontrol-settings:/app/settings
+      - //var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - DB_HOST=db # can be container name, service name, or real dns / ip
       - DB_NAME=ticketcontrol

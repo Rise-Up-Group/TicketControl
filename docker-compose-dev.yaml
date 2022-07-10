@@ -31,6 +31,7 @@ services:
       - ./app:/app # auto refresh server files
       - ./app/settings:/app/settings
       - ./data/web:/vol/web
+      - //var/run/docker.sock:/var/run/docker.sock:ro
     depends_on: # make serve name as dns work & connect containers
       - db
 

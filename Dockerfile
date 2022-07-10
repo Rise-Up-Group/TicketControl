@@ -16,23 +16,21 @@ RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     apk add --update --no-cache --virtual .tmp-deps \
         linux-headers build-base musl-dev && \
+    apk add --update --no-cache docker && \
     /py/bin/pip install -r /requirements.txt && \
     apk del .tmp-deps && \
-    adduser --disabled-password --no-create-home app && \
     mkdir -p /vol/web/static && \
     mkdir -p /vol/web/media && \
     mkdir -p /app/uploads && \
     mkdir -p /app/settings && \
-    chown -R app:app /vol && \
-    chmod -R 755 /vol/ && \
-    chown -R app:app /app/uploads && \
-    chmod -R 755 /app/uploads && \
-    chown -R app:app /app/settings && \
-    chmod -R 755 /app/settings && \
+    #chown -R app:app /vol && \
+    #chmod -R 755 /vol/ && \
+    #chown -R app:app /app/uploads && \
+    #chmod -R 755 /app/uploads && \
+    #chown -R app:app /app/settings && \
+    #chmod -R 755 /app/settings && \
     chmod -R +x /scripts
 
 ENV PATH="/scripts:/py/bin:$PATH"
-
-USER app
 
 CMD ["run.sh"]

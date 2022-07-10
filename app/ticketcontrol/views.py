@@ -1037,8 +1037,9 @@ def settings_view(request):
             except PermissionError:
                 return render_error(request, 403, "Unable to save settings file")
 
-            if request.POST.get('restart-server', False) == "on":
-                os.system("/sbin/reboot")
+            if request.POST.get('restart-container', False) == "on":
+                with open("/etc/hostname", "r") as hostname:
+                    os.system("docker restart "+hostname.read())
 
         return render(request, "settings.html", {"settings": settings_json})
     else:
