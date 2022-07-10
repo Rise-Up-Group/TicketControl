@@ -50,3 +50,23 @@ function add_textarea_open_listeners() {
         });
     })
 }
+
+async function submit_form(form) {
+    let form_data = new FormData(form);
+
+    let action = "";
+    if (form.hasAttribute("action")) action = form.getAttribute("action");
+    else action = window.location.pathname;
+    let method = "GET";
+    if (form.hasAttribute("method")) method = form.getAttribute("method");
+    window.scrollTo(0, 0);
+    let res = await fetch(action, {
+        method: method,
+        body: form_data
+    });
+    if (res.status !== 200) {
+        document.getElementById('response').contentWindow.document.write(await res.text());
+        document.getElementById('response').style.display = "block";
+        $("#response-modal").modal("show");
+    }
+}
