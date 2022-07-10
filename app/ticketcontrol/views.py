@@ -897,10 +897,20 @@ def group_create_view(request):
                     in_all_permissions = True
             if in_all_permissions:
                 group.permissions.add(permission)
+        categories = request.POST.getlist("categories")
+        group_categories = group.categories.all()
+        for category in categories:
+            in_group_categories = False
+            for group_category in group_categories:
+                if int(category) == group_category.id:
+                    in_group_categories = True
+            if not in_group_categories:
+                group.categories.add(category)
         group.save()
         return redirect("manage_groups")
     return render(request, "user/group/create.html",
-                  {"permissions": Permission.objects.all(), "half_page": settings.CONTENT["half_page"]})
+                  {"permissions": Permission.objects.all(), "categories": Category.objects.all(),
+                   "half_page": settings.CONTENT["half_page"]})
 
 
 @permission_required("auth.view_group")
@@ -932,14 +942,34 @@ def group_edit_view(request, id):
                         in_all_permissions = True
                 if not in_group_permissions and in_all_permissions:
                     group.permissions.add(permission)
-            group.save()
-            return redirect("manage_groups")
-        return render_error(request, 403, "Editing default group \"admin\" is not allowed.")
+
+        categories = request.POST.getlist("categories")
+        group_categories = group.categories.all()
+        for category in categories:
+            in_group_categories = False
+            for group_category in group_categories:
+                if int(category) == group_category.id:
+                    in_group_categories = True
+            if not in_group_categories:
+                group.categories.add(category)
+        for group_category in group_categories:
+            in_categories = False
+            for category in categories:
+                if group_category.id == int(category):
+                    in_categories = True
+            if not in_categories:
+                group.categories.remove(group_category.id)
+        group.save()
+        return redirect("manage_groups")
     group_permissions = []
     for permissionId in group.permissions.all().values_list("id", flat=True):
         group_permissions.append(permissionId)
+    group_categories = []
+    for categoryId in group.categories.all().values_list("id", flat=True):
+        group_categories.append(categoryId)
     return render(request, "user/group/edit.html",
                   {"group": group, "group_permissions": group_permissions, "permissions": Permission.objects.all(),
+                   "group_categories": group_categories, "categories": Category.objects.all(),
                    "can_change": can_edit, "can_delete": request.user.has_perm(
                       "ticketcontrol.delete_group") and group.name != "admin" and group.name != "moderator" and group.name != "user",
                    "half_page": settings.CONTENT["half_page"]})

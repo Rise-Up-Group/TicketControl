@@ -22,6 +22,16 @@
                 {% endfor %}
             </select>
         </div>
+        <label for="permissions">Verwaltete Kategorien</label>
+        <div class="form-outline mb-4">
+            <select style="height: 20vh; width: 100%;" multiple="" name="categories" id="categories">
+                {% for category in categories %}
+                    <option class="checkbox" value="{{ category.id }}"
+                            {% if category.id in group_categories %}
+                            selected{% endif %}>{{ category.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
         {% if can_change %}
             <input class="btn btn-primary btn-block" type="submit" name="submit" id="submit" value="Speichern">
         {% endif %}

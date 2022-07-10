@@ -179,6 +179,7 @@ class Permission(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
+    groups = models.ManyToManyField(Group, related_name="categories", blank=True)
 
     def __str__(self):
         return self.name
