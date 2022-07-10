@@ -166,12 +166,12 @@ figure {
     color: var(--color-text)!important;
     border-color: var(--color-input-group-text-border)!important;
 }
-input[type="text"], input[type="number"], input[type="color"], input[type="email"], input[type="password"], input[type="firstname"], input[type="lastname"], input[type="username"], textarea, select, option, .input {
+input[type="text"], input[type="number"], input[type="color"], input[type="email"], input[type="password"], input[type="firstname"], input[type="lastname"], input[type="username"], input[type="date"], textarea, select, option, .input {
     background-color: var(--color-input-background)!important;
     color: var(--color-text)!important;
     border-color: var(--color-input-border)!important;
 }
-input[type="text"][disabled], input[type="number"][disabled], input[type="color"][disabled], input[type="email"][disabled], input[type="password"][disabled], input[type="firstname"][disabled], input[type="lastname"][disabled], input[type="username"][disabled], textarea[disabled], select[disabled], option[disabled], .input[disabled] {
+input[type="text"][disabled], input[type="number"][disabled], input[type="color"][disabled], input[type="email"][disabled], input[type="password"][disabled], input[type="firstname"][disabled], input[type="lastname"][disabled], input[type="username"][disabled], input[type="date"][disabled] textarea[disabled], select[disabled], option[disabled], .input[disabled] {
     background-color: var(--color-input-disabled-background)!important;
 }
 .btn-secondary {
