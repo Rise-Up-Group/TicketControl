@@ -772,8 +772,16 @@ def user_passwordreset_request_view(request):
 
 @permission_required("ticketcontrol.view_user")
 def user_manage_view(request):
+    users = User.objects.all().exclude(username="ghost")
+    users = handle_filter(request.GET, users, "username")
+    users = handle_filter(request.GET, users, "first_name")
+    users = handle_filter(request.GET, users, "last_name")
+    users = handle_filter(request.GET, users, "email")
+    users = handle_range_filter(request.GET, users, "date_joined")
+    users = handle_range_filter(request.GET, users, "last_login")
+    users = handle_filter(request.GET, users, "email_confirmed")
     return render(request, "user/manage.html",
-                  {"users": User.objects.all().exclude(username="ghost"),
+                  {"users": users, "GET": request.GET,
                    "can_create": request.user.has_perm("ticketcontrol.create_user"),
                    "can_change": request.user.has_perm("ticketcontrol.change_user"),
                    "can_delete": request.user.has_perm("ticketcontrol.delete_user")})
