@@ -172,8 +172,16 @@ def ticket_view(request, id):
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
         categories = Category.objects.all()
-        context = {"ticket": ticket, "moderators": ticket.moderators.all(),
+        moderators = ticket.moderators.all()
+        self_assign = True
+        if user.has_perm("ticketcontrol.assign_ticket"):
+            for moderator in moderators:
+                if moderator.id == user.id:
+                    self_assign = False
+                    break
+        context = {"ticket": ticket, "moderators": moderators,
                    "participants": ticket.participating.all(), "comments": comments, "categories": categories,
+                   "self_assign": self_assign,
                    "allow_location": settings.GENERAL["allow_location"],
                    "force_location": settings.GENERAL["force_location"]}
         return render(request, "ticket/detail.html", context)

@@ -4,6 +4,7 @@
 {% block title %}Ticket details: {{ ticket.title }}{% endblock %}
 
 {% block content %}
+    <div id="username" style="display:none;">{{ user.username }}</div>
     <div class="container bg-transparent rounded mt-3">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
@@ -45,7 +46,7 @@
                     {% endif %}
                     {% if perms.ticketcontrol.assign_ticket %}
                         <div role="separator" class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
+                        <a class="dropdown-item" id="self-assign-ticket" {% if not self_assign %}style="display:none;"{% endif %} href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
                             zuweisen</a>
                         <a class="dropdown-item" role="button" data-toggle="modal" data-target="#assign-moderator">Moderator
                             zuweisen</a>
