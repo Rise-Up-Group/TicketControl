@@ -11,7 +11,8 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">Titel:</span>
                 </div>
-                <input type="text" class="form-control" name="title" placeholder="Titel eingeben..." autofocus required>
+                <input type="text" class="form-control" name="title" placeholder="Titel eingeben..." autofocus required
+                       maxlength="255">
             </div>
             {% if allow_location %}
                 <div class="input-group mb-3">
@@ -19,7 +20,7 @@
                         <span class="input-group-text">Standort:</span>
                     </div>
                     <input type="text" class="form-control" name="location" placeholder="Bsp: R40 oder THM A13 R202"
-                            {% if force_location %} required{% endif %}>
+                            {% if force_location %} required{% endif %} maxlength="255">
                 </div>
             {% endif %}
             <div class="input-group">
@@ -40,7 +41,7 @@
                     <hr>
                     <div class="form-group">
                         <textarea class="form-control" id="exampleFormControlTextarea1" rows="15"
-                                  name="description" required></textarea>
+                                  name="description" required maxlength="4000000000"></textarea>
                     </div>
                     <div class="input file-drop-box text-center" id="file-drop-box-ticket">
                         <div class="file-drop-list"></div>
