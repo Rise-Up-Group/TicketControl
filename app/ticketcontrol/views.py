@@ -234,7 +234,8 @@ def ticket_comment_add(request, id):
         if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm(
                 "ticketcontrol.view_ticket"):
             return render_error(request, 404, "Ticket does not exist")
-
+        if not request.POST["comment"]:
+            return render_error(request, 406, "Comment is empty")
         comment = ticket.add_comment(request.POST["comment"], user)
         for attachment_id in request.POST.getlist("attachments"):
             try:
