@@ -165,7 +165,7 @@
                 {% csrf_token %}
                 <p class="lead">Beschreibung</p>
                 <hr>
-                <p data-input type="textarea" name="description">{{ ticket.description }}</p>
+                <p data-input type="textarea" name="description" required maxlength="4000000000">{{ ticket.description }}</p>
                 {% if ticket.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
                     Attachments:<br>
                     <div class="input file-drop-box text-center" id="file-drop-box-ticket">
@@ -207,7 +207,7 @@
                     <p class="lead">{{ comment.user.username }}
                         | {{ comment.user.first_name }} {{ comment.user.last_name }} </p>
                     <hr>
-                    <p data-input type="textarea" name="content">{{ comment.content }}</p>
+                    <p data-input type="textarea" name="content" required maxlength="4000000000">{{ comment.content }}</p>
                     {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
                         Attachments:<br>
                         <div class="input file-drop-box text-center" id="file-drop-box-comment-{{ comment.id }}">
