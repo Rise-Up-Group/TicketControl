@@ -1041,6 +1041,7 @@ def category_create_view(request):
         groups = request.POST.getlist("groups")
         for group in groups:
             category.groups.add(group)
+        category.save()
         return redirect("manage_categories")
     else:
         groups = Group.objects.all()
@@ -1078,9 +1079,8 @@ def category_edit_view(request, id):
             return redirect("login")
     groups = Group.objects.all()
     selected_groups = []
-    for group in groups:
-        if group in category.groups.all():
-            selected_groups.append(group.id)
+    for group in category.groups.all():
+        selected_groups.append(group.id)
     return render(request, "category/edit.html", {"category": category, "groups": groups, "selected_groups": selected_groups,
                                                   "can_change": request.user.has_perm("ticketcontrol.change_category"),
                                                   "can_delete": request.user.has_perm("ticketcontrol.delete_category")})
