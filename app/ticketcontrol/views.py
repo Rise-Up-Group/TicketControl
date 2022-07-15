@@ -983,7 +983,7 @@ def group_create_view(request):
             return render_error(request, 404, "Group does not exist")
         except DataError:
             return render_error(request, 400,
-                                "DataError: invalid data supplied (maybe too many characters in one field)")        
+                                "DataError: invalid data supplied (maybe too many characters in one field)")
         permissions = request.POST.getlist("permissions")
         all_permissions = Permission.objects.all()
         for permission in permissions:
@@ -1149,9 +1149,9 @@ def category_create_view(request):
             for group in groups:
                 category.groups.add(group)
             category.save()
-         except DataError:
+        except DataError:
             return render_error(request, 400,
-                                "DataError: invalid data supplied (maybe too many characters in one field)")       
+                                "DataError: invalid data supplied (maybe too many characters in one field)")
         return redirect("manage_categories")
     else:
         groups = Group.objects.all()
@@ -1195,9 +1195,10 @@ def category_edit_view(request, id):
     selected_groups = []
     for group in category.groups.all():
         selected_groups.append(group.id)
-    return render(request, "category/edit.html", {"category": category, "groups": groups, "selected_groups": selected_groups,
-                                                  "can_change": request.user.has_perm("ticketcontrol.change_category"),
-                                                  "can_delete": request.user.has_perm("ticketcontrol.delete_category")})
+    return render(request, "category/edit.html",
+                  {"category": category, "groups": groups, "selected_groups": selected_groups,
+                   "can_change": request.user.has_perm("ticketcontrol.change_category"),
+                   "can_delete": request.user.has_perm("ticketcontrol.delete_category")})
 
 
 @permission_required("ticketcontrol.delete_category")
