@@ -4,6 +4,7 @@
 {% block title %}Ticket details: {{ ticket.title }}{% endblock %}
 
 {% block content %}
+    <div id="username" style="display:none;">{{ user.username }}</div>
     <div class="container bg-transparent rounded mt-3">
         <div class="input-group mb-3">
             <div class="input-group-prepend">
@@ -13,7 +14,7 @@
             </div>
             <input id="title" type="text" class="form-control" placeholder="{{ ticket.title }}"
                    value="{{ ticket.title }}"
-                   oninput="show_update_ticket_warning()">
+                   oninput="show_update_ticket_warning()" required maxlength="255">
             <div class="input-group-append" id="ticket-options">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">Optionen
@@ -45,7 +46,9 @@
                     {% endif %}
                     {% if perms.ticketcontrol.assign_ticket %}
                         <div role="separator" class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
+                        <a class="dropdown-item" id="self-assign-ticket"
+                           {% if not self_assign %}style="display:none;"{% endif %} href="#"
+                           onclick="add_user(`moderators`, `{{ user.username }}`);">Mir
                             zuweisen</a>
                         <a class="dropdown-item" role="button" data-toggle="modal" data-target="#assign-moderator">Moderator
                             zuweisen</a>
@@ -59,7 +62,8 @@
                     <span class="input-group-text">Standort / Raum</span>
                 </div>
                 <input id="location" type="text" class="form-control" placeholder="{{ ticket.location }}"
-                       value="{{ ticket.location }}" oninput="show_update_ticket_warning()">
+                       value="{{ ticket.location }}" oninput="show_update_ticket_warning()"
+                       {% if force_location %}required{% endif %} maxlength="255">
             </div>
         {% endif %}
         <div class="mb-3 row">
@@ -161,7 +165,7 @@
                 {% csrf_token %}
                 <p class="lead">Beschreibung</p>
                 <hr>
-                <p data-input type="textarea" name="description">{{ ticket.description }}</p>
+                <p data-input type="textarea" name="description" required maxlength="4000000000">{{ ticket.description }}</p>
                 {% if ticket.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == ticket.owner.id %}
                     Attachments:<br>
                     <div class="input file-drop-box text-center" id="file-drop-box-ticket">
@@ -203,7 +207,7 @@
                     <p class="lead">{{ comment.user.username }}
                         | {{ comment.user.first_name }} {{ comment.user.last_name }} </p>
                     <hr>
-                    <p data-input type="textarea" name="content">{{ comment.content }}</p>
+                    <p data-input type="textarea" name="content" required maxlength="4000000000">{{ comment.content }}</p>
                     {% if comment.attachment_set.count > 0 or perms.ticketcontrol.add_attachment or user.id == comment.user.id %}
                         Attachments:<br>
                         <div class="input file-drop-box text-center" id="file-drop-box-comment-{{ comment.id }}">
@@ -246,7 +250,7 @@
             <form action="{% url 'add_comment_to_ticket' id=ticket.id %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
-                    <textarea class="form-control" rows="5" name="comment"></textarea>
+                    <textarea class="form-control" rows="5" name="comment" required maxlength="4000000000"></textarea>
                 </div>
                 <div class="input file-drop-box text-center" id="file-drop-box-new-comment">
                     <div class="file-drop-list"></div>

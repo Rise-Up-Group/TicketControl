@@ -148,9 +148,10 @@ class User(BaseUser):
             recipient_list=[self.email],
             fail_silently=False
         )
+
     def delete(self):
         ghost = User.objects.get(username="ghost")
-        tickets = self.ticket_set.all()
+        tickets = self.tickets.all()
         for ticket in tickets:
             ticket.owner = ghost
             ticket.save()

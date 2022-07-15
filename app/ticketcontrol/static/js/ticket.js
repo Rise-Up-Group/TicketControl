@@ -34,6 +34,9 @@ async function add_user(mode, username) {
             user_span.appendChild(delete_span);
             user_span.innerHTML += "]";
             user_list.appendChild(user_span);
+            if (mode === "moderators" && username === document.getElementById("username").innerHTML) {
+                document.getElementById("self-assign-ticket").style.display = "none";
+            }
         }
     }
 }
@@ -47,6 +50,9 @@ async function delete_moderator(username) {
     });
     if (response.ok) {
         document.getElementById("moderator-"+username).remove();
+        if (username === document.getElementById("username").innerHTML) {
+            document.getElementById("self-assign-ticket").style.display = "block";
+        }
     }
 }
 

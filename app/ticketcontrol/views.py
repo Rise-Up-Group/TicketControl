@@ -16,6 +16,7 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
+from django.db.utils import DataError
 
 from django.views.static import serve
 
@@ -94,6 +95,24 @@ def handle_filter(GET, objects, name):
     return objects
 
 
+def handle_range_filter(GET, objects, name):
+    if name + "_start" in GET and name + "_end" in GET:
+        start = GET[name + "_start"]
+        end = GET[name + "_end"]
+
+        filter = {}
+        if not start and end:
+            filter[name + "__lt"] = end
+        elif not end and start:
+            filter[name + "__gt"] = start
+        elif start and end:
+            filter[name + "__range"] = (start, end)
+        else:
+            return objects
+        return objects.filter(**filter)
+    return objects
+
+
 def handle_user_filter(GET, objects, name):
     if name in GET and GET[name]:
         for username in GET[name].split(","):
@@ -116,6 +135,7 @@ def ticket_manage_view(request):
     tickets = handle_filter(request.GET, tickets, "category")
     tickets = handle_filter(request.GET, tickets, "title")
     tickets = handle_filter(request.GET, tickets, "location")
+    tickets = handle_range_filter(request.GET, tickets, "creation_date")
     if request.user.has_perm("ticketcontrol.unhide_ticket"):
         tickets = handle_filter(request.GET, tickets, "hidden")
     else:
@@ -153,8 +173,16 @@ def ticket_view(request, id):
         comments = Comment.objects.filter(ticket_id=ticket.id)
 
         categories = Category.objects.all()
-        context = {"ticket": ticket, "moderators": ticket.moderators.all(),
+        moderators = ticket.moderators.all()
+        self_assign = True
+        if user.has_perm("ticketcontrol.assign_ticket"):
+            for moderator in moderators:
+                if moderator.id == user.id:
+                    self_assign = False
+                    break
+        context = {"ticket": ticket, "moderators": moderators,
                    "participants": ticket.participating.all(), "comments": comments, "categories": categories,
+                   "self_assign": self_assign,
                    "allow_location": settings.GENERAL["allow_location"],
                    "force_location": settings.GENERAL["force_location"]}
         return render(request, "ticket/detail.html", context)
@@ -176,8 +204,12 @@ def ticket_new_view(request):
                 return render_error(request, 406, "You have to fill in the location")
         if not request.POST["title"] or not request.POST["description"]:
             return render_error(request, 406, "You have to fill in title and description.")
-        ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
-                                   Category.objects.get(id=request.POST["category"]), location)
+        try:
+            ticket = Ticket.add_ticket(request.POST["title"], request.POST["description"], user,
+                                       Category.objects.get(id=request.POST["category"]), location)
+        except DataError:
+            return render_error(request, 400,
+                                "DataError: invalid data supplied (maybe too many characters in one field)")
         for attachment_id in request.POST.getlist("attachments"):
             try:
                 attachment = Attachment.objects.get(id=attachment_id)
@@ -207,8 +239,13 @@ def ticket_comment_add(request, id):
         if ticket.owner.id != request.user.id and not request.user in ticket.participating.all() and not request.user.has_perm(
                 "ticketcontrol.view_ticket"):
             return render_error(request, 404, "Ticket does not exist")
-
-        comment = ticket.add_comment(request.POST["comment"], user)
+        if not request.POST["comment"]:
+            return render_error(request, 406, "Comment is empty")
+        try:
+            comment = ticket.add_comment(request.POST["comment"], user)
+        except DataError:
+            return render_error(request, 400,
+                                "DataError: invalid data supplied (maybe too many characters in one field)")
         for attachment_id in request.POST.getlist("attachments"):
             try:
                 attachment = Attachment.objects.get(id=attachment_id)
@@ -229,8 +266,12 @@ def comment_edit(request, id):
         except Comment.DoesNotExist:
             return render_error(request, 404, "Comment not found")
         if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == comment.user.id:
-            comment.content = request.POST['content']
-            comment.save()
+            try:
+                comment.content = request.POST['content']
+                comment.save()
+            except DataError:
+                return render_error(request, 400,
+                                    "DataError: invalid data supplied (maybe too many characters in one field)")
             return redirect('ticket_view', id=comment.ticket_id)
         else:
             return render_error(request, 403,
@@ -377,14 +418,18 @@ def ticket_info_update(request, id):
         try:
             ticket = Ticket.objects.get(id=id)
             if request.user.id == ticket.owner.id or request.user.has_perm("ticketcontrol.change_ticket"):
-                if request.POST['title'] != "" and not None:
-                    ticket.title = request.POST['title']
-                if settings.GENERAL["allow_location"]:
-                    if (request.POST['location'] != "" and not None) or not settings.GENERAL["force_location"]:
-                        ticket.location = request.POST['location']
-                if not request.POST['category'] in (0, "", "0", None):
-                    ticket.category = Category.objects.get(id=request.POST['category'])
-                ticket.save()
+                try:
+                    if request.POST['title'] != "" and not None:
+                        ticket.title = request.POST['title']
+                    if settings.GENERAL["allow_location"]:
+                        if (request.POST['location'] != "" and not None) or not settings.GENERAL["force_location"]:
+                            ticket.location = request.POST['location']
+                    if not request.POST['category'] in (0, "", "0", None):
+                        ticket.category = Category.objects.get(id=request.POST['category'])
+                    ticket.save()
+                except DataError:
+                    return render_error(request, 400,
+                                        "DataError: invalid data supplied (maybe too many characters in one field)")
             else:
                 return render_error(request, 403,
                                     "You aren't allowed to edit tickets or you aren't the owner of the ticket")
@@ -403,8 +448,12 @@ def ticket_edit(request, id):
         except Ticket.DoesNotExist:
             return render_error(request, 404, "Ticket does not exist")
         if request.user.has_perm("ticketcontrol.change_comment") or request.user.id == ticket.owner.id:
-            ticket.description = request.POST['description']
-            ticket.save()
+            try:
+                ticket.description = request.POST['description']
+                ticket.save()
+            except DataError:
+                return render_error(request, 400,
+                                    "DataError: invalid data supplied (maybe too many characters in one field)")
             return redirect('ticket_view', id=id)
         else:
             return render_error(request, 403, "You aren't allowed to edit this ticket")
@@ -481,6 +530,9 @@ def attachment_upload(request):
             return render_error(request, 404, "Comment does not exist")
         except PermissionError:
             return render_error(request, 403, "Unable to save attachment")
+        except DataError:
+            return render_error(request, 400,
+                                "DataError: invalid data supplied (maybe too many characters in one field)")
     return render_error(request, 405, "This site is only available for post requests")
 
 
@@ -515,9 +567,10 @@ def attachment_edit(request, id):
 def username_check(username, old_username=None):
     if User.objects.filter(username=username).exists():
         i = 1
-        while User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username and i < 200:
+        while User.objects.filter(username=username + str(i)).exists() and username + str(
+                i) != old_username and i < 200:
             i += 1
-        if User.objects.filter(username=username+str(i)).exists() and username+str(i) != old_username:
+        if User.objects.filter(username=username + str(i)).exists() and username + str(i) != old_username:
             return {"status": 406}
         return {"status": 409, "username": username + str(i)}
     return {"status": 200}
@@ -594,8 +647,10 @@ def register_view(request):
             lastname = request.POST['lastname']
             if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
                 username = request.POST['username']
+            elif settings.REGISTER["use_email_prefix_as_username"]:
+                username = email.split("@")[0]
             else:
-                username = firstname[0:1] + "." + lastname
+                username = firstname[0:1] + "." + lastname.replace(" ", "-")
             res = username_check(username)
             if res["status"] == 409:
                 username = res["username"]
@@ -612,10 +667,14 @@ def register_view(request):
                             email_authorized = True
                             break
                 if email_authorized:
-                    user = User.add_user(None, firstname, lastname, username, password, groups=None, is_active=True,
-                                         email_confirmed=False)
-                    user.new_email = request.POST['email']
-                    user.save()
+                    try:
+                        user = User.add_user(None, firstname, lastname, username, password, groups=None, is_active=True,
+                                             email_confirmed=False)
+                        user.new_email = request.POST['email']
+                        user.save()
+                    except DataError:
+                        return render_error(request, 400,
+                                            "DataError: invalid data supplied (maybe too many characters in one field)")
                     try:
                         User.send_emailverification_mail(user, request)
                     except SMTPRecipientsRefused:
@@ -631,7 +690,9 @@ def register_view(request):
         else:
             return render_error(request, 409, "Passwords do not match")
     return render(request, "user/register.html", {"half_page": settings.CONTENT["half_page"],
-                                                  "allow_custom_username": settings.REGISTER["allow_custom_username"]})
+                                                  "allow_custom_username": settings.REGISTER["allow_custom_username"],
+                                                  "use_email_prefix_as_username": settings.REGISTER[
+                                                      "use_email_prefix_as_username"]})
 
 
 @permission_required("ticketcontrol.add_user")
@@ -643,27 +704,36 @@ def user_create_view(request):
         groups = None
         if request.user.has_perm("ticketcontrol.change_user_permission"):
             groups = request.POST.getlist("groups")
+        email = request.POST['email']
         firstname = request.POST['firstname']
         lastname = request.POST['lastname']
         username = None
         if settings.REGISTER["allow_custom_username"] and "username" in request.POST:
             username = request.POST['username']
+        elif settings.REGISTER["use_email_prefix_as_username"]:
+            username = email.split("@")[0]
         else:
-            username = firstname[0:1] + "." + lastname
+            username = firstname[0:1] + "." + lastname.replace(" ", "-")
         res = username_check(username)
         if res["status"] == 409:
             username = res["username"]
 
-        if not User.objects.filter(email=request.POST['email']).exists() and not res["status"] == 406:
-            User.add_user(request.POST['email'], request.POST['firstname'], request.POST['lastname'],
-                          username, password, groups, request.POST.get("is_active", False) == "on",
-                          email_confirmed=True)
-            return redirect("manage_users")
+        if not User.objects.filter(email=email).exists() and not res["status"] == 406:
+            try:
+                User.add_user(request.POST['email'], firstname, lastname,
+                              username, password, groups, request.POST.get("is_active", False) == "on",
+                              email_confirmed=True)
+                return redirect("manage_users")
+            except DataError:
+                return render_error(request, 400,
+                                    "DataError: invalid data supplied (maybe too many characters in one field)")
         else:
             return render_error(request, 409, "Username or E-Mail already exists")
     return render(request, "user/create.html", {"groups": Group.objects.all(),
                                                 "can_change_permission": request.user.has_perm(
-                                                    "ticketcontrol.change_user_permission")})
+                                                    "ticketcontrol.change_user_permission"),
+                                                "use_email_prefix_as_username": settings.REGISTER[
+                                                    "use_email_prefix_as_username"]})
 
 
 def user_activate_view(request):
@@ -743,8 +813,16 @@ def user_passwordreset_request_view(request):
 
 @permission_required("ticketcontrol.view_user")
 def user_manage_view(request):
+    users = User.objects.all().exclude(username="ghost")
+    users = handle_filter(request.GET, users, "username")
+    users = handle_filter(request.GET, users, "first_name")
+    users = handle_filter(request.GET, users, "last_name")
+    users = handle_filter(request.GET, users, "email")
+    users = handle_range_filter(request.GET, users, "date_joined")
+    users = handle_range_filter(request.GET, users, "last_login")
+    users = handle_filter(request.GET, users, "email_confirmed")
     return render(request, "user/manage.html",
-                  {"users": User.objects.all().exclude(username="ghost"),
+                  {"users": users, "GET": request.GET,
                    "can_create": request.user.has_perm("ticketcontrol.create_user"),
                    "can_change": request.user.has_perm("ticketcontrol.change_user"),
                    "can_delete": request.user.has_perm("ticketcontrol.delete_user")})
@@ -758,8 +836,8 @@ def user_details_view(request, id):
         return render_error(request, 404, "User does not exist")
     if request.user.has_perm("ticketcontrol.view_user") or request.user.id == id:
         return render(request, "user/detail.html", {"content_user": user,
-                                                     "can_change": request.user.has_perm(
-                                                         "ticketcontrol.change_user") or request.user.id == id})
+                                                    "can_change": request.user.has_perm(
+                                                        "ticketcontrol.change_user") or request.user.id == id})
     return redirect("login")
 
 
@@ -768,7 +846,8 @@ def user_live_search(request, typed_username):
     users = User.objects.filter(username__contains=typed_username)[:10]
     res = []
     for user in users:
-        new_user = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "id": user.id}
+        new_user = {"username": user.username, "first_name": user.first_name, "last_name": user.last_name,
+                    "id": user.id}
         res.append(new_user)
     return JsonResponse(res, safe=False)  # It's ok. Disables typecheck for dict. Make sure to only pass an array
 
@@ -798,41 +877,45 @@ def user_edit_view(request, id):
                         username = res["username"]
                     if res["status"] == 406:
                         return render_error(request, 406, "Unable to get unused username")
-
-            user.update_user(None, request.POST['firstname'], request.POST['lastname'],
-                             username, password, groups,
-                             request.POST.get("is_active", False) == "on")
-            email = request.POST['email']
-            if user.email != email:
-                if not User.objects.filter(email=email).exists():
-                    if request.user.has_perm("ticketcontrol.change_user"):
-                        user.email = email
-                        user.save()
+            try:
+                user.update_user(None, request.POST['firstname'], request.POST['lastname'],
+                                 username, password, groups,
+                                 request.POST.get("is_active", False) == "on")
+                email = request.POST['email']
+                if user.email != email:
+                    if not User.objects.filter(email=email).exists():
+                        if request.user.has_perm("ticketcontrol.change_user"):
+                            user.email = email
+                            user.save()
+                        else:
+                            email_authorized = False
+                            if not settings.REGISTER['email_whitelist_enable']:
+                                email_authorized = True
+                            else:
+                                for whitelist_entry in settings.REGISTER['email_whitelist']:
+                                    if whitelist_entry.startswith("@"):
+                                        whitelist_entry = ".*" + whitelist_entry
+                                    if re.fullmatch(whitelist_entry, email) is not None:
+                                        email_authorized = True
+                                        break
+                            if email_authorized:
+                                user.update_user(email=email)
+                                try:
+                                    user.send_emailverification_mail(request)
+                                except SMTPRecipientsRefused:
+                                    return render_error(request, 500, "Unable to send verification email")
+                                except ConnectionRefusedError:
+                                    return render_error(request, 500, "Unable to connect to E-Mail server")
+                                return render(request, "user/activate.html",
+                                              {"half_page": settings.CONTENT["half_page"]})
+                            else:
+                                return render_error(request, 406, "Your E-Mail address is not white-listed")
                     else:
-                        email_authorized = False
-                        if not settings.REGISTER['email_whitelist_enable']:
-                            email_authorized = True
-                        else:
-                            for whitelist_entry in settings.REGISTER['email_whitelist']:
-                                if whitelist_entry.startswith("@"):
-                                    whitelist_entry = ".*" + whitelist_entry
-                                if re.fullmatch(whitelist_entry, email) is not None:
-                                    email_authorized = True
-                                    break
-                        if email_authorized:
-                            user.update_user(email=email)
-                            try:
-                                user.send_emailverification_mail(request)
-                            except SMTPRecipientsRefused:
-                                return render_error(request, 500, "Unable to send verification email")
-                            except ConnectionRefusedError:
-                                return render_error(request, 500, "Unable to connect to E-Mail server")
-                            return render(request, "user/activate.html", {"half_page": settings.CONTENT["half_page"]})
-                        else:
-                            return render_error(request, 406, "Your E-Mail address is not white-listed")
-                else:
-                    return render_error(request, 409, "E-Mail already exists")
-                return redirect("edit_user", id=id)
+                        return render_error(request, 409, "E-Mail already exists")
+                    return redirect("edit_user", id=id)
+            except DataError:
+                return render_error(request, 400,
+                                    "DataError: invalid data supplied (maybe too many characters in one field)")
         try:
             user = User.objects.get(pk=id)
         except User.DoesNotExist:
@@ -886,8 +969,21 @@ def group_create_view(request):
     if request.method == 'POST':
         try:
             group = Group.objects.create(name=request.POST['name'])
+            permissions = request.POST.getlist("permissions")
+            all_permissions = Permission.objects.all()
+            for permission in permissions:
+                in_all_permissions = False
+                for perm in all_permissions:
+                    if int(perm.perm.id) == int(permission):
+                        in_all_permissions = True
+                if in_all_permissions:
+                    group.permissions.add(permission)
+            group.save()
         except Group.DoesNotExist:
             return render_error(request, 404, "Group does not exist")
+        except DataError:
+            return render_error(request, 400,
+                                "DataError: invalid data supplied (maybe too many characters in one field)")        
         permissions = request.POST.getlist("permissions")
         all_permissions = Permission.objects.all()
         for permission in permissions:
@@ -913,46 +1009,51 @@ def group_edit_view(request, id):
     except Group.DoesNotExist:
         return render_error(request, 404, "Group does not exist")
     if request.method == 'POST' and can_edit:
-        if group.name != "admin" and group.name != "moderator" and group.name != "user":
-            group.name = request.POST['name']
-        if group.name != "admin":  # admin is superuser anyway
-            group_permissions = group.permissions.all()
-            permissions = request.POST.getlist("permissions")
-            all_permissions = Permission.objects.all()
-            for permission in group_permissions:
-                if not permission.id in permissions:
-                    group.permissions.remove(permission.id)
+        try:
+            if group.name != "admin" and group.name != "moderator" and group.name != "user":
+                group.name = request.POST['name']
+            if group.name != "admin":  # admin is superuser anyway
+                group_permissions = group.permissions.all()
+                permissions = request.POST.getlist("permissions")
+                all_permissions = Permission.objects.all()
+                for permission in group_permissions:
+                    if not permission.id in permissions:
+                        group.permissions.remove(permission.id)
 
-            for permission in permissions:
-                in_group_permissions = False
-                for perm in group_permissions:
-                    if perm.id == permission:
-                        in_group_permissions = True
-                in_all_permissions = False
-                for perm in all_permissions:
-                    if int(perm.perm.id) == int(permission):
-                        in_all_permissions = True
-                if not in_group_permissions and in_all_permissions:
-                    group.permissions.add(permission)
-
-        categories = request.POST.getlist("categories")
-        group_categories = group.categories.all()
-        for category in categories:
-            in_group_categories = False
-            for group_category in group_categories:
-                if int(category) == group_category.id:
-                    in_group_categories = True
-            if not in_group_categories:
-                group.categories.add(category)
-        for group_category in group_categories:
-            in_categories = False
+                for permission in permissions:
+                    in_group_permissions = False
+                    for perm in group_permissions:
+                        if perm.id == permission:
+                            in_group_permissions = True
+                    in_all_permissions = False
+                    for perm in all_permissions:
+                        if int(perm.perm.id) == int(permission):
+                            in_all_permissions = True
+                    if not in_group_permissions and in_all_permissions:
+                        group.permissions.add(permission)
+            else:
+                return render_error(request, 403, "Editing default group \"admin\" is not allowed.")
+            categories = request.POST.getlist("categories")
+            group_categories = group.categories.all()
             for category in categories:
-                if group_category.id == int(category):
-                    in_categories = True
-            if not in_categories:
-                group.categories.remove(group_category.id)
-        group.save()
-        return redirect("manage_groups")
+                in_group_categories = False
+                for group_category in group_categories:
+                    if int(category) == group_category.id:
+                        in_group_categories = True
+                if not in_group_categories:
+                    group.categories.add(category)
+            for group_category in group_categories:
+                in_categories = False
+                for category in categories:
+                    if group_category.id == int(category):
+                        in_categories = True
+                if not in_categories:
+                    group.categories.remove(group_category.id)
+            group.save()
+            return redirect("manage_groups")
+        except DataError:
+            return render_error(request, 400,
+                                "DataError: invalid data supplied (maybe too many characters in one field)")
     group_permissions = []
     for permissionId in group.permissions.all().values_list("id", flat=True):
         group_permissions.append(permissionId)
@@ -996,6 +1097,7 @@ def settings_view(request):
             general['allow_location'] = request.POST.get("general.allow-location", False) == "on"
             general['force_location'] = request.POST.get("general.force-location", False) == "on"
             general['meme_mode'] = request.POST.get("general.meme-mode", False) == "on"
+
             email_server = settings_json['email_server']
             email_server['smtp_host'] = request.POST['email-server.smtp-host']
             email_server['smtp_port'] = int(request.POST['email-server.smtp-port'])
@@ -1014,6 +1116,8 @@ def settings_view(request):
 
             register = settings_json['register']
             register['allow_custom_username'] = request.POST.get("register.allow-custom-username", False) == "on"
+            register['use_email_prefix_as_username'] = request.POST.get("register.use-email-prefix-as-username",
+                                                                        False) == "on"
             register['email_whitelist_enable'] = request.POST.get("register.email-whitelist-enable", False) == "on"
             register['email_whitelist'] = []
             for entry in request.POST.getlist('register.email-whitelist'):
@@ -1026,10 +1130,12 @@ def settings_view(request):
             except PermissionError:
                 return render_error(request, 403, "Unable to save settings file")
 
-            if request.POST.get('restart-server', False) == "on":
-                os.system("/sbin/reboot")
-
-        return render(request, "settings.html", {"settings": settings_json})
+            if request.POST.get('restart-container', False) == "on":
+                with open("/etc/hostname", "r") as hostname:
+                    os.system("docker restart " + hostname.read())
+            return HttpResponse(status=200)
+        else:
+            return render(request, "settings.html", {"settings": settings_json})
     else:
         return render_error(request, 403, "Only superuser is allowed to change system settings")
 
@@ -1037,11 +1143,15 @@ def settings_view(request):
 @permission_required("ticketcontrol.add_category")
 def category_create_view(request):
     if request.method == "POST":
-        category = Category.objects.create(name=request.POST['name'])
-        groups = request.POST.getlist("groups")
-        for group in groups:
-            category.groups.add(group)
-        category.save()
+        try:
+            category = Category.objects.create(name=request.POST['name'])
+            groups = request.POST.getlist("groups")
+            for group in groups:
+                category.groups.add(group)
+            category.save()
+         except DataError:
+            return render_error(request, 400,
+                                "DataError: invalid data supplied (maybe too many characters in one field)")       
         return redirect("manage_categories")
     else:
         groups = Group.objects.all()
@@ -1056,24 +1166,28 @@ def category_edit_view(request, id):
         return render_error(request, 404, "Category does not exist")
     if request.method == "POST":
         if request.user.has_perm("ticketcontrol.edit_category"):
-            category.name = request.POST['name']
-            groups = request.POST.getlist("groups")
-            category_groups = category.groups.all()
-            for group in groups:
-                in_category_groups = False
-                for category_group in category_groups:
-                    if int(group) == category_group.id:
-                        in_category_groups = True
-                if not in_category_groups:
-                    category.groups.add(group)
-            for category_group in category_groups:
-                in_groups = False
+            try:
+                category.name = request.POST['name']
+                groups = request.POST.getlist("groups")
+                category_groups = category.groups.all()
                 for group in groups:
-                    if category_group.id == int(group):
-                        in_groups = True
-                if not in_groups:
-                    category.groups.remove(category_group.id)
-            category.save()
+                    in_category_groups = False
+                    for category_group in category_groups:
+                        if int(group) == category_group.id:
+                            in_category_groups = True
+                    if not in_category_groups:
+                        category.groups.add(group)
+                for category_group in category_groups:
+                    in_groups = False
+                    for group in groups:
+                        if category_group.id == int(group):
+                            in_groups = True
+                    if not in_groups:
+                        category.groups.remove(category_group.id)
+                category.save()
+            except DataError:
+                return render_error(request, 400,
+                                    "DataError: invalid data supplied (maybe too many characters in one field)")
             return redirect("manage_categories")
         else:
             return redirect("login")

@@ -6,7 +6,7 @@
 {% block content %}
     <br>
     <div class="row">
-        <div class="col-xl-3">
+        <div class="col-12 col-xl-3">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5>Filters</h5>
@@ -24,6 +24,18 @@
                                             selected{% endif %}>{{ status }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+                        <br>
+                        <div class="dropdown">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="filter-creation_date">Datum:</label>
+                                </div>
+                                <input class="form-control" type="date" name="creation_date_start" value="{{ GET.creation_date_start }}">
+                                <div type="text" class="form-control form-control-text input-group-text">bis</div>
+                                <input class="form-control" type="date" name="creation_date_end" value="{{ GET.creation_date_end }}">
+                            </div>
+                            <datalist id="filter-owner-data-list"></datalist>
                         </div>
                         <br>
                         <div class="input-group">
@@ -114,19 +126,19 @@
                                 <div class="input-group-prepend">
                                     <label class="input-group-text">Versteckt:</label>
                                 </div>
-                                <input type="radio" id="filter-hidden-none" name="hidden" value="0"
-                                       onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                <input type="radio" id="filter-email_verified-none" name="hidden" value="0"
+                                       onclick="update_filter_radiobuttons()" style="display: none;"
                                        {% if GET.hidden != "1" and GET.hidden != "2" %}checked{% endif %}>
-                                <input type="radio" id="filter-hidden-false" name="hidden" value="True"
-                                       onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                <input type="radio" id="filter-email_verified-false" name="hidden" value="True"
+                                       onclick="update_filter_radiobuttons()" style="display: none;"
                                        {% if GET.hidden == "True" %}checked{% endif %}>
-                                <input type="radio" id="filter-hidden-true" name="hidden" value="False"
-                                       onclick="update_hidden_filter_radiobuttons()" style="display: none;"
+                                <input type="radio" id="filter-email_verified-true" name="hidden" value="False"
+                                       onclick="update_filter_radiobuttons()" style="display: none;"
                                        {% if GET.hidden == "False" %}checked{% endif %}>
                                 <div class="input-group-append">
-                                    <label class="btn" for="filter-hidden-none">Nicht filtern</label>
-                                    <label class="btn" for="filter-hidden-false">Versteckt</label>
-                                    <label class="btn" for="filter-hidden-true">Sichtbar</label>
+                                    <label class="btn" for="filter-email_verified-none">Nicht filtern</label>
+                                    <label class="btn" for="filter-email_verified-false">Versteckt</label>
+                                    <label class="btn" for="filter-email_verified-true">Sichtbar</label>
                                 </div>
                             </div>
                             <br>
@@ -136,7 +148,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-9">
+        <div class="col-12 col-xl-9">
             <div class="card mb-4">
                 <div class="card-header">
                     <h5>Tickets</h5>
@@ -149,6 +161,7 @@
                             {% if not GET.status or GET.status == "0" %}
                                 <th>Status</th>
                             {% endif %}
+                            <th>Datum</th>
                             {% if not GET.category or GET.category == "0" %}
                                 <th>Kategorie</th>
                             {% endif %}
@@ -179,6 +192,7 @@
                                 {% if not GET.status or GET.status == "0" %}
                                     <td>{{ ticket.status }}</td>
                                 {% endif %}
+                                <td>{{ ticket.creation_date|date:"d.m.y" }}</td>
                                 {% if not GET.status or GET.category == "0" %}
                                     <td>{{ ticket.category }}</td>
                                 {% endif %}
@@ -221,20 +235,8 @@
         </div>
     </div>
     <script src="{% static '/js/user.js' %}"></script>
+    <script src="{% static '/js/filter.js' %}"></script>
     <script>
-        function update_hidden_filter_radiobuttons() {
-            document.querySelectorAll('input[type="radio"][name="hidden"]').forEach(radio => {
-                let label = document.querySelector('label[for="' + radio.id + '"]');
-                if (radio.checked) {
-                    label.classList.remove("btn-outline-secondary");
-                    label.classList.add("btn-primary");
-                } else {
-                    label.classList.remove("btn-primary");
-                    label.classList.add("btn-outline-secondary");
-                }
-            })
-        }
-
-        window.addEventListener("load", update_hidden_filter_radiobuttons);
+        window.addEventListener("load", update_filter_radiobuttons);
     </script>
 {% endblock %}
