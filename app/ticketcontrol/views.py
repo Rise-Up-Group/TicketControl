@@ -891,21 +891,13 @@ def group_create_view(request):
         permissions = request.POST.getlist("permissions")
         all_permissions = Permission.objects.all()
         for permission in permissions:
-            in_all_permissions = False
             for perm in all_permissions:
                 if int(perm.perm.id) == int(permission):
-                    in_all_permissions = True
-            if in_all_permissions:
-                group.permissions.add(permission)
+                    group.permissions.add(permission)
+                    break
         categories = request.POST.getlist("categories")
-        group_categories = group.categories.all()
         for category in categories:
-            in_group_categories = False
-            for group_category in group_categories:
-                if int(category) == group_category.id:
-                    in_group_categories = True
-            if not in_group_categories:
-                group.categories.add(category)
+            group.categories.add(category)
         group.save()
         return redirect("manage_groups")
     return render(request, "user/group/create.html",
@@ -1047,14 +1039,8 @@ def category_create_view(request):
     if request.method == "POST":
         category = Category.objects.create(name=request.POST['name'])
         groups = request.POST.getlist("groups")
-        category_groups = category.groups.all()
         for group in groups:
-            in_category_groups = False
-            for category_group in category_groups:
-                if int(group) == category_group.id:
-                    in_category_groups = True
-            if not in_category_groups:
-                category.groups.add(group)
+            category.groups.add(group)
         return redirect("manage_categories")
     else:
         groups = Group.objects.all()
