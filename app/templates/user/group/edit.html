@@ -28,7 +28,7 @@
                 {% for category in categories %}
                     <option class="checkbox" value="{{ category.id }}"
                             {% if category.id in group_categories %}
-                            selected{% endif %}>{{ category.name}}</option>
+                            selected{% endif %}>{{ category.name }}</option>
                 {% endfor %}
             </select>
         </div>

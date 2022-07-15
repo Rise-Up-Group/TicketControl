@@ -1045,10 +1045,20 @@ def settings_view(request):
 @permission_required("ticketcontrol.add_category")
 def category_create_view(request):
     if request.method == "POST":
-        Category.objects.create(name=request.POST['name'])
+        category = Category.objects.create(name=request.POST['name'])
+        groups = request.POST.getlist("groups")
+        category_groups = category.groups.all()
+        for group in groups:
+            in_category_groups = False
+            for category_group in category_groups:
+                if int(group) == category_group.id:
+                    in_category_groups = True
+            if not in_category_groups:
+                category.groups.add(group)
         return redirect("manage_categories")
     else:
-        return render(request, "category/create.html")
+        groups = Group.objects.all()
+        return render(request, "category/create.html", {"groups": groups})
 
 
 @permission_required("ticketcontrol.view_category")
@@ -1060,11 +1070,32 @@ def category_edit_view(request, id):
     if request.method == "POST":
         if request.user.has_perm("ticketcontrol.edit_category"):
             category.name = request.POST['name']
+            groups = request.POST.getlist("groups")
+            category_groups = category.groups.all()
+            for group in groups:
+                in_category_groups = False
+                for category_group in category_groups:
+                    if int(group) == category_group.id:
+                        in_category_groups = True
+                if not in_category_groups:
+                    category.groups.add(group)
+            for category_group in category_groups:
+                in_groups = False
+                for group in groups:
+                    if category_group.id == int(group):
+                        in_groups = True
+                if not in_groups:
+                    category.groups.remove(category_group.id)
             category.save()
             return redirect("manage_categories")
         else:
             return redirect("login")
-    return render(request, "category/edit.html", {"category": category,
+    groups = Group.objects.all()
+    selected_groups = []
+    for group in groups:
+        if group in category.groups.all():
+            selected_groups.append(group.id)
+    return render(request, "category/edit.html", {"category": category, "groups": groups, "selected_groups": selected_groups,
                                                   "can_change": request.user.has_perm("ticketcontrol.change_category"),
                                                   "can_delete": request.user.has_perm("ticketcontrol.delete_category")})
 
