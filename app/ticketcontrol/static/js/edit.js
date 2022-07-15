@@ -10,7 +10,10 @@ function make_editable(button) {
             input.setAttribute("type", element.getAttribute("type"));
         }
         input.classList.add("form-control");
-        input.setAttribute("name", element.getAttribute("name"));
+        let attributes = ["name", "required", "minlength", "maxlength"];
+        attributes.forEach((attribute) => {
+            if (element.hasAttribute(attribute)) input.setAttribute(attribute, element.getAttribute(attribute));
+        });
         input.innerHTML = element.innerHTML;
         element.parentNode.replaceChild(input, element);
     });
