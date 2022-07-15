@@ -19,6 +19,14 @@
             <label for="name">Name</label>
             <input type="text" id="name" name="name" class="form-control" required maxlength="255"/>
         </div>
+        <label for="groups">Verwaltende Gruppen</label>
+        <div class="form-outline mb-4">
+            <select style="height: 20vh; width: 100%;" multiple="" name="groups" id="groups">
+                {% for group in groups %}
+                    <option class="checkbox" value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <input class="btn btn-primary btn-block mb-2" type="submit" name="submit" id="submit" value="Erstellen">
     </form>
 {% endblock %}
